@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ckr2ss5d82ark"]
+
+[ext_resource type="Script" path="res://characters/effects/decrease_hp.gd" id="1_j5j7v"]
+
+[node name="DecreaseHp" type="Node"]
+script = ExtResource("1_j5j7v")
