@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bbdisxdflvtjr"]
+
+[ext_resource type="Script" path="res://characters/effects/increase_speed.gd" id="1_o20br"]
+
+[node name="IncreaseSpeed" type="Node"]
+script = ExtResource("1_o20br")

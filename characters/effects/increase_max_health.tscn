@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://7rx1o8jlj1g"]
+
+[ext_resource type="Script" path="res://characters/effects/increase_max_health.gd" id="1_n3cvv"]
+
+[node name="IncreaseMaxHealth" type="Node"]
+script = ExtResource("1_n3cvv")
+
+[connection signal="effect_end" from="." to="." method="_on_effect_end"]
