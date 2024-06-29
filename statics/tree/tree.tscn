@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://jw3dvyxgj4mt"]
+
+[ext_resource type="Texture2D" uid="uid://drgmstfv3fr3k" path="res://assets/world/static/TX Plant.png" id="1_1jo3r"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ujsty"]
+radius = 4.0
+height = 40.0
+
+[node name="Tree" type="StaticBody2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(281, 139)
+texture = ExtResource("1_1jo3r")
+region_enabled = true
+region_rect = Rect2(22.9667, 10.8941, 116.005, 143.3)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(280, 188)
+shape = SubResource("CapsuleShape2D_ujsty")

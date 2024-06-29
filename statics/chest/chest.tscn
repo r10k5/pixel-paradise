@@ -41,7 +41,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sm8jy"]
-size = Vector2(32, 49)
+size = Vector2(32, 25)
 
 [node name="Chest" type="StaticBody2D"]
 
@@ -69,7 +69,7 @@ frame = 1
 frame_progress = 0.0515457
 
 [node name="HitBox" type="CollisionShape2D" parent="."]
-position = Vector2(0, 4.5)
+position = Vector2(0, 13.5)
 shape = SubResource("RectangleShape2D_sm8jy")
 
 [connection signal="body_entered" from="Area2D" to="Area2D" method="_on_body_entered"]

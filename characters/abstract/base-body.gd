@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal changed_hp(current_health)
+
 enum CharacterState {
 	Idle,
 	MoveLeft,
@@ -75,6 +77,7 @@ func set_health(health: int) -> bool:
 		return false
 		
 	_health = health
+	changed_hp.emit(_health)
 	return true
 
 func has_state(state: CharacterState) -> bool:

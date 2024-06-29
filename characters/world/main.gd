@@ -7,6 +7,7 @@ const MAX_CHESTS = 10
 @onready var chests = $Chests
 @onready var player = $Player
 @onready var chest_timer = $ChestTimer
+@onready var hp = $HP
 
 func on_player_entered_to_chest(chest):
 	return func(body):
@@ -26,9 +27,14 @@ func remove_chest(chest):
 			chests.remove_child(chest)
 
 func _ready():
+	on_hp_changed(player.get_health())
 	player.set_speed(200.0)
+	player.changed_hp.connect(on_hp_changed)
 	chest_timer.timeout.connect(spawn_chest)
 	chest_timer.start()
+
+func on_hp_changed(current_hp):
+	hp.set_hp(current_hp)
 
 func spawn_chest():
 	if len(chests.get_children()) >= MAX_CHESTS:
