@@ -41,7 +41,6 @@ func can_apply(entity):
 		var effects = entity.get_effects()
 		
 		if typeof(effects) == TYPE_ARRAY:
-			print(effects)
 			var filtered = effects.filter(func(eff): return eff.get_id() == get_id())
 			
 			return len(filtered) == 0

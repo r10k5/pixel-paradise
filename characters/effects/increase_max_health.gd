@@ -20,5 +20,4 @@ func apply(entity):
 	entity.set_max_health(entity_max_health + _increased_max_health)
 
 func _on_effect_end():
-	print("effect ends")
 	_entity.set_max_health(_entity.get_max_health() - _increased_max_health)

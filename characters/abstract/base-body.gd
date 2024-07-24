@@ -12,6 +12,10 @@ enum CharacterState {
 	MoveUpRight,
 	MoveDownLeft,
 	MoveDownRight,
+	DamageUp,
+	DamageRight,
+	DamageLeft,
+	DamageDown,
 }
 
 var _current_state = CharacterState.Idle
@@ -24,14 +28,38 @@ var _effects = []
 
 @onready var _effects_node = $Effects
 
+func take_damage(damage):
+	_health -= damage
+	_health = max(_health, _min_health)
+	_health = min(_health, _max_health)
+	
+	var damage_state = CharacterState.DamageUp
+	
+	if _is_relative_or_exact_up_direction(_current_state):
+		damage_state = CharacterState.DamageUp
+	elif _is_exact_horizontal_direction(_current_state):
+		if _current_state == CharacterState.MoveLeft or _current_state == CharacterState.Idle and $AnimatedSprite2D.flip_h:
+			damage_state = CharacterState.DamageLeft
+		else: 
+			damage_state = CharacterState.DamageRight
+	elif _is_relative_or_exact_down_direction(_current_state):
+		damage_state = CharacterState.DamageDown
+		
+	change_state(damage_state)
+	changed_hp.emit(_health)
+	
+	if _health <= _min_health:
+		die()
+		
+func die():
+	pass
+	
 func remove_effect(effect):
 	if effect in _effects:
-		print("before", _effects)
 		_effects = _effects.filter(
 			func(eff):
 				return eff.get_id() != effect.get_id()
 		)
-		print("after", _effects)
 		
 		if effect in _effects_node.get_children():
 			_effects_node.remove_child(effect)
@@ -132,13 +160,30 @@ func _map_state_to_vector(state: CharacterState) -> Vector2:
 			return Vector2(0, 0)
 	
 func _is_relative_or_exact_up_direction(state: CharacterState) -> bool:
-	return state == CharacterState.MoveUp or state == CharacterState.MoveUpLeft or state == CharacterState.MoveUpRight
+	var up_directions = [
+		CharacterState.MoveUp,
+		CharacterState.MoveUpLeft,
+		CharacterState.MoveUpRight,
+	]
+	
+	return state in up_directions
 
 func _is_relative_or_exact_down_direction(state: CharacterState) -> bool:
-	return state == CharacterState.MoveDown or state == CharacterState.MoveDownLeft or state == CharacterState.MoveDownRight
+	var down_directions = [
+		CharacterState.MoveDown,
+		CharacterState.MoveDownLeft,
+		CharacterState.MoveDownRight,
+	]
+	
+	return state in down_directions
 	
 func _is_exact_horizontal_direction(state: CharacterState) -> bool:
-	return state == CharacterState.MoveLeft or state == CharacterState.MoveRight
+	var horizontal_directions = [
+		CharacterState.MoveLeft,
+		CharacterState.MoveRight,
+	]
+	
+	return state in horizontal_directions
 	
 func _map_state_to_animation_name(state: CharacterState) -> String:
 	match state:
@@ -154,20 +199,25 @@ func _map_state_to_animation_name(state: CharacterState) -> String:
 			return "idle_down"
 		CharacterState.Idle when _is_exact_horizontal_direction(_previous_state):
 			return "idle_horizontal"
+		CharacterState.DamageUp when _is_relative_or_exact_up_direction(_previous_state):
+			return "damage_up"
+		CharacterState.DamageLeft when _is_exact_horizontal_direction(_previous_state):
+			return "damage_horizontal"
+		CharacterState.DamageRight when _is_exact_horizontal_direction(_previous_state):
+			return "damage_horizontal"
+		CharacterState.DamageDown when _is_relative_or_exact_down_direction(_previous_state):
+			return "damage_down"
 		_:
 			return "idle_up"
 	
 func _is_need_to_flip_animation(previous_state: CharacterState) -> bool:
-	return (
-		has_state(CharacterState.MoveLeft) or 
-		has_state(CharacterState.MoveUpLeft) or 
-		has_state(CharacterState.MoveDownLeft) or
-			(
-				has_state(CharacterState.Idle) and
-					previous_state == CharacterState.MoveLeft or 
-					previous_state == CharacterState.MoveLeft
-			)
-	)
+	var flip_states = [
+		CharacterState.MoveLeft,
+		CharacterState.MoveUpLeft,
+		CharacterState.MoveDownLeft
+	]
+	return previous_state in flip_states
+
 	
 func get_speed() -> float:
 	return _speed
@@ -178,13 +228,15 @@ func set_speed(value: float):
 func change_state(to: CharacterState):
 	if to == _current_state:
 		return
-		
+
 	_previous_state = _current_state
 	_current_state = to
-	
+
 	$AnimatedSprite2D.play(_map_state_to_animation_name(_current_state))
-	$AnimatedSprite2D.flip_h = _is_need_to_flip_animation(_previous_state)
+	$AnimatedSprite2D.flip_h = _is_need_to_flip_animation(_current_state)
+
 	velocity = _map_state_to_vector(_current_state).normalized() * _speed
+
 
 func move_up():
 	change_state(CharacterState.MoveUp)

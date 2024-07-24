@@ -42,7 +42,6 @@ func _on_body_entered(body):
 		player_entered.emit(body)
 		tooltip.visible = true
 
-
 func _on_body_exited(body):
 	if body.name == "Player":
 		player_exited.emit(body)

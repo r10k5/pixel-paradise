@@ -1,5 +1,7 @@
 extends "res://characters/abstract/base-body.gd"
 
+signal on_use
+
 var _entities_near = []
 
 func get_player_direction() -> Vector2:
@@ -32,8 +34,13 @@ func action():
 	if Input.is_action_pressed("action"):
 		for entity in _entities_near:
 			entity.action()
+			
+func use():
+	if Input.is_action_just_released("use"):
+		on_use.emit()
 
 func _physics_process(_delta):
 	action()
+	use()
 	change_state(map_vector_to_state(get_player_direction()))
 	move_and_slide()

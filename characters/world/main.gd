@@ -3,12 +3,14 @@ extends Node2D
 const CHEST = preload("res://statics/chest/chest.tscn")
 const INCREASE_SPEED = preload("res://characters/effects/increase_speed.tscn")
 const DECREASE_HP = preload("res://characters/effects/decrease_hp.tscn")
+const BOMB = preload("res://statics/bomb/bomb.tscn")
 const MAX_CHESTS = 10
 
 @onready var chests = $Chests
 @onready var player = $Player
 @onready var chest_timer = $ChestTimer
 @onready var hp = $HP
+@onready var bombs = $Bombs
 
 func on_player_entered_to_chest(chest):
 	return func(body):
@@ -33,6 +35,13 @@ func _ready():
 	player.changed_hp.connect(on_hp_changed)
 	chest_timer.timeout.connect(spawn_chest)
 	chest_timer.start()
+	player.on_use.connect(on_player_use)
+
+func on_player_use():
+	var bomb = BOMB.instantiate()
+	bomb.position = player.position + Vector2(40, 0)
+	bomb.on_boom.connect(func(): bombs.remove_child(bomb))
+	bombs.add_child(bomb)
 
 func on_hp_changed(current_hp):
 	hp.set_hp(current_hp)
