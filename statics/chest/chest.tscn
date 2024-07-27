@@ -1,28 +1,26 @@
-[gd_scene load_steps=9 format=3 uid="uid://bmv8t5r25k4wp"]
+[gd_scene load_steps=10 format=3 uid="uid://d1kjc1ta064pj"]
 
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_mucst"]
 [ext_resource type="Texture2D" uid="uid://bwkf7cl84hcm0" path="res://assets/world/static/TX Props.png" id="1_vveg6"]
-[ext_resource type="Script" path="res://statics/chest/chest_to_open.gd" id="2_8ds1y"]
+[ext_resource type="Script" path="res://statics/chest/chest.gd" id="2_0u2he"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_74o22"]
-size = Vector2(76, 80)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_w7mqv"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_dfjw5"]
 atlas = ExtResource("1_vveg6")
 region = Rect2(96, 0, 32, 64)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_koq1j"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_dj28c"]
 atlas = ExtResource("1_vveg6")
 region = Rect2(96, 0, 32, 64)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_wso7w"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_nfmpp"]
 atlas = ExtResource("1_vveg6")
 region = Rect2(96, 64, 32, 64)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_x6s77"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_grntd"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_w7mqv")
+"texture": SubResource("AtlasTexture_dfjw5")
 }],
 "loop": true,
 "name": &"idle",
@@ -30,47 +28,33 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_koq1j")
+"texture": SubResource("AtlasTexture_dj28c")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_wso7w")
+"texture": SubResource("AtlasTexture_nfmpp")
 }],
 "loop": false,
 "name": &"open",
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_sm8jy"]
-size = Vector2(32, 25)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k8hbk"]
+size = Vector2(30, 24)
 
-[node name="Chest" type="StaticBody2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mn7fx"]
+size = Vector2(86, 76)
 
-[node name="Area2D" type="Area2D" parent="."]
-collision_layer = 2
-script = ExtResource("2_8ds1y")
+[node name="Chest" instance=ExtResource("1_mucst")]
+script = ExtResource("2_0u2he")
 
-[node name="Tooltip" type="Label" parent="Area2D"]
-visible = false
-offset_left = -45.0
-offset_top = -44.0
-offset_right = 46.0
-offset_bottom = -21.0
-text = "<E> to open"
-
-[node name="ToOpenCollision" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(0, 4)
-shape = SubResource("RectangleShape2D_74o22")
-
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-sprite_frames = SubResource("SpriteFrames_x6s77")
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_grntd")
 animation = &"open"
-autoplay = "idle"
-frame = 1
-frame_progress = 0.0515457
 
-[node name="HitBox" type="CollisionShape2D" parent="."]
-position = Vector2(0, 13.5)
-shape = SubResource("RectangleShape2D_sm8jy")
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 13)
+shape = SubResource("RectangleShape2D_k8hbk")
 
-[connection signal="body_entered" from="Area2D" to="Area2D" method="_on_body_entered"]
-[connection signal="body_exited" from="Area2D" to="Area2D" method="_on_body_exited"]
+[node name="CollisionShape2D" parent="Area2D" index="0"]
+position = Vector2(0, 5)
+shape = SubResource("RectangleShape2D_mn7fx")

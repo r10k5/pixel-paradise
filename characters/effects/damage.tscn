@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://gkokiq64h5l6"]
-
-[ext_resource type="Script" path="res://characters/effects/damage.gd" id="1_11bjx"]
-
-[node name="Damage" type="Node"]
-script = ExtResource("1_11bjx")

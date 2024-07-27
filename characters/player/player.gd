@@ -31,7 +31,7 @@ func remove_near_entity(entity):
 		_entities_near = _entities_near.filter(func(ent): return entity != ent)
 
 func action():
-	if Input.is_action_pressed("action"):
+	if Input.is_action_pressed("interact"):
 		for entity in _entities_near:
 			entity.action()
 			
