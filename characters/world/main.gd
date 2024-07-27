@@ -30,12 +30,12 @@ func remove_chest(chest):
 			chests.remove_child(chest)
 
 func _ready():
-	on_hp_changed(player.get_health())
 	player.set_speed(200.0)
 	player.changed_hp.connect(on_hp_changed)
 	chest_timer.timeout.connect(spawn_chest)
 	chest_timer.start()
 	player.on_use.connect(on_player_use)
+	on_hp_changed(player.get_health())
 
 func on_player_use():
 	var bomb = BOMB.instantiate()

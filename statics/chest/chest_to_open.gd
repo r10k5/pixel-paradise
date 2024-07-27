@@ -1,4 +1,4 @@
-extends Area2D
+extends Entity
 
 signal player_entered(body)
 signal player_exited(body)
