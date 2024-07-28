@@ -1,10 +1,58 @@
-[gd_scene load_steps=56 format=3 uid="uid://cigs3qqjaampo"]
+[gd_scene load_steps=62 format=3 uid="uid://dly8e43c4ufdb"]
 
-[ext_resource type="PackedScene" uid="uid://bv1sf87mxeyb6" path="res://characters/abstract/base_body.tscn" id="1_nydr6"]
-[ext_resource type="Script" path="res://characters/player/player.gd" id="2_6hte0"]
 [ext_resource type="Texture2D" uid="uid://bgfh0rm3gi2id" path="res://assets/characters/player/idle.png" id="2_r1xks"]
 [ext_resource type="Texture2D" uid="uid://d0t28s252c6ln" path="res://assets/characters/player/damage.png" id="3_btgjx"]
 [ext_resource type="Texture2D" uid="uid://balbpmn3prufv" path="res://assets/characters/player/walk.png" id="3_gr68n"]
+[ext_resource type="Texture2D" uid="uid://duqe8cla5vvuk" path="res://assets/characters/player/death.png" id="4_naieq"]
+
+[sub_resource type="GDScript" id="GDScript_vs2bx"]
+script/source = "extends \"res://characters/abstract/base-body.gd\"
+
+signal on_use
+
+var _entities_near = []
+
+func get_player_direction() -> Vector2:
+	var motion = Vector2()
+	
+	if Input.is_action_pressed(\"ui_up\"):
+		motion.y -= 1
+		
+	if Input.is_action_pressed(\"ui_down\"):
+		motion.y += 1
+	
+	if Input.is_action_pressed(\"ui_right\"):
+		motion.x += 1
+		
+	if Input.is_action_pressed(\"ui_left\"):
+		motion.x -= 1
+	
+	return motion
+
+func add_near_entity(entity):
+	if \"action\" in entity:
+		if entity not in _entities_near:
+			_entities_near.push_back(entity)
+
+func remove_near_entity(entity):
+	if entity in _entities_near:
+		_entities_near = _entities_near.filter(func(ent): return entity != ent)
+
+func action():
+	if Input.is_action_pressed(\"interact\"):
+		for entity in _entities_near:
+			entity.action()
+			
+func use():
+	if Input.is_action_just_released(\"use\"):
+		on_use.emit()
+
+func _physics_process(_delta):
+	action()
+	use()
+	change_state(map_vector_to_state(get_player_direction()))
+	move_and_slide()
+"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jmge8"]
 atlas = ExtResource("3_btgjx")
@@ -53,6 +101,30 @@ region = Rect2(160, 240, 80, 80)
 [sub_resource type="AtlasTexture" id="AtlasTexture_46ec8"]
 atlas = ExtResource("3_btgjx")
 region = Rect2(240, 240, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a3tro"]
+atlas = ExtResource("4_naieq")
+region = Rect2(32, 104, 26, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hof5c"]
+atlas = ExtResource("4_naieq")
+region = Rect2(110, 104, 26, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vadi5"]
+atlas = ExtResource("4_naieq")
+region = Rect2(188, 104, 26, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2kkis"]
+atlas = ExtResource("4_naieq")
+region = Rect2(266, 104, 26, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bblef"]
+atlas = ExtResource("4_naieq")
+region = Rect2(344, 104, 26, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_00msl"]
+atlas = ExtResource("4_naieq")
+region = Rect2(422, 104, 26, 26)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vxy3p"]
 atlas = ExtResource("2_r1xks")
@@ -253,6 +325,29 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_a3tro")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hof5c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vadi5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2kkis")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bblef")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_00msl")
+}],
+"loop": true,
+"name": &"death_horizontal",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_vxy3p")
 }, {
 "duration": 1.0,
@@ -388,20 +483,26 @@ animations = [{
 "loop": true,
 "name": &"move_up",
 "speed": 8.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"new_animation",
+"speed": 5.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1ajpw"]
 height = 28.0
 
-[node name="Player" instance=ExtResource("1_nydr6")]
+[node name="Player"]
 collision_mask = 3
-script = ExtResource("2_6hte0")
+script = SubResource("GDScript_vs2bx")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 scale = Vector2(2.05, 2.05)
 sprite_frames = SubResource("SpriteFrames_rqjc4")
-animation = &"damage_up"
+animation = &"death_horizontal"
 autoplay = "idle_up"
+frame_progress = 0.144623
 
 [node name="CollisionShape2D" parent="." index="1"]
 position = Vector2(1, 0)

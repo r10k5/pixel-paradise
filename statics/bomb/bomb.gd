@@ -17,3 +17,4 @@ func _on_animated_sprite_2d_animation_finished():
 	for entity in entities_near:
 		entity.take_damage(damage_amount)
 	die()
+	queue_free()

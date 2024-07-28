@@ -21,3 +21,4 @@ func interact():
 	# Это временно
 	await get_tree().create_timer(0.5).timeout
 	die()
+	queue_free()
