@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://dhqvarbhiojb4"]
+
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_ymnf6"]
+[ext_resource type="Script" path="res://statics/drop/log.gd" id="2_b3rpq"]
+[ext_resource type="Texture2D" uid="uid://danl6trst3v7t" path="res://assets/drop_item/log.png" id="3_3sfql"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m5g6y"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_3sfql")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nwhoy"]
+radius = 5.03329
+height = 28.0545
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5t0rs"]
+radius = 26.0192
+
+[node name="CharacterBody2D" instance=ExtResource("1_ymnf6")]
+script = ExtResource("2_b3rpq")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_m5g6y")
+
+[node name="CollisionShape2D" parent="." index="1"]
+rotation = -1.68075
+shape = SubResource("CapsuleShape2D_nwhoy")
+one_way_collision_margin = 0.0
+debug_color = Color(0.611765, 0.4, 0.372549, 0.419608)
+
+[node name="Area2D" parent="." index="2"]
+position = Vector2(1, 1)
+
+[node name="CollisionShape2D" parent="Area2D" index="0"]
+shape = SubResource("CircleShape2D_5t0rs")

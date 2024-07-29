@@ -1,0 +1,41 @@
+[gd_scene load_steps=4 format=3 uid="uid://q8lkjijx2kh4"]
+
+[ext_resource type="Script" path="res://ui/inventory_manager.gd" id="1_1odut"]
+[ext_resource type="Texture2D" uid="uid://div31jnlhwkgf" path="res://assets/ui/сell.png" id="1_yl00f"]
+[ext_resource type="Script" path="res://ui/inventory_cell.gd" id="2_2cltu"]
+
+[node name="CanvasLayer" type="CanvasLayer"]
+script = ExtResource("1_1odut")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_2cltu")
+
+[node name="TextureRect" type="TextureRect" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.498
+anchor_top = 0.951
+anchor_right = 0.498
+anchor_bottom = 0.951
+offset_left = 522.08
+offset_top = 545.96
+offset_right = 586.08
+offset_bottom = 609.96
+texture = ExtResource("1_yl00f")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -576.0
+offset_top = -648.0
+offset_right = -512.0
+offset_bottom = -584.0
+grow_horizontal = 2
+grow_vertical = 0
