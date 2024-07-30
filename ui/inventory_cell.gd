@@ -1,15 +1,17 @@
 extends Control
 
-@export var item_texture: Texture
-@export var item_name: String = ""
-@export var item_count: int = 0
+var item_texture: Texture
+var item_count: int = 0
+var item_name: String = ""
+
+@onready var item_count_lable = $ItemCount
+@onready var item_texture_node = $TextureRect
 
 func _ready():
-	$TextureRect.texture = item_texture
-	$ItemName.text = item_name
-	$ItemCount.text = str(item_count)
+	item_texture_node.texture = item_texture
+	item_count_lable.text = str(item_count)
 
 func increase_count(amount: int):
 	item_count += amount
-	$ItemCount.text = str(item_count)
+	item_count_lable.text = str(item_count)
 
