@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://bt3bkao0rxxi8"]
+[gd_scene load_steps=12 format=3 uid="uid://bmx534g8umnmk"]
 
 [ext_resource type="Texture2D" uid="uid://cwysm0f14ihcw" path="res://assets/world/bomb/bomb-14.png" id="1_gfiw4"]
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_wo0oe"]
 [ext_resource type="Texture2D" uid="uid://c3woyhwbbinbt" path="res://assets/world/bomb/bomb-23.png" id="2_3fyx5"]
 [ext_resource type="Texture2D" uid="uid://bl7uphjei3tsp" path="res://assets/world/bomb/bomb-32.png" id="3_tncd6"]
 [ext_resource type="Texture2D" uid="uid://dpsaqj4okdsu8" path="res://assets/world/bomb/bomb-41.png" id="4_caa7h"]
@@ -8,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://ded7fkl26tpa1" path="res://assets/world/bomb/bomb.png" id="6_s7jcp"]
 [ext_resource type="Script" path="res://statics/bomb/bomb.gd" id="7_ypdgx"]
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_tt2qt"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_im3s8"]
 animations = [{
 "frames": [{
 "duration": 1.0,
@@ -34,36 +35,26 @@ animations = [{
 "speed": 1.0
 }]
 
-[sub_resource type="GDScript" id="GDScript_vabp4"]
-script/source = "extends AnimatedSprite2D
+[sub_resource type="CircleShape2D" id="CircleShape2D_nhv3k"]
+radius = 13.0384
 
-"
+[sub_resource type="CircleShape2D" id="CircleShape2D_7u57g"]
+radius = 75.505
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_oml0c"]
-radius = 12.0416
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_ijsd8"]
-radius = 99.0808
-
-[node name="Bomb" type="StaticBody2D"]
+[node name="Bomb" instance=ExtResource("1_wo0oe")]
 script = ExtResource("7_ypdgx")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(-4.76837e-07, -0.5)
-scale = Vector2(0.9375, 0.96875)
-sprite_frames = SubResource("SpriteFrames_tt2qt")
-script = SubResource("GDScript_vabp4")
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_im3s8")
+frame = 3
+frame_progress = 0.297564
 
-[node name="HitBox" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" parent="." index="1"]
 position = Vector2(-1, 2)
-shape = SubResource("CircleShape2D_oml0c")
+shape = SubResource("CircleShape2D_nhv3k")
 
-[node name="Area2D" type="Area2D" parent="."]
-
-[node name="BoomShape" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" parent="Area2D" index="0"]
 position = Vector2(-1, 2)
-shape = SubResource("CircleShape2D_ijsd8")
+shape = SubResource("CircleShape2D_7u57g")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
-[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
-[connection signal="body_exited" from="Area2D" to="." method="_on_area_2d_body_exited"]

@@ -1,0 +1,83 @@
+[gd_scene load_steps=10 format=3 uid="uid://dj5mld0uc4emo"]
+
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_gvv6t"]
+[ext_resource type="Script" path="res://characters/abstract/base_body_v2.gd" id="2_14da1"]
+[ext_resource type="Script" path="res://characters/abstract/states/fsm.gd" id="3_go6oc"]
+[ext_resource type="Script" path="res://characters/abstract/states/base_body/base_idle.gd" id="4_75g2e"]
+[ext_resource type="Script" path="res://characters/abstract/states/base_body/directional/walk/walk_up.gd" id="5_r1qmr"]
+[ext_resource type="Script" path="res://characters/abstract/states/base_body/directional/walk/walk_left.gd" id="6_qctwc"]
+[ext_resource type="Script" path="res://characters/abstract/states/base_body/base_death.gd" id="7_g7kak"]
+[ext_resource type="Script" path="res://characters/abstract/states/base_body/directional/walk/walk_right.gd" id="7_kyhta"]
+[ext_resource type="Script" path="res://characters/abstract/states/base_body/directional/walk/walk_down.gd" id="8_pol2d"]
+
+[node name="BaseBody" instance=ExtResource("1_gvv6t")]
+script = ExtResource("2_14da1")
+speed = 10.0
+
+[node name="FSM" type="Node" parent="." index="4" node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_go6oc")
+initial_state = NodePath("idle_up")
+
+[node name="idle_left" type="Node" parent="FSM" index="0" node_paths=PackedStringArray("base_body", "death_state")]
+script = ExtResource("4_75g2e")
+base_body = NodePath("../..")
+animation = "idle_left"
+death_state = NodePath("../death_left")
+
+[node name="idle_right" type="Node" parent="FSM" index="1" node_paths=PackedStringArray("base_body", "death_state")]
+script = ExtResource("4_75g2e")
+base_body = NodePath("../..")
+animation = "idle_right"
+death_state = NodePath("../death_right")
+
+[node name="idle_up" type="Node" parent="FSM" index="2" node_paths=PackedStringArray("base_body", "death_state")]
+script = ExtResource("4_75g2e")
+base_body = NodePath("../..")
+animation = "idle_up"
+death_state = NodePath("../death_up")
+
+[node name="idle_down" type="Node" parent="FSM" index="3" node_paths=PackedStringArray("base_body", "death_state")]
+script = ExtResource("4_75g2e")
+base_body = NodePath("../..")
+animation = "idle_down"
+death_state = NodePath("../death_down")
+
+[node name="walk_up" type="Node" parent="FSM" index="4" node_paths=PackedStringArray("base_body")]
+script = ExtResource("5_r1qmr")
+base_body = NodePath("../..")
+animation = "walk_up"
+
+[node name="walk_left" type="Node" parent="FSM" index="5" node_paths=PackedStringArray("base_body")]
+script = ExtResource("6_qctwc")
+base_body = NodePath("../..")
+animation = "walk_left"
+
+[node name="walk_right" type="Node" parent="FSM" index="6" node_paths=PackedStringArray("base_body")]
+script = ExtResource("7_kyhta")
+base_body = NodePath("../..")
+animation = "walk_right"
+
+[node name="walk_down" type="Node" parent="FSM" index="7" node_paths=PackedStringArray("base_body")]
+script = ExtResource("8_pol2d")
+base_body = NodePath("../..")
+animation = "walk_down"
+
+[node name="death_left" type="Node" parent="FSM" index="8" node_paths=PackedStringArray("base_body")]
+script = ExtResource("7_g7kak")
+base_body = NodePath("../..")
+animation = "death_left"
+
+[node name="death_right" type="Node" parent="FSM" index="9" node_paths=PackedStringArray("base_body")]
+script = ExtResource("7_g7kak")
+base_body = NodePath("../..")
+animation = "death_right"
+
+[node name="death_up" type="Node" parent="FSM" index="10" node_paths=PackedStringArray("base_body")]
+script = ExtResource("7_g7kak")
+base_body = NodePath("../..")
+animation = "death_up"
+
+[node name="death_down" type="Node" parent="FSM" index="11" node_paths=PackedStringArray("base_body")]
+script = ExtResource("7_g7kak")
+base_body = NodePath("../..")
+animation = "death_down"
