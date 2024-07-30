@@ -6,42 +6,34 @@
 [node name="Control" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 64.0
+offset_bottom = 64.0
 script = ExtResource("1_pw4rr")
 
 [node name="Background" type="TextureRect" parent="."]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.498
-anchor_top = 0.951
-anchor_right = 0.498
-anchor_bottom = 0.951
-offset_left = 519.08
-offset_top = 530.96
-offset_right = 583.08
-offset_bottom = 594.96
+offset_right = 64.0
+offset_bottom = 64.0
 texture = ExtResource("2_7girg")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.498
-anchor_top = 0.951
-anchor_right = 0.498
-anchor_bottom = 0.951
-offset_left = 519.08
-offset_top = 530.96
-offset_right = 583.08
-offset_bottom = 594.96
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 60.0
+offset_bottom = 60.0
+expand_mode = 3
 
 [node name="ItemCount" type="Label" parent="."]
 texture_filter = 1
-layout_mode = 0
-offset_left = 540.0
-offset_top = 609.0
-offset_right = 603.0
-offset_bottom = 632.0
+layout_mode = 1
+offset_left = 4.0
+offset_top = 37.0
+offset_right = 60.0
+offset_bottom = 60.0
 text = "1"
 horizontal_alignment = 2
 vertical_alignment = 1

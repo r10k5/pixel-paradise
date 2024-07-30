@@ -6,15 +6,25 @@ signal drop_item(item)
 signal drop_effect(item)
 signal death()
 signal health_changed(value: int)
+signal pick_up(entity: BaseEntity)
+
+enum PickUpTrigger {
+	Auto,
+	Manual,
+	None
+}
 
 var id = null
+var title = ""
 var max_health: int = 100
 var health: int = max_health
 var can_be_destroyed: bool = true
+var pick_up_trigger: PickUpTrigger = PickUpTrigger.None
 var drops: Array = []
 var effects: Array = []
 var animations: Dictionary = {}
 var effects_can_be_applied: Dictionary = {}
+@export var texture: Texture
 
 var is_near_player: bool = false
 var can_interact: bool = true
@@ -61,6 +71,14 @@ func apply_effect(effect):
 func _input(event):
 	if event.is_action_pressed("interact") and is_near_player and can_interact:
 		interact()
+		
+	if event.is_action_pressed("pick_up") and pick_up_trigger == PickUpTrigger.Manual:
+		on_pick_up()
+
+func on_pick_up():
+	pick_up.emit(self)
+	# Логика поднятия объекта
+	pass
 
 func interact():
 	# Логика взаимодействия с объектом
@@ -72,6 +90,9 @@ func _on_Player_nearby(state: bool):
 func _on_body_entered(body):
 	if body not in entities_near:
 		entities_near.push_back(body)
+		
+	if pick_up_trigger == PickUpTrigger.Auto:
+		on_pick_up()
 		
 	if body.name.to_lower() == "player":
 		_on_Player_nearby(true)

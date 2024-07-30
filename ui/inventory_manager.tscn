@@ -3,20 +3,21 @@
 [ext_resource type="Script" path="res://ui/inventory_manager.gd" id="1_1odut"]
 [ext_resource type="PackedScene" uid="uid://cl738u6wnt1ws" path="res://ui/inventory_cell.tscn" id="2_v8jpq"]
 
-[node name="CanvasLayer" type="CanvasLayer" node_paths=PackedStringArray("container")]
+[node name="CanvasLayer" type="CanvasLayer"]
 script = ExtResource("1_1odut")
 inventory_cell_scene = ExtResource("2_v8jpq")
-container = NodePath("HBoxContainer")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -576.0
-offset_top = -648.0
-offset_right = -512.0
-offset_bottom = -584.0
+anchors_preset = -1
+anchor_left = 0.085
+anchor_top = 0.901
+anchor_right = 0.085
+anchor_bottom = 0.901
+offset_left = 0.0800018
+offset_top = 0.151978
+offset_right = 954.08
+offset_bottom = 64.152
 grow_horizontal = 2
 grow_vertical = 0
+size_flags_vertical = 4
+theme_override_constants/separation = 64

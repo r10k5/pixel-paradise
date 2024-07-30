@@ -11,6 +11,7 @@ const TREE = preload("res://statics/tree/tree.tscn")
 @onready var trees = $Trees
 @onready var droped_items = $DropItems
 @onready var timer = $ChestTimer
+@onready var inventory = $Inventory
 
 func _ready():
 	player.health_changed.connect(on_health_changed)
@@ -30,11 +31,16 @@ func spawn_tree():
 	tree.position = tree_position
 	
 	tree.drop_item.connect(func(item):
-		print(item)
 		item.position = tree.position
+		item.pick_up.connect(on_item_pick_up)
 		droped_items.add_child(item)
 	)
 	trees.add_child(tree)
+
+func on_item_pick_up(item: BaseEntity):
+	if player in item.entities_near:
+		inventory.add_item_to_inventory(item)
+		item.queue_free()
 
 #@onready var chests = $Chests
 #@onready var player = $Player

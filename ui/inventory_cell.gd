@@ -1,5 +1,7 @@
 extends Control
 
+class_name InventoryCell
+
 var item_texture: Texture
 var item_count: int = 0
 var item_name: String = ""

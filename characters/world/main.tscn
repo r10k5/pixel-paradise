@@ -295,6 +295,6 @@ transform = Transform2D(1, 0, 0, 1, 0, 20)
 
 [node name="Trees" type="Node" parent="."]
 
-[node name="CanvasLayer" parent="." instance=ExtResource("5_k1elx")]
+[node name="Inventory" parent="." instance=ExtResource("5_k1elx")]
 
 [connection signal="timeout" from="ChestTimer" to="." method="_on_chest_timer_timeout"]

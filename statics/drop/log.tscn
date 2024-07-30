@@ -22,8 +22,9 @@ height = 28.0545
 [sub_resource type="CircleShape2D" id="CircleShape2D_5t0rs"]
 radius = 26.0192
 
-[node name="CharacterBody2D" instance=ExtResource("1_ymnf6")]
+[node name="Log" instance=ExtResource("1_ymnf6")]
 script = ExtResource("2_b3rpq")
+texture = ExtResource("3_3sfql")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_m5g6y")
@@ -39,3 +40,4 @@ position = Vector2(1, 1)
 
 [node name="CollisionShape2D" parent="Area2D" index="0"]
 shape = SubResource("CircleShape2D_5t0rs")
+debug_color = Color(0.807843, 0.564706, 0.984314, 0.180392)
