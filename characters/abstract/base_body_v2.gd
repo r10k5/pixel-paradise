@@ -9,15 +9,3 @@ class_name BaseBody
 
 func _ready():
 	fsm.initial_state = idle_up
-
-func move_right():
-	velocity = Vector2(1, 0)
-	
-func move_left():
-	velocity = Vector2(-1, 0)
-	
-func move_up():
-	velocity = Vector2(0, -1)
-	
-func move_down():
-	velocity = Vector2(0, 1)

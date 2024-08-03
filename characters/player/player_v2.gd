@@ -17,26 +17,11 @@ func _ready():
 		"death_up": "death_up",
 		"death_down": "death_down",
 	}
-	
-func motion(_delta: float):
-	var motion_vector = Vector2()
-	
-	if Input.is_action_pressed("move_down"):
-		motion_vector.y += 1
-	if Input.is_action_pressed("move_up"):
-		motion_vector.y += -1
-	if Input.is_action_pressed("move_left"):
-		motion_vector.x += -1
-	if Input.is_action_pressed("move_right"):
-		motion_vector.x += 1
-		
-	velocity = motion_vector.normalized() * speed
 
 func use():
 	if Input.is_action_just_pressed("use"):
 		take_damage(health)
 
-func _physics_process(delta: float):
-	motion(delta)
+func _physics_process(_delta: float):
 	use()
 	move_and_slide()

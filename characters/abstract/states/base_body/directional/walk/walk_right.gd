@@ -16,11 +16,5 @@ func exit():
 	base_body.death.disconnect(set_death_state)
 
 func update(_delta: float):
-	if base_body.velocity.length() == 0:
-		transition.emit(self, "idle_right")
-	elif base_body.velocity.x < 0:
-		transition.emit(self, "walk_left")
-	elif base_body.velocity.y > 0:
-		transition.emit(self, "walk_down")
-	elif base_body.velocity.y < 0:
-		transition.emit(self, "walk_up")
+	base_body.velocity = Vector2(1, 0).normalized() * base_body.speed
+	pass
