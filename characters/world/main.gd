@@ -16,7 +16,7 @@ const TREE = preload("res://statics/tree/tree.tscn")
 func _ready():
 	player.health_changed.connect(on_health_changed)
 	on_health_changed(player.health)
-	timer.timeout.connect(spawn_tree)
+	#timer.timeout.connect(spawn_tree)
 	
 func on_health_changed(current_health: int):
 	hp_bar.set_hp(current_health)

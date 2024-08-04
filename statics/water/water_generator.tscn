@@ -640,3 +640,6 @@ script = ExtResource("1_eq8h1")
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_vxcqx")
 format = 2
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.25
