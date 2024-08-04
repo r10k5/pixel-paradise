@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://8gwdk2mrbhyt"]
+[gd_scene load_steps=9 format=3 uid="uid://8gwdk2mrbhyt"]
 
 [ext_resource type="Texture2D" uid="uid://bpvkswwhrosr6" path="res://assets/world/static/TX Tileset Grass.png" id="1_71ssx"]
 [ext_resource type="Script" path="res://characters/world/main.gd" id="1_hhpii"]
 [ext_resource type="PackedScene" uid="uid://bq6p04xegy3wa" path="res://characters/player/player_v2.tscn" id="5_8m08q"]
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" uid="uid://wy7y4bgolppp" path="res://ui/health.tscn" id="5_pijuu"]
+[ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w50e3"]
 texture = ExtResource("1_71ssx")
@@ -296,5 +297,8 @@ transform = Transform2D(1, 0, 0, 1, 0, 20)
 [node name="Trees" type="Node" parent="."]
 
 [node name="Inventory" parent="." instance=ExtResource("5_k1elx")]
+
+[node name="WaterGenerator" parent="." instance=ExtResource("6_dnm44")]
+position = Vector2(320, 244)
 
 [connection signal="timeout" from="ChestTimer" to="." method="_on_chest_timer_timeout"]

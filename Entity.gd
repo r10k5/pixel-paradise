@@ -100,7 +100,7 @@ func _on_body_entered(body):
 func _on_body_exited(body):
 	if body in entities_near:
 		entities_near = entities_near.filter(
-			func(entity: BaseEntity): entity != body
+			func(entity: BaseEntity): return entity != body
 		)
 
 	if body.name.to_lower() == "player":
