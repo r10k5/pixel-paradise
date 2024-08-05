@@ -12,11 +12,16 @@ const TREE = preload("res://statics/tree/tree.tscn")
 @onready var droped_items = $DropItems
 @onready var timer = $ChestTimer
 @onready var inventory = $Inventory
+@onready var full_inventory = $CanvasLayer/FullInventory
 
+func _input(event):
+	if event.is_action_released("inventory"):
+		full_inventory.show()
+		
 func _ready():
 	player.health_changed.connect(on_health_changed)
 	on_health_changed(player.health)
-	#timer.timeout.connect(spawn_tree)
+	timer.timeout.connect(spawn_tree)
 	
 func on_health_changed(current_health: int):
 	hp_bar.set_hp(current_health)
@@ -41,44 +46,3 @@ func on_item_pick_up(item: BaseEntity):
 	if player in item.entities_near:
 		inventory.add_item_to_inventory(item)
 		item.queue_free()
-
-#@onready var chests = $Chests
-#@onready var player = $Player
-#@onready var chest_timer = $ChestTimer
-#@onready var bombs = $Bombs
-#
-#func _ready():
-	#player.set_speed(200.0)
-	#player.changed_hp.connect(on_hp_changed)
-	#chest_timer.timeout.connect(spawn_chest)
-	#chest_timer.start()
-	#player.on_use.connect(on_player_use)
-	#on_hp_changed(player.get_health())
-#
-#func on_player_use():
-	#var bomb = BOMB.instantiate()
-	#bomb.position = player.position + Vector2(40, 0)
-	#bombs.add_child(bomb)
-#
-
-	#
-#func generate_effect():
-	#var speed_effect = INCREASE_SPEED.instantiate()
-	#speed_effect.timeout = 5
-	#return speed_effect
-#
-#func spawn_chest():
-	#if len(chests.get_children()) >= MAX_CHESTS:
-		#return
-	#
-	#var chest = CHEST.instantiate()
-	#var chest_position = Vector2(randf_range(100, 1000), randf_range(100, 550))
-#
-	#chest.position = chest_position
-	#
-	#chest.drops.push_back(generate_effect())
-	#chest.chest_open.connect(func(item):
-		#print(item)
-		#player.accept_item(item)
-	#)
-	#chests.add_child(chest)

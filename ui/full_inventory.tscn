@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://dx2rm62v0pgjb"]
+
+[ext_resource type="Texture2D" uid="uid://jplfd3q0flct" path="res://assets/ui/inventory-background.png" id="1_0mnfd"]
+[ext_resource type="Script" path="res://ui/full_inventory.gd" id="1_b33jh"]
+
+[node name="FullInventory" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 3.0
+offset_right = 616.0
+offset_bottom = 483.0
+script = ExtResource("1_b33jh")
+
+[node name="InventoryContainer" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 1.0
+offset_top = -1.0
+offset_right = 611.0
+offset_bottom = 474.0
+
+[node name="InventoryGrid" type="GridContainer" parent="InventoryContainer"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="InventoryContainer"]
+layout_mode = 2
+texture = ExtResource("1_0mnfd")
+expand_mode = 1
+
+[node name="ExitButtonContainer" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 535.0
+offset_right = 606.0
+offset_bottom = 66.0
+
+[node name="ExitButton" type="Button" parent="ExitButtonContainer"]
+layout_mode = 2
+text = "Exit"
+icon_alignment = 1

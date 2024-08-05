@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://8gwdk2mrbhyt"]
+[gd_scene load_steps=10 format=3 uid="uid://8gwdk2mrbhyt"]
 
 [ext_resource type="Texture2D" uid="uid://bpvkswwhrosr6" path="res://assets/world/static/TX Tileset Grass.png" id="1_71ssx"]
 [ext_resource type="Script" path="res://characters/world/main.gd" id="1_hhpii"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" uid="uid://wy7y4bgolppp" path="res://ui/health.tscn" id="5_pijuu"]
 [ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
+[ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w50e3"]
 texture = ExtResource("1_71ssx")
@@ -299,5 +300,18 @@ transform = Transform2D(1, 0, 0, 1, 0, 20)
 [node name="Trees" type="Node" parent="."]
 
 [node name="Inventory" parent="." instance=ExtResource("5_k1elx")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="FullInventory" parent="CanvasLayer" instance=ExtResource("7_p1uhn")]
+anchors_preset = -1
+anchor_left = 0.308
+anchor_top = 0.438
+anchor_right = 0.308
+anchor_bottom = 0.438
+offset_left = 693.184
+offset_top = -221.824
+offset_right = 1304.18
+offset_bottom = 250.176
 
 [connection signal="timeout" from="ChestTimer" to="." method="_on_chest_timer_timeout"]

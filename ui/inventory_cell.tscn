@@ -1,12 +1,12 @@
 [gd_scene load_steps=3 format=3 uid="uid://cl738u6wnt1ws"]
 
 [ext_resource type="Script" path="res://ui/inventory_cell.gd" id="1_pw4rr"]
-[ext_resource type="Texture2D" uid="uid://div31jnlhwkgf" path="res://assets/ui/сell.png" id="2_7girg"]
+[ext_resource type="Texture2D" uid="uid://og0m7k6mj350" path="res://assets/ui/cell-2.png" id="2_y24fy"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 64.0
+offset_right = 67.0
 offset_bottom = 64.0
 script = ExtResource("1_pw4rr")
 
@@ -14,9 +14,10 @@ script = ExtResource("1_pw4rr")
 texture_filter = 1
 layout_mode = 1
 anchors_preset = -1
-offset_right = 64.0
-offset_bottom = 64.0
-texture = ExtResource("2_7girg")
+offset_right = 66.0
+offset_bottom = 63.0
+texture = ExtResource("2_y24fy")
+expand_mode = 3
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
