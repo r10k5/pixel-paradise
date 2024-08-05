@@ -20,7 +20,7 @@ radius = 5.03329
 height = 28.0545
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5t0rs"]
-radius = 26.0192
+radius = 39.0
 
 [node name="Log" instance=ExtResource("1_ymnf6")]
 script = ExtResource("2_b3rpq")

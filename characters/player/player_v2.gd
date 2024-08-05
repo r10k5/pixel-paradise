@@ -2,7 +2,14 @@ extends BaseBody
 
 class_name Player
 
+@onready var clothes = $AnimatedSprite2D2
 var inventory: Inventory = Inventory.new()
+var clothes_animations = {
+	"idle_right": "right",
+	"idle_left": "left",
+	"idle_up": "up",
+	"idle_down": "down",
+}
 
 func _ready():
 	animations = {
@@ -19,7 +26,13 @@ func _ready():
 		"death_up": "death_up",
 		"death_down": "death_down",
 	}
+	animation_change.connect(on_animation_change)
+	
 
+func on_animation_change(animation_name: String):
+	if animation_name in clothes_animations:
+		var animation = clothes_animations[animation_name]
+		clothes.play(animation)
 func use():
 	if Input.is_action_just_pressed("use"):
 		take_damage(health)

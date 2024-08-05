@@ -1,0 +1,60 @@
+[gd_scene load_steps=7 format=3 uid="uid://cbmcsf1h54v0j"]
+
+[ext_resource type="Texture2D" uid="uid://10r6xw2a3awo" path="res://assets/characters/clothes/test-shirt.png" id="1_oshpk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_48hh5"]
+atlas = ExtResource("1_oshpk")
+region = Rect2(0, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a2mrf"]
+atlas = ExtResource("1_oshpk")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8us6j"]
+atlas = ExtResource("1_oshpk")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uyp1p"]
+atlas = ExtResource("1_oshpk")
+region = Rect2(32, 48, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_5huru"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_48hh5")
+}],
+"loop": true,
+"name": &"down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a2mrf")
+}],
+"loop": true,
+"name": &"left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8us6j")
+}],
+"loop": true,
+"name": &"right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uyp1p")
+}],
+"loop": true,
+"name": &"up",
+"speed": 5.0
+}]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D"]
+modulate = Color(0.740365, 0.000466868, 0.750614, 1)
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_5huru")
+animation = &"right"

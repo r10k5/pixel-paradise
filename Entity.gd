@@ -7,6 +7,7 @@ signal drop_effect(item)
 signal death()
 signal health_changed(value: int)
 signal pick_up(entity: BaseEntity)
+signal animation_change(name: String)
 
 enum PickUpTrigger {
 	Auto,
@@ -59,6 +60,7 @@ func drop_effects():
 func play_animation(animation_name: String):
 	if animation_name in animations:
 		$AnimatedSprite2D.play(animations[animation_name])
+		animation_change.emit(animation_name)
 		return $AnimatedSprite2D.animation_finished
 
 func apply_effect(effect):

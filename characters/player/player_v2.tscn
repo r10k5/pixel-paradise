@@ -1,4 +1,4 @@
-[gd_scene load_steps=85 format=3 uid="uid://bq6p04xegy3wa"]
+[gd_scene load_steps=86 format=3 uid="uid://bq6p04xegy3wa"]
 
 [ext_resource type="PackedScene" uid="uid://dj5mld0uc4emo" path="res://characters/abstract/base_body_v2.tscn" id="1_3rgay"]
 [ext_resource type="Script" path="res://characters/player/player_v2.gd" id="2_6timk"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://characters/player/player_walk_left.gd" id="8_prdk1"]
 [ext_resource type="Script" path="res://characters/player/player_walk_right.gd" id="9_aa44n"]
 [ext_resource type="Script" path="res://characters/player/player_walk_down.gd" id="10_itodi"]
+[ext_resource type="PackedScene" uid="uid://cbmcsf1h54v0j" path="res://characters/player/clothes/test_blue-shirt.tscn" id="11_3wywb"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xgh8j"]
 atlas = ExtResource("3_7fqnh")
@@ -589,9 +590,10 @@ speed = 200.0
 zoom = Vector2(2, 2)
 
 [node name="AnimatedSprite2D" parent="." index="1"]
+modulate = Color(1, 0.87526, 0.81089, 1)
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_hr3hw")
-animation = &"death_down"
+animation = &"idle_down"
 autoplay = "idle_up"
 
 [node name="CollisionShape2D" parent="." index="2"]
@@ -621,3 +623,8 @@ script = ExtResource("9_aa44n")
 
 [node name="walk_down" parent="FSM" index="7"]
 script = ExtResource("10_itodi")
+
+[node name="AnimatedSprite2D2" parent="." index="6" instance=ExtResource("11_3wywb")]
+position = Vector2(-2, -2)
+scale = Vector2(2, 2)
+animation = &"down"
