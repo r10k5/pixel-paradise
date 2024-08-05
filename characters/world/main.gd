@@ -7,12 +7,12 @@ const MAX_TREES = 10
 const TREE = preload("res://statics/tree/tree.tscn")
 
 @onready var player = $Player
-@onready var hp_bar = $HP
+@onready var hp_bar = $UI/HP
 @onready var trees = $Trees
 @onready var droped_items = $DropItems
 @onready var timer = $ChestTimer
-@onready var inventory = $Inventory
-@onready var full_inventory = $CanvasLayer/FullInventory
+@onready var inventory = $UI/Inventory
+@onready var full_inventory = $UI/FullInventory
 
 func _input(event):
 	if event.is_action_released("inventory"):

@@ -291,19 +291,15 @@ position = Vector2(357, 287)
 [node name="ChestTimer" type="Timer" parent="."]
 autostart = true
 
-[node name="HP" parent="." instance=ExtResource("5_pijuu")]
-offset = Vector2(0, 20)
-transform = Transform2D(1, 0, 0, 1, 0, 20)
-
 [node name="Bombs" type="Node" parent="."]
 
 [node name="Trees" type="Node" parent="."]
 
-[node name="Inventory" parent="." instance=ExtResource("5_k1elx")]
+[node name="UI" type="CanvasLayer" parent="."]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="FullInventory" type="CanvasLayer" parent="UI"]
 
-[node name="FullInventory" parent="CanvasLayer" instance=ExtResource("7_p1uhn")]
+[node name="FullInventory" parent="UI/FullInventory" instance=ExtResource("7_p1uhn")]
 anchors_preset = -1
 anchor_left = 0.308
 anchor_top = 0.438
@@ -313,5 +309,11 @@ offset_left = 693.184
 offset_top = -221.824
 offset_right = 1304.18
 offset_bottom = 250.176
+
+[node name="Inventory" parent="UI" instance=ExtResource("5_k1elx")]
+
+[node name="HP" parent="UI" instance=ExtResource("5_pijuu")]
+offset = Vector2(0, 20)
+transform = Transform2D(1, 0, 0, 1, 0, 20)
 
 [connection signal="timeout" from="ChestTimer" to="." method="_on_chest_timer_timeout"]
