@@ -11,20 +11,28 @@ offset_right = 616.0
 offset_bottom = 483.0
 script = ExtResource("1_b33jh")
 
-[node name="InventoryContainer" type="PanelContainer" parent="."]
-layout_mode = 0
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 2
 offset_left = 1.0
 offset_top = -1.0
 offset_right = 611.0
 offset_bottom = 474.0
+texture = ExtResource("1_0mnfd")
+expand_mode = 1
+
+[node name="InventoryContainer" type="PanelContainer" parent="."]
+self_modulate = Color(1, 1, 1, 0.0196078)
+layout_mode = 0
+offset_left = 41.0
+offset_top = 45.0
+offset_right = 571.0
+offset_bottom = 446.0
 
 [node name="InventoryGrid" type="GridContainer" parent="InventoryContainer"]
 layout_mode = 2
-
-[node name="TextureRect" type="TextureRect" parent="InventoryContainer"]
-layout_mode = 2
-texture = ExtResource("1_0mnfd")
-expand_mode = 1
+theme_override_constants/h_separation = 73
+theme_override_constants/v_separation = 76
+columns = 7
 
 [node name="ExitButtonContainer" type="PanelContainer" parent="."]
 layout_mode = 0

@@ -12,7 +12,7 @@ const TREE = preload("res://statics/tree/tree.tscn")
 @onready var droped_items = $Entities/DropItems
 @onready var timer = $Entities/Chests/ChestTimer
 @onready var inventory = $UI/Inventory
-@onready var full_inventory = $UI/FullInventory
+@onready var full_inventory = $UI/FullInventory/FullInventory
 
 func _input(event):
 	if event.is_action_released("inventory"):
@@ -21,6 +21,7 @@ func _input(event):
 func _ready():
 	player.health_changed.connect(on_health_changed)
 	player.inventory.item_add.connect(on_add_item_to_inventory)
+	full_inventory.connect_inventory(player.inventory)
 	on_health_changed(player.health)
 	timer.timeout.connect(spawn_tree)
 	

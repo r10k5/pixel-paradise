@@ -22,6 +22,9 @@ func get_item(id: int) -> InventoryItem:
 	
 	return null
 	
+func get_items() -> Array:
+	return _items.values()
+	
 func add_item(item: BaseEntity) -> bool:
 	if item.id in _item_id_index_map:
 		var index = _item_id_index_map[item.id]
