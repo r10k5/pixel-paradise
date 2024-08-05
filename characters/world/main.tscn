@@ -273,6 +273,19 @@ sources/0 = SubResource("TileSetAtlasSource_w50e3")
 [node name="Main" type="Node2D"]
 script = ExtResource("1_hhpii")
 
+[node name="Entities" type="Node" parent="."]
+
+[node name="DropItems" type="Node" parent="Entities"]
+
+[node name="Chests" type="Node" parent="Entities"]
+
+[node name="ChestTimer" type="Timer" parent="Entities/Chests"]
+autostart = true
+
+[node name="Bombs" type="Node" parent="Entities"]
+
+[node name="Trees" type="Node" parent="Entities"]
+
 [node name="TileMap" type="TileMap" parent="."]
 scale = Vector2(1.5, 1.5)
 tile_set = SubResource("TileSet_nxl3g")
@@ -283,17 +296,6 @@ layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 1, 131072, 196608, 3, 19
 
 [node name="Player" parent="." instance=ExtResource("5_8m08q")]
 position = Vector2(357, 287)
-
-[node name="DropItems" type="Node" parent="."]
-
-[node name="Chests" type="Node" parent="."]
-
-[node name="ChestTimer" type="Timer" parent="."]
-autostart = true
-
-[node name="Bombs" type="Node" parent="."]
-
-[node name="Trees" type="Node" parent="."]
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -316,4 +318,4 @@ offset_bottom = 250.176
 offset = Vector2(0, 20)
 transform = Transform2D(1, 0, 0, 1, 0, 20)
 
-[connection signal="timeout" from="ChestTimer" to="." method="_on_chest_timer_timeout"]
+[connection signal="timeout" from="Entities/Chests/ChestTimer" to="." method="_on_chest_timer_timeout"]

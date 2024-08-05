@@ -8,9 +8,9 @@ const TREE = preload("res://statics/tree/tree.tscn")
 
 @onready var player = $Player
 @onready var hp_bar = $UI/HP
-@onready var trees = $Trees
-@onready var droped_items = $DropItems
-@onready var timer = $ChestTimer
+@onready var trees = $Entities/Trees
+@onready var droped_items = $Entities/DropItems
+@onready var timer = $Entities/Chests/ChestTimer
 @onready var inventory = $UI/Inventory
 @onready var full_inventory = $UI/FullInventory
 
