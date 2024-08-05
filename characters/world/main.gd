@@ -6,7 +6,7 @@ const BOMB = preload("res://statics/bomb/bomb.tscn")
 const MAX_TREES = 10
 const TREE = preload("res://statics/tree/tree.tscn")
 
-@onready var player = $Player
+@onready var player: Player = $Player
 @onready var hp_bar = $UI/HP
 @onready var trees = $Entities/Trees
 @onready var droped_items = $Entities/DropItems
@@ -20,6 +20,7 @@ func _input(event):
 		
 func _ready():
 	player.health_changed.connect(on_health_changed)
+	player.inventory.item_add.connect(on_add_item_to_inventory)
 	on_health_changed(player.health)
 	timer.timeout.connect(spawn_tree)
 	
@@ -42,7 +43,15 @@ func spawn_tree():
 	)
 	trees.add_child(tree)
 
+func _on_item_pick_up(item: BaseEntity):
+	if item in droped_items.get_children():
+		player.inventory.add_item(item)
+		droped_items.remove_child(item)
+	
+
 func on_item_pick_up(item: BaseEntity):
 	if player in item.entities_near:
-		inventory.add_item_to_inventory(item)
-		item.queue_free()
+		call_deferred("_on_item_pick_up", item)
+		
+func on_add_item_to_inventory(item: InventoryItem):
+	inventory.on_add_item(item)

@@ -28,6 +28,7 @@ version_control/autoload_on_startup=true
 
 folder_colors={
 "res://characters/": "red",
+"res://core/": "purple",
 "res://statics/": "green",
 "res://ui/": "orange"
 }

@@ -2,6 +2,8 @@ extends BaseBody
 
 class_name Player
 
+var inventory: Inventory = Inventory.new()
+
 func _ready():
 	animations = {
 		"idle_right": "idle_right",
