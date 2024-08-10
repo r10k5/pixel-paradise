@@ -27,6 +27,7 @@ version_control/autoload_on_startup=true
 [file_customization]
 
 folder_colors={
+"res://assets/": "teal",
 "res://characters/": "red",
 "res://core/": "purple",
 "res://statics/": "green",

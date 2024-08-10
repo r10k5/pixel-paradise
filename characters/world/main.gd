@@ -5,6 +5,8 @@ const INCREASE_SPEED = preload("res://characters/effects/increase_speed.tscn")
 const BOMB = preload("res://statics/bomb/bomb.tscn")
 const MAX_TREES = 10
 const TREE = preload("res://statics/tree/tree.tscn")
+const FROG = preload("res://characters/friendly_entities/frog.tscn")
+const MAX_FROGS = 10
 
 @onready var player: Player = $Player
 @onready var hp_bar = $UI/HP
@@ -13,6 +15,7 @@ const TREE = preload("res://statics/tree/tree.tscn")
 @onready var timer = $Entities/Chests/ChestTimer
 @onready var inventory = $UI/Inventory
 @onready var full_inventory = $UI/FullInventory/FullInventory
+@onready var frogs = $Frogs
 
 func _input(event):
 	if event.is_action_released("inventory"):
@@ -24,6 +27,7 @@ func _ready():
 	full_inventory.connect_inventory(player.inventory)
 	on_health_changed(player.health)
 	timer.timeout.connect(spawn_tree)
+	timer.timeout.connect(spawn_frog)
 	
 func on_health_changed(current_health: int):
 	hp_bar.set_hp(current_health)
@@ -56,3 +60,15 @@ func on_item_pick_up(item: BaseEntity):
 		
 func on_add_item_to_inventory(item: InventoryItem):
 	inventory.on_add_item(item)
+
+
+func spawn_frog():
+	if len(frogs.get_children()) >= MAX_FROGS:
+		return
+	
+	var frog = FROG.instantiate()
+	var frog_position = Vector2(randf_range(100, 1000), randf_range(100, 550))
+
+	frog.position = frog_position
+	
+	frogs.add_child(frog)

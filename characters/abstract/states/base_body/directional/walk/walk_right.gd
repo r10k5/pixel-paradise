@@ -17,4 +17,4 @@ func exit():
 
 func update(_delta: float):
 	base_body.velocity = Vector2(1, 0).normalized() * base_body.speed
-	pass
+	
