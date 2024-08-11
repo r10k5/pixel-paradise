@@ -33,6 +33,7 @@ func on_animation_change(animation_name: String):
 	if animation_name in clothes_animations:
 		var animation = clothes_animations[animation_name]
 		clothes.play(animation)
+
 func use():
 	if Input.is_action_just_pressed("use"):
 		take_damage(health)

@@ -1,9 +1,5 @@
 extends BaseBody
 
-@onready var timer = $Timer
-var directions = ["up", "down", "left", "right"]
-var current_direction = "down"
-
 func _ready():
 	super._ready()
 	id = "friendly-entity:frog"
@@ -30,31 +26,6 @@ func _ready():
 	}
 	effects_can_be_applied = {}
 	can_interact = false
-	
-	timer.timeout.connect(random_change_state)
-	timer.start(5)
-	
-func random_change_state():
-	var state = "idle"
-	if  randf() < 0.5:
-		state = "walk"
-		
-	var fsm_state = state + "_" + current_direction
-	if fsm_state == fsm.current_state.name:
-		random_change_state()
-		
-	fsm.change_state(fsm.current_state, fsm_state)
-	
-	if state == "walk":
-		timer.start(0.3)
-	else:
-		timer.start(5)
-	
-	if state == "idle":
-		change_direction()
-	
-func change_direction():
-	current_direction = directions[randi() % directions.size()]
-	
+
 func _physics_process(_delta: float):
 	move_and_slide()

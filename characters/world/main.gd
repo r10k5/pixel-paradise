@@ -4,12 +4,12 @@ const CHEST = preload("res://statics/chest/chest.tscn")
 const INCREASE_SPEED = preload("res://characters/effects/increase_speed.tscn")
 const BOMB = preload("res://statics/bomb/bomb.tscn")
 const TREE = preload("res://statics/tree/tree.tscn")
-const FROG = preload("res://characters/friendly_entities/frog.tscn")
+const FROG = preload("res://characters/friendly_entities/frog/frog.tscn")
 const MUSHROOM = preload("res://statics/mushrooms/mushroom.tscn")
 
 const MAX_MUSHROOM = 2
-const MAX_FROGS = 2
-const MAX_TREES = 10
+const MAX_FROGS = 1
+const MAX_TREES = 1
 
 @onready var player: Player = $Player
 @onready var hp_bar = $UI/HP

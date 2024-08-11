@@ -1,79 +1,84 @@
-[gd_scene load_steps=24 format=3 uid="uid://b4m7esy4yej56"]
+[gd_scene load_steps=29 format=3 uid="uid://b4m7esy4yej56"]
 
-[ext_resource type="PackedScene" uid="uid://dj5mld0uc4emo" path="res://characters/abstract/base_body_v2.tscn" id="1_r0lk5"]
-[ext_resource type="Script" path="res://characters/friendly_entities/frog.gd" id="2_u8ofp"]
-[ext_resource type="Texture2D" uid="uid://xbjuw22wkn1p" path="res://assets/characters/frendly/animals.png" id="3_sfdum"]
+[ext_resource type="PackedScene" uid="uid://dj5mld0uc4emo" path="res://characters/abstract/base_body_v2.tscn" id="1_dixgk"]
+[ext_resource type="Script" path="res://characters/friendly_entities/frog/frog.gd" id="2_j3ecg"]
+[ext_resource type="Texture2D" uid="uid://xbjuw22wkn1p" path="res://assets/characters/frendly/animals.png" id="3_p78id"]
+[ext_resource type="Script" path="res://characters/friendly_entities/frog/states/frog_idle.gd" id="4_ilxg0"]
+[ext_resource type="Script" path="res://characters/friendly_entities/frog/states/frog_walk_up.gd" id="5_uu2g3"]
+[ext_resource type="Script" path="res://characters/friendly_entities/frog/states/frog_walk_left.gd" id="6_658jq"]
+[ext_resource type="Script" path="res://characters/friendly_entities/frog/states/frog_walk_right.gd" id="7_frmd7"]
+[ext_resource type="Script" path="res://characters/friendly_entities/frog/states/frog_walk_down.gd" id="8_0r0l5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_puf6p"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(0, 16, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hqcnw"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(32, 16, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_df652"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(16, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8koxy"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(48, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_s3s0a"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(0, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kjq1p"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(32, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hn7qc"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(16, 16, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6hj28"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(0, 48, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_82ssx"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(16, 32, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kt5nk"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(0, 32, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lfrsa"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(16, 48, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vjheo"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(64, 16, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_y6jjo"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(96, 16, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_utin4"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(80, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_t30a4"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(112, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bx1a8"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(64, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ckn7p"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(96, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i0t11"]
-atlas = ExtResource("3_sfdum")
+atlas = ExtResource("3_p78id")
 region = Rect2(80, 16, 16, 16)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_foc4c"]
@@ -196,17 +201,41 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_qsx6u"]
 radius = 7.0
 
-[node name="BaseBody" instance=ExtResource("1_r0lk5")]
-script = ExtResource("2_u8ofp")
+[node name="Frog" instance=ExtResource("1_dixgk")]
+script = ExtResource("2_j3ecg")
 
-[node name="AnimatedSprite2D" parent="." index="0"]
+[node name="StateTimer" type="Timer" parent="." index="0"]
+
+[node name="AnimatedSprite2D" parent="." index="1"]
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_foc4c")
-animation = &"jump_down"
+animation = &"idle_up"
 
-[node name="CollisionShape2D" parent="." index="1"]
+[node name="CollisionShape2D" parent="." index="2"]
 position = Vector2(0, 4)
 shape = SubResource("CircleShape2D_qsx6u")
 debug_color = Color(0.0337217, 0.544387, 0.20084, 0.42)
 
-[node name="Timer" type="Timer" parent="." index="5"]
+[node name="idle_left" parent="FSM" index="0"]
+script = ExtResource("4_ilxg0")
+
+[node name="idle_right" parent="FSM" index="1"]
+script = ExtResource("4_ilxg0")
+
+[node name="idle_up" parent="FSM" index="2"]
+script = ExtResource("4_ilxg0")
+
+[node name="idle_down" parent="FSM" index="3"]
+script = ExtResource("4_ilxg0")
+
+[node name="walk_up" parent="FSM" index="4"]
+script = ExtResource("5_uu2g3")
+
+[node name="walk_left" parent="FSM" index="5"]
+script = ExtResource("6_658jq")
+
+[node name="walk_right" parent="FSM" index="6"]
+script = ExtResource("7_frmd7")
+
+[node name="walk_down" parent="FSM" index="7"]
+script = ExtResource("8_0r0l5")
