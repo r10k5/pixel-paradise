@@ -1,12 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://8gwdk2mrbhyt"]
+[gd_scene load_steps=12 format=3 uid="uid://8gwdk2mrbhyt"]
 
 [ext_resource type="Texture2D" uid="uid://bpvkswwhrosr6" path="res://assets/world/static/TX Tileset Grass.png" id="1_71ssx"]
 [ext_resource type="Script" path="res://characters/world/main.gd" id="1_hhpii"]
 [ext_resource type="PackedScene" uid="uid://bq6p04xegy3wa" path="res://characters/player/player_v2.tscn" id="5_8m08q"]
+[ext_resource type="Texture2D" uid="uid://yo7iagcy30dc" path="res://assets/characters/player/light.png" id="5_32ub7"]
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" uid="uid://wy7y4bgolppp" path="res://ui/health.tscn" id="5_pijuu"]
 [ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
 [ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
+[ext_resource type="Script" path="res://characters/world/SetTime.gd" id="8_0iml5"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w50e3"]
 texture = ExtResource("1_71ssx")
@@ -301,6 +303,16 @@ layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 1, 131072, 196608, 3, 19
 [node name="Player" parent="." instance=ExtResource("5_8m08q")]
 position = Vector2(357, 287)
 
+[node name="PointLight2D2" type="PointLight2D" parent="Player"]
+position = Vector2(-1.04904e-05, -1.00001)
+scale = Vector2(1.28869, 1.13988)
+energy = 0.1
+range_z_max = 1026
+range_item_cull_mask = 3
+texture = ExtResource("5_32ub7")
+texture_scale = 3.38
+height = 10.0
+
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="FullInventory" type="CanvasLayer" parent="UI"]
@@ -321,5 +333,10 @@ offset_bottom = 250.176
 [node name="HP" parent="UI" instance=ExtResource("5_pijuu")]
 offset = Vector2(0, 20)
 transform = Transform2D(1, 0, 0, 1, 0, 20)
+
+[node name="DayNight" type="Node2D" parent="."]
+script = ExtResource("8_0iml5")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="DayNight"]
 
 [connection signal="timeout" from="Entities/Chests/ChestTimer" to="." method="_on_chest_timer_timeout"]
