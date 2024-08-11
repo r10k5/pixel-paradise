@@ -1,0 +1,54 @@
+[gd_scene load_steps=10 format=3 uid="uid://c0y2n5cpexl7l"]
+
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_udhdh"]
+[ext_resource type="Script" path="res://statics/mushrooms/mushroom.gd" id="2_3dgmk"]
+[ext_resource type="Texture2D" uid="uid://dmdrukdgw4t6a" path="res://assets/world/static/mushroom-texture.png" id="3_kd86f"]
+[ext_resource type="Texture2D" uid="uid://dlix5wrpxaohv" path="res://assets/world/static/mushroom.png" id="3_rfg6v"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1ohq8"]
+atlas = ExtResource("3_rfg6v")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0bymq"]
+atlas = ExtResource("3_rfg6v")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_q8uod"]
+animations = [{
+"frames": [{
+"duration": 20.0,
+"texture": SubResource("AtlasTexture_1ohq8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0bymq")
+}],
+"loop": true,
+"name": &"idle_down",
+"speed": 3.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ms1a3"]
+radius = 5.0
+height = 22.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sy7ay"]
+radius = 27.074
+
+[node name="Mushroom" instance=ExtResource("1_udhdh")]
+modulate = Color(0.912799, 0.872165, 0.863459, 1)
+script = ExtResource("2_3dgmk")
+texture = ExtResource("3_kd86f")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_q8uod")
+animation = &"idle_down"
+frame_progress = 0.0384669
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 1)
+shape = SubResource("CapsuleShape2D_ms1a3")
+debug_color = Color(0.552941, 0.533333, 0.494118, 0.239216)
+
+[node name="CollisionShape2D" parent="Area2D" index="0"]
+shape = SubResource("CircleShape2D_sy7ay")
+debug_color = Color(0.801204, 0.400881, 0.336668, 0.0313726)
