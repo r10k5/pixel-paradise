@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://8gwdk2mrbhyt"]
+[gd_scene load_steps=13 format=3 uid="uid://8gwdk2mrbhyt"]
 
 [ext_resource type="Texture2D" uid="uid://bpvkswwhrosr6" path="res://assets/world/static/TX Tileset Grass.png" id="1_71ssx"]
 [ext_resource type="Script" path="res://characters/world/main.gd" id="1_hhpii"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://yo7iagcy30dc" path="res://assets/characters/player/light.png" id="5_32ub7"]
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" uid="uid://wy7y4bgolppp" path="res://ui/health.tscn" id="5_pijuu"]
+[ext_resource type="Script" path="res://characters/world/PointLight2D2.gd" id="6_ab0jk"]
 [ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
 [ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
 [ext_resource type="Script" path="res://characters/world/SetTime.gd" id="8_0iml5"]
@@ -306,12 +307,14 @@ position = Vector2(357, 287)
 [node name="PointLight2D2" type="PointLight2D" parent="Player"]
 position = Vector2(-1.04904e-05, -1.00001)
 scale = Vector2(1.28869, 1.13988)
-energy = 0.1
+color = Color(1, 1, 1, 0.247059)
+energy = 1.85
 range_z_max = 1026
 range_item_cull_mask = 3
 texture = ExtResource("5_32ub7")
-texture_scale = 3.38
-height = 10.0
+texture_scale = 6.69
+height = 12.0
+script = ExtResource("6_ab0jk")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -333,6 +336,18 @@ offset_bottom = 250.176
 [node name="HP" parent="UI" instance=ExtResource("5_pijuu")]
 offset = Vector2(0, 20)
 transform = Transform2D(1, 0, 0, 1, 0, 20)
+
+[node name="TimeLabel" type="Label" parent="UI"]
+offset_left = 266.0
+offset_top = 18.0
+offset_right = 387.0
+offset_bottom = 50.0
+
+[node name="DateLabel" type="Label" parent="UI"]
+offset_left = 407.0
+offset_top = 20.0
+offset_right = 539.0
+offset_bottom = 53.0
 
 [node name="DayNight" type="Node2D" parent="."]
 script = ExtResource("8_0iml5")

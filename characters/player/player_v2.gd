@@ -36,7 +36,8 @@ func on_animation_change(animation_name: String):
 
 func use():
 	if Input.is_action_just_pressed("use"):
-		take_damage(health)
+		#take_damage(health)
+		pass
 
 func _physics_process(_delta: float):
 	use()
