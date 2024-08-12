@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://bsfuta7xun83h"]
+[gd_scene load_steps=7 format=3 uid="uid://bsfuta7xun83h"]
 
 [ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_afdup"]
 [ext_resource type="Texture2D" uid="uid://c8swhmddflqb" path="res://assets/world/static/kust.png" id="2_4k26f"]
@@ -19,8 +19,11 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rk8qa"]
-radius = 18.0
-height = 52.0
+radius = 16.9906
+height = 46.0506
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_483ki"]
+size = Vector2(56, 45.25)
 
 [node name="CharacterBody2D" instance=ExtResource("1_afdup")]
 
@@ -29,7 +32,12 @@ modulate = Color(0.941176, 0.807843, 0.4, 1)
 sprite_frames = SubResource("SpriteFrames_gp20s")
 
 [node name="CollisionShape2D" parent="." index="1"]
-position = Vector2(0, 6)
+position = Vector2(0, 12)
 rotation = -1.57952
 shape = SubResource("CapsuleShape2D_rk8qa")
 debug_color = Color(0.196078, 0.627451, 0.392157, 0)
+
+[node name="CollisionShape2D" parent="Area2D" index="0"]
+position = Vector2(1, 6.625)
+shape = SubResource("RectangleShape2D_483ki")
+debug_color = Color(0.423529, 0.588235, 0.372549, 0.129412)

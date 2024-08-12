@@ -10,8 +10,8 @@ const KUST = preload("res://statics/tree/kust.tscn")
 
 const MAX_MUSHROOM = 2
 const MAX_FROGS = 1
-const MAX_TREES = 10
-const MAX_KUSTI = 10
+const MAX_TREES = 40
+const MAX_KUSTI = 40
 
 @onready var player: Player = $Player
 @onready var hp_bar = $UI/HP
@@ -56,40 +56,46 @@ func get_free_position() -> Vector2:
 
 func spawn_all():
 	# Spawn trees
-	while len(trees.get_children()) < MAX_TREES:
+	if len(trees.get_children()) < MAX_TREES:
 		var tree = TREE.instantiate()
 		var tree_position = get_free_position()
 		tree.position = tree_position
 		occupied_positions.append(tree_position)
+
+		tree.drop_item.connect(func(item):
+			item.position = tree.position
+			item.pick_up.connect(on_item_pick_up)
+			droped_items.add_child(item)
+		)
 		trees.add_child(tree)
-		break
 
 	# Spawn frogs
-	while len(frogs.get_children()) < MAX_FROGS:
+	if len(frogs.get_children()) < MAX_FROGS:
 		var frog = FROG.instantiate()
 		var frog_position = get_free_position()
 		frog.position = frog_position
 		occupied_positions.append(frog_position)
+
 		frogs.add_child(frog)
-		break
 
 	# Spawn mushrooms
-	while len(mushrooms.get_children()) < MAX_MUSHROOM:
+	if len(mushrooms.get_children()) < MAX_MUSHROOM:
 		var mushroom = MUSHROOM.instantiate()
 		var mushroom_position = get_free_position()
 		mushroom.position = mushroom_position
 		occupied_positions.append(mushroom_position)
-		mushrooms.add_child(mushroom)
-		break
+		mushroom.pick_up.connect(on_item_pick_up)
 
-	# Spawn kust
-	while len(kusti.get_children()) < MAX_KUSTI:
+		mushrooms.add_child(mushroom)
+
+		# Spawn kust
+	if len(kusti.get_children()) < MAX_KUSTI:
 		var kust = KUST.instantiate()
 		var kust_position = get_free_position()
 		kust.position = kust_position
 		occupied_positions.append(kust_position)
+		
 		kusti.add_child(kust)
-		break
 
 func _on_item_pick_up(item: BaseEntity):
 	if item in item.get_parent().get_children():

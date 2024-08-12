@@ -24,8 +24,8 @@ radius = 7.0
 height = 54.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ctjw8"]
-radius = 22.0
-height = 60.0
+radius = 53.0
+height = 154.0
 
 [node name="CharacterBody2D" instance=ExtResource("1_yo725")]
 script = ExtResource("2_1uqsy")
@@ -41,5 +41,6 @@ shape = SubResource("CapsuleShape2D_i6hax")
 position = Vector2(-1, 53)
 
 [node name="CollisionShape2D" parent="Area2D" index="0"]
-position = Vector2(0, -3)
+position = Vector2(2, -45)
 shape = SubResource("CapsuleShape2D_ctjw8")
+debug_color = Color(0, 0.6, 0.129412, 0.0705882)
