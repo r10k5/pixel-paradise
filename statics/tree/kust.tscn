@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://bsfuta7xun83h"]
+
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_afdup"]
+[ext_resource type="Texture2D" uid="uid://c8swhmddflqb" path="res://assets/world/static/kust.png" id="2_4k26f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6jx3v"]
+atlas = ExtResource("2_4k26f")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gp20s"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6jx3v")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rk8qa"]
+radius = 18.0
+height = 52.0
+
+[node name="CharacterBody2D" instance=ExtResource("1_afdup")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+modulate = Color(0.941176, 0.807843, 0.4, 1)
+sprite_frames = SubResource("SpriteFrames_gp20s")
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 6)
+rotation = -1.57952
+shape = SubResource("CapsuleShape2D_rk8qa")
+debug_color = Color(0.196078, 0.627451, 0.392157, 0)

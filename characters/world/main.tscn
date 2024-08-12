@@ -291,6 +291,8 @@ autostart = true
 
 [node name="Mushrooms" type="Node" parent="Entities"]
 
+[node name="Kusti" type="Node" parent="Entities"]
+
 [node name="TileMap" type="TileMap" parent="."]
 scale = Vector2(1.5, 1.5)
 tile_set = SubResource("TileSet_nxl3g")

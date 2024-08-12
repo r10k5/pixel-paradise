@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://dtpb4dypr4ehk"]
 
-[ext_resource type="Script" path="res://Entity.gd" id="1_d5dcj"]
+[ext_resource type="Script" path="res://statics/tree/kust.gd" id="1_q4wk3"]
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
-script = ExtResource("1_d5dcj")
+script = ExtResource("1_q4wk3")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 

@@ -2,7 +2,7 @@ extends Node2D
 
 # Время суток и дата
 var time_of_day : float = 0.0  # 0.0 - утро, 1.0 - ночь
-var day_duration : float = 10.0  # Длительность одного дня в секундах
+var day_duration : float = 120.0  # Длительность одного дня в секундах
 var current_day : int = 1
 var current_month : int = 1
 var total_days_in_month : int = 30  # Можно сделать массив для разного количества дней в месяцах

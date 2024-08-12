@@ -6,10 +6,12 @@ const BOMB = preload("res://statics/bomb/bomb.tscn")
 const TREE = preload("res://statics/tree/tree.tscn")
 const FROG = preload("res://characters/friendly_entities/frog/frog.tscn")
 const MUSHROOM = preload("res://statics/mushrooms/mushroom.tscn")
+const KUST = preload("res://statics/tree/kust.tscn")
 
 const MAX_MUSHROOM = 2
 const MAX_FROGS = 1
-const MAX_TREES = 1
+const MAX_TREES = 10
+const MAX_KUSTI = 10
 
 @onready var player: Player = $Player
 @onready var hp_bar = $UI/HP
@@ -20,6 +22,7 @@ const MAX_TREES = 1
 @onready var full_inventory = $UI/FullInventory/FullInventory
 @onready var frogs = $Frogs
 @onready var mushrooms = $Entities/Mushrooms
+@onready var kusti = $Entities/Kusti
 
 func _input(event):
 	if event.is_action_released("inventory"):
@@ -67,6 +70,14 @@ func spawn_all():
 		mushroom.pick_up.connect(on_item_pick_up)
 		
 		mushrooms.add_child(mushroom)
+		
+		# Spawn kust
+	if len(kusti.get_children()) < MAX_KUSTI:
+		var kust = KUST.instantiate()
+		var kust_position = Vector2(randf_range(100, 1000), randf_range(100, 550))
+		kust.position = kust_position
+		
+		kusti.add_child(kust)
 
 func _on_item_pick_up(item: BaseEntity):
 	if item in item.get_parent().get_children():
