@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://bmx534g8umnmk"]
 
 [ext_resource type="Texture2D" uid="uid://cwysm0f14ihcw" path="res://assets/world/bomb/bomb-14.png" id="1_gfiw4"]
-[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_wo0oe"]
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_wo0oe"]
 [ext_resource type="Texture2D" uid="uid://c3woyhwbbinbt" path="res://assets/world/bomb/bomb-23.png" id="2_3fyx5"]
 [ext_resource type="Texture2D" uid="uid://bl7uphjei3tsp" path="res://assets/world/bomb/bomb-32.png" id="3_tncd6"]
 [ext_resource type="Texture2D" uid="uid://dpsaqj4okdsu8" path="res://assets/world/bomb/bomb-41.png" id="4_caa7h"]

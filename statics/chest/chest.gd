@@ -1,4 +1,4 @@
-extends "res://Entity.gd"
+extends "res://core/entity/entity.gd"
 
 signal chest_open(items)
 

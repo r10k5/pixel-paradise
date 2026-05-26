@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://bsfuta7xun83h"]
+[gd_scene load_steps=8 format=3 uid="uid://bsfuta7xun83h"]
 
-[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_afdup"]
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_afdup"]
+[ext_resource type="Script" path="res://statics/tree/kust.gd" id="2_kust"]
 [ext_resource type="Texture2D" uid="uid://c8swhmddflqb" path="res://assets/world/static/kust.png" id="2_4k26f"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6jx3v"]
@@ -26,6 +27,7 @@ height = 46.0506
 size = Vector2(56, 45.25)
 
 [node name="CharacterBody2D" instance=ExtResource("1_afdup")]
+script = ExtResource("2_kust")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 modulate = Color(0.941176, 0.807843, 0.4, 1)

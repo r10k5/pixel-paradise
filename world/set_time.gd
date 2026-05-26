@@ -21,6 +21,10 @@ func _ready():
 func _process(delta):
 	# Обновляем время суток
 	time_of_day += delta / day_duration
+	# Защита от NaN/битых значений: NaN ломает lerp и может привести к "невидимому" CanvasModulate.
+	if time_of_day != time_of_day:
+		time_of_day = 0.0
+	time_of_day = clampf(time_of_day, 0.0, 1.0)
 	if time_of_day >= 1.0:
 		time_of_day -= 1.0  # Начинаем новый цикл
 		increment_day()  # Переход на следующий день
@@ -49,13 +53,15 @@ func update_time_display():
 	date_label.text = "Date: %02d/%02d" % [current_day, current_month]
 
 func update_lighting():
-	# Определяем цвета для разных фаз суток
-	var morning_color = Color(0.4, 0.4, 0.6, 0.5)
-	var day_color = Color(1, 0.8, 0.6, 1)
-	var evening_color = Color(1, 1, 1, 1)
-	var night_color = Color(0.8, 0.6, 1, 0.8)
+	if canvas_modulate == null:
+		return
+	# Определяем цвета для разных фаз суток (только RGB; alpha всегда 1).
+	var morning_color := Color(0.85, 0.88, 0.95, 1.0)
+	var day_color := Color(1.0, 1.0, 1.0, 1.0)
+	var evening_color := Color(1.0, 0.92, 0.82, 1.0)
+	var night_color := Color(0.55, 0.6, 0.85, 1.0)
 
-	var color : Color
+	var color: Color
 
 	# Утро (0.0 - 0.25)
 	if time_of_day < 0.25:
@@ -73,5 +79,7 @@ func update_lighting():
 	else:
 		color = night_color.lerp(morning_color, (time_of_day - 0.75) / 0.25)
 
-	# Устанавливаем цвет освещения сцены
+	if color != color:
+		color = Color.WHITE
+	color.a = 1.0
 	canvas_modulate.color = color

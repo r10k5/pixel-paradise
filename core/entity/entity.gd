@@ -27,6 +27,8 @@ var animations: Dictionary = {}
 var effects_can_be_applied: Dictionary = {}
 @export var texture: Texture
 
+## Смещение «линии земли» для YSort (если включён на родителе).
+@export var depth_sort_feet_bias: float = 14.0
 var is_near_player: bool = false
 var can_interact: bool = true
 var entities_near: Array = []

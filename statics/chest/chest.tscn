@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://d1kjc1ta064pj"]
 
-[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://Entity.tscn" id="1_mucst"]
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_mucst"]
 [ext_resource type="Texture2D" uid="uid://bwkf7cl84hcm0" path="res://assets/world/static/TX Props.png" id="1_vveg6"]
 [ext_resource type="Script" path="res://statics/chest/chest.gd" id="2_0u2he"]
 

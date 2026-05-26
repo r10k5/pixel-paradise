@@ -638,6 +638,7 @@ sources/0 = SubResource("TileSetAtlasSource_pmh0o")
 script = ExtResource("1_eq8h1")
 
 [node name="TileMap" type="TileMap" parent="."]
+scale = Vector2(1.5, 1.5)
 tile_set = SubResource("TileSet_vxcqx")
 format = 2
 

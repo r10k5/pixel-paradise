@@ -2,40 +2,49 @@ extends Control
 
 @onready var inventory_grid: GridContainer = $InventoryContainer/InventoryGrid
 @onready var exit_button: Button = $ExitButtonContainer/ExitButton
-	
+
 @onready var inventory_cell_scene = preload("res://ui/inventory_cell.tscn")
 
-# Подключаем сигнал нажатия кнопки выхода
-func _ready():
-	exit_button.pressed.connect(_on_exit_button_pressed)
+var _inventory: Inventory
 
-func connect_inventory(inventory: Inventory):
-	for item in inventory.get_items():
-		var cell_instance = inventory_cell_scene.instantiate() as InventoryCell
-		cell_instance.inventory_item = item as InventoryItem
-		inventory_grid.add_child(cell_instance)
-	
-	inventory.item_add.connect(on_change_item)
-	inventory.item_drop.connect(on_change_item)
+func _ready() -> void:
+	visible = false
+	exit_button.pressed.connect(hide)
 
-# Обработчик нажатия кнопки выхода
-func _on_exit_button_pressed():
-	hide()
+func connect_inventory(inventory: Inventory) -> void:
+	_inventory = inventory
+	_build_grid()
+	inventory.item_add.connect(_on_inventory_changed)
+	inventory.item_drop.connect(_on_inventory_changed_drop)
 
-# Метод для отображения подобранной вещи
-func on_change_item(item: InventoryItem):
+func toggle() -> void:
+	visible = not visible
+	if visible:
+		_refresh_all()
+
+func _build_grid() -> void:
 	for child in inventory_grid.get_children():
-		if (
-				child is InventoryCell and
-				(child as InventoryCell).inventory_item.id == item.id
-		):
-			(child as InventoryCell).replace(item)
-			return
-	
-# Метод для отображения полного инвентаря
-func show_inventory():
-	self.visible = true
+		child.queue_free()
+	for slot_item in _inventory.get_items():
+		var cell := inventory_cell_scene.instantiate() as InventoryCell
+		cell.inventory_item = slot_item
+		inventory_grid.add_child(cell)
 
-# Метод для скрытия полного инвентаря
-func hide_inventory():
-	self.visible = false
+func _refresh_all() -> void:
+	var cells := inventory_grid.get_children()
+	var items := _inventory.get_items()
+	for i in range(mini(cells.size(), items.size())):
+		if cells[i] is InventoryCell:
+			(cells[i] as InventoryCell).replace(items[i])
+
+func _on_inventory_changed(item: InventoryItem) -> void:
+	_refresh_slot(item.id)
+
+func _on_inventory_changed_drop(_item: BaseEntity, _count: int) -> void:
+	_refresh_all()
+
+func _refresh_slot(slot_id: int) -> void:
+	for child in inventory_grid.get_children():
+		if child is InventoryCell and (child as InventoryCell).inventory_item.id == slot_id:
+			(child as InventoryCell).replace(_inventory.get_item(slot_id))
+			return
