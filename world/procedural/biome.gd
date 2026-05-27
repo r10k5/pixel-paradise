@@ -37,24 +37,6 @@ static func create_default_biomes() -> Array[Biome]:
 	# Сначала узкие биомы, луг — последний (fallback).
 	var biomes: Array[Biome] = []
 
-	var river := Biome.new(BiomeType.RIVER, "River")
-	river.min_height = -1.0
-	river.max_height = 1.0
-	river.min_moisture = 0.0
-	river.max_moisture = 1.0
-	river.temperature_range = Vector2(0.0, 1.0)
-	river.decoration_chance = 0.0
-	biomes.append(river)
-
-	var lake := Biome.new(BiomeType.LAKE, "Lake")
-	lake.min_height = -1.0
-	lake.max_height = 1.0
-	lake.min_moisture = 0.0
-	lake.max_moisture = 1.0
-	lake.temperature_range = Vector2(0.0, 1.0)
-	lake.decoration_chance = 0.0
-	biomes.append(lake)
-
 	var forest := Biome.new(BiomeType.FOREST, "Forest")
 	forest.min_height = -0.22
 	forest.max_height = 0.5

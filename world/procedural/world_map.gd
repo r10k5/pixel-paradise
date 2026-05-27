@@ -15,6 +15,8 @@ const CACHE_MAX_SIZE := 4096
 var spawn_tile: Vector2i = Vector2i.ZERO
 var biomes: Array[Biome] = []
 var settings: WorldGenerationSettings
+var _river_biome: Biome
+var _lake_biome: Biome
 
 var _biome_map: Dictionary = {}
 var _height_cache: Dictionary = {}
@@ -43,6 +45,7 @@ func generate(_map_width: int, _map_height: int, map_seed: int = 0, gen_settings
 		biomes = Biome.create_default_biomes()
 	else:
 		biomes = []
+	_init_water_biomes()
 
 	spawn_tile = _find_spawn_tile_near(Vector2i.ZERO)
 
@@ -57,16 +60,12 @@ func get_biome(tile: Vector2i) -> Biome:
 		return _biome_map[tile]
 
 	if is_river(tile):
-		var river_biome := _find_biome(Biome.BiomeType.RIVER)
-		if river_biome != null:
-			_cache_biome(tile, river_biome)
-			return river_biome
+		_cache_biome(tile, _river_biome)
+		return _river_biome
 
 	if is_lake(tile):
-		var lake_biome := _find_biome(Biome.BiomeType.LAKE)
-		if lake_biome != null:
-			_cache_biome(tile, lake_biome)
-			return lake_biome
+		_cache_biome(tile, _lake_biome)
+		return _lake_biome
 
 	var height := height_at(tile)
 	var moisture := moisture_at(tile)
@@ -143,9 +142,13 @@ func is_water(tile: Vector2i) -> bool:
 	return is_lake(tile) or is_river(tile) or is_puddle(tile)
 
 func is_river(tile: Vector2i) -> bool:
+	if not _is_base_water(tile):
+		return false
 	return _is_river_channel(tile)
 
 func is_lake(tile: Vector2i) -> bool:
+	if not _is_base_water(tile):
+		return false
 	if _is_river_channel(tile):
 		return false
 	return _is_lake_basin(tile)
@@ -156,7 +159,7 @@ func is_puddle(tile: Vector2i) -> bool:
 	return not _path_noise_at(tile)
 
 func _is_puddle_candidate(tile: Vector2i) -> bool:
-	if _is_river_channel(tile) or _is_lake_basin(tile):
+	if _is_base_water(tile):
 		return false
 	if height_at(tile) < settings.puddle_level:
 		return true
@@ -278,19 +281,13 @@ func _pick_grass_for_biome(tile: Vector2i, biome: Biome) -> Vector2i:
 			return _pick_grass(tile)
 		Biome.BiomeType.FOREST:
 			return GrassTiles.pick_forest_grass(tile)
-		Biome.BiomeType.DESERT, Biome.BiomeType.SNOW, Biome.BiomeType.SWAMP, Biome.BiomeType.RIVER, Biome.BiomeType.LAKE:
+		Biome.BiomeType.DESERT, Biome.BiomeType.SNOW, Biome.BiomeType.SWAMP:
 			return GrassTiles.GRASS_PLAIN[abs(int(tile.x * 31 + tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()]
 		_:
 			return _pick_grass(tile)
 
 func _pick_grass_under_water(tile: Vector2i) -> Vector2i:
 	return GrassTiles.GRASS_UNDER_WATER[abs(int(tile.x * 13 + tile.y * 11)) % GrassTiles.GRASS_UNDER_WATER.size()]
-
-func _find_biome(target_type: Biome.BiomeType) -> Biome:
-	for biome in biomes:
-		if biome.biome_type == target_type:
-			return biome
-	return null
 
 func _tile_roll01(tile: Vector2i, salt: int) -> float:
 	var hash := absi(tile.x * 73856093 ^ tile.y * 19349663 ^ int(_rng.seed) ^ salt)
@@ -306,3 +303,12 @@ func _is_lake_basin(tile: Vector2i) -> bool:
 		return false
 	var n := _lake_noise.get_noise_2d(tile.x, tile.y)
 	return n > settings.lake_threshold
+
+func _is_base_water(tile: Vector2i) -> bool:
+	return height_at(tile) < settings.water_level
+
+func _init_water_biomes() -> void:
+	_river_biome = Biome.new(Biome.BiomeType.RIVER, "River")
+	_river_biome.decoration_chance = 0.0
+	_lake_biome = Biome.new(Biome.BiomeType.LAKE, "Lake")
+	_lake_biome.decoration_chance = 0.0
