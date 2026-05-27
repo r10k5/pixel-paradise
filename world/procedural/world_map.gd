@@ -11,6 +11,7 @@ enum Terrain {
 }
 
 const CACHE_MAX_SIZE := 4096
+const WATER_MODE_LAKE := 2
 
 var spawn_tile: Vector2i = Vector2i.ZERO
 var biomes: Array[Biome] = []
@@ -22,6 +23,8 @@ var _biome_map: Dictionary = {}
 var _height_cache: Dictionary = {}
 var _moisture_cache: Dictionary = {}
 var _temperature_cache: Dictionary = {}
+var _river_channel_cache: Dictionary = {}
+var _lake_channel_cache: Dictionary = {}
 
 var _rng := RandomNumberGenerator.new()
 var _height_noise: FastNoiseLite
@@ -139,24 +142,18 @@ func _path_noise_at(tile: Vector2i) -> bool:
 	return n < settings.path_density or v < settings.path_thickness or h < settings.path_thickness
 
 func is_water(tile: Vector2i) -> bool:
-	return is_lake(tile) or is_river(tile) or is_puddle(tile)
+	return is_lake(tile)
 
 func is_river(tile: Vector2i) -> bool:
-	if not _is_base_water(tile):
-		return false
-	return _is_river_channel(tile)
+	return false
 
 func is_lake(tile: Vector2i) -> bool:
 	if not _is_base_water(tile):
 		return false
-	if _is_river_channel(tile):
-		return false
-	return _is_lake_basin(tile)
+	return _is_lake_cluster(tile)
 
 func is_puddle(tile: Vector2i) -> bool:
-	if not _is_puddle_candidate(tile):
-		return false
-	return not _path_noise_at(tile)
+	return false
 
 func _is_puddle_candidate(tile: Vector2i) -> bool:
 	if _is_base_water(tile):
@@ -194,6 +191,8 @@ func _clear_caches() -> void:
 	_height_cache.clear()
 	_moisture_cache.clear()
 	_temperature_cache.clear()
+	_river_channel_cache.clear()
+	_lake_channel_cache.clear()
 
 func _setup_noises(seed_value: int) -> void:
 	_height_noise = FastNoiseLite.new()
@@ -294,8 +293,48 @@ func _tile_roll01(tile: Vector2i, salt: int) -> float:
 	return float(hash % 10000) / 10000.0
 
 func _is_river_channel(tile: Vector2i) -> bool:
-	var n := absf(_river_noise.get_noise_2d(tile.x, tile.y))
-	return n < settings.river_width
+	var key := "%d,%d" % [tile.x, tile.y]
+	if _river_channel_cache.has(key):
+		return _river_channel_cache[key]
+
+	var result := false
+	var half_width := maxi(settings.river_min_half_width, 1)
+	var min_len := maxi(settings.river_min_length_tiles, 1)
+	var max_gap := 2
+
+	for offset in range(-half_width, half_width + 1):
+		var vertical_tile := tile + Vector2i(offset, 0)
+		var vertical_len := _river_line_core_length(vertical_tile, Vector2i(0, 1), min_len, max_gap)
+		if vertical_len >= min_len:
+			result = true
+			break
+
+		var horizontal_tile := tile + Vector2i(0, offset)
+		var horizontal_len := _river_line_core_length(horizontal_tile, Vector2i(1, 0), min_len, max_gap)
+		if horizontal_len >= min_len:
+			result = true
+			break
+
+	if _river_channel_cache.size() >= CACHE_MAX_SIZE:
+		_river_channel_cache.clear()
+	_river_channel_cache[key] = result
+	return result
+
+func _is_lake_cluster(tile: Vector2i) -> bool:
+	var key := "%d,%d" % [tile.x, tile.y]
+	if _lake_channel_cache.has(key):
+		return _lake_channel_cache[key]
+
+	var result := _water_component_size_at_least(
+		tile,
+		WATER_MODE_LAKE,
+		maxi(settings.lake_min_size_tiles, 1)
+	)
+
+	if _lake_channel_cache.size() >= CACHE_MAX_SIZE:
+		_lake_channel_cache.clear()
+	_lake_channel_cache[key] = result
+	return result
 
 func _is_lake_basin(tile: Vector2i) -> bool:
 	var h := height_at(tile)
@@ -312,3 +351,79 @@ func _init_water_biomes() -> void:
 	_river_biome.decoration_chance = 0.0
 	_lake_biome = Biome.new(Biome.BiomeType.LAKE, "Lake")
 	_lake_biome.decoration_chance = 0.0
+
+func _is_river_core(tile: Vector2i) -> bool:
+	if not _is_base_water(tile):
+		return false
+	var n := absf(_river_noise.get_noise_2d(tile.x, tile.y))
+	return n < settings.river_width
+
+func _river_line_core_length(tile: Vector2i, dir: Vector2i, target_len: int, max_gap: int) -> int:
+	if not _is_river_core(tile):
+		return 0
+	var core_count := 1
+	core_count += _river_line_core_length_one_side(tile, dir, target_len, max_gap)
+	if core_count >= target_len:
+		return core_count
+	core_count += _river_line_core_length_one_side(tile, -dir, target_len, max_gap)
+	return core_count
+
+func _river_line_core_length_one_side(start_tile: Vector2i, dir: Vector2i, target_len: int, max_gap: int) -> int:
+	var core_count := 0
+	var gap_streak := 0
+	for step in range(1, target_len * 2):
+		var tile := start_tile + dir * step
+		if _is_river_core(tile):
+			core_count += 1
+			gap_streak = 0
+			if core_count >= target_len:
+				return core_count
+		else:
+			gap_streak += 1
+			if gap_streak > max_gap:
+				break
+	return core_count
+
+func _is_lake_core(tile: Vector2i) -> bool:
+	if not _is_base_water(tile):
+		return false
+	return _is_lake_basin(tile)
+
+func _water_component_size_at_least(start: Vector2i, mode: int, required: int) -> bool:
+	if required <= 1:
+		return _is_water_mode_core(start, mode)
+	if not _is_water_mode_core(start, mode):
+		return false
+
+	var queue: Array[Vector2i] = [start]
+	var visited: Dictionary = { _tile_key(start): true }
+	var count := 0
+	var dirs: Array[Vector2i] = [
+		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
+	]
+
+	while not queue.is_empty():
+		var tile: Vector2i = queue[0]
+		queue.remove_at(0)
+		count += 1
+		if count >= required:
+			return true
+
+		for d in dirs:
+			var next: Vector2i = tile + d
+			var key: String = _tile_key(next)
+			if visited.has(key):
+				continue
+			visited[key] = true
+			if _is_water_mode_core(next, mode):
+				queue.append(next)
+
+	return false
+
+func _is_water_mode_core(tile: Vector2i, mode: int) -> bool:
+	if mode == WATER_MODE_LAKE:
+		return _is_lake_core(tile)
+	return false
+
+func _tile_key(tile: Vector2i) -> String:
+	return "%d,%d" % [tile.x, tile.y]

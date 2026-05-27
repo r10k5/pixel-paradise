@@ -15,9 +15,12 @@ extends Resource
 @export_group("Вода: реки/озёра/лужи")
 @export var river_frequency: float = 0.006
 @export var river_width: float = 0.045
+@export var river_min_half_width: int = 1
+@export var river_min_length_tiles: int = 50
 @export var lake_frequency: float = 0.01
 @export var lake_threshold: float = 0.2
 @export var lake_height_bias: float = 0.04
+@export var lake_min_size_tiles: int = 10
 @export var puddle_frequency: float = 0.08
 @export var puddle_threshold: float = 0.86
 @export var puddle_spawn_chance: float = 0.2
