@@ -68,14 +68,14 @@ static func get_tile(height_map: Array, x: int, y: int, water_level: float):
 		return TileType.Center
 	return TileType.Center
 
-static func get_tile_from_world_map(world_map: WorldMap, tile: Vector2i, water_level: float):
-	if world_map.height_at(tile) >= water_level:
+static func get_tile_from_world_map(world_map: WorldMap, tile: Vector2i):
+	if not world_map.is_water(tile):
 		return null
 
-	var left: bool = world_map.height_at(tile + Vector2i(-1, 0)) < water_level
-	var right: bool = world_map.height_at(tile + Vector2i(1, 0)) < water_level
-	var top: bool = world_map.height_at(tile + Vector2i(0, -1)) < water_level
-	var bottom: bool = world_map.height_at(tile + Vector2i(0, 1)) < water_level
+	var left: bool = world_map.is_water(tile + Vector2i(-1, 0))
+	var right: bool = world_map.is_water(tile + Vector2i(1, 0))
+	var top: bool = world_map.is_water(tile + Vector2i(0, -1))
+	var bottom: bool = world_map.is_water(tile + Vector2i(0, 1))
 
 	if left and right and top and bottom:
 		return TileType.Center

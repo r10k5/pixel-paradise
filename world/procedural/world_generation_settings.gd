@@ -10,6 +10,17 @@ extends Resource
 @export var height_frequency: float = 0.035
 @export var height_octaves: int = 4
 @export var water_level: float = -0.22
+@export var puddle_level: float = -0.16
+
+@export_group("Вода: реки/озёра/лужи")
+@export var river_frequency: float = 0.006
+@export var river_width: float = 0.045
+@export var lake_frequency: float = 0.01
+@export var lake_threshold: float = 0.2
+@export var lake_height_bias: float = 0.04
+@export var puddle_frequency: float = 0.08
+@export var puddle_threshold: float = 0.86
+@export var puddle_spawn_chance: float = 0.2
 
 @export_group("Биомы")
 @export var enable_biomes: bool = true

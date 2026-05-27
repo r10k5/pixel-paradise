@@ -221,9 +221,7 @@ func _is_near_path(tile: Vector2i) -> bool:
 func _paint_water_tile(tile: Vector2i, source_id: int) -> void:
 	if not world_map.is_water(tile):
 		return
-	var tile_type = WaterTiles.get_tile_from_world_map(
-		world_map, tile, generation_settings.water_level
-	)
+	var tile_type = WaterTiles.get_tile_from_world_map(world_map, tile)
 	if tile_type == null:
 		return
 	var atlas: Vector2i = WaterTiles.tile_type_to_atlas(tile_type)

@@ -29,6 +29,9 @@ var _horizontal_noise: FastNoiseLite
 var _flower_noise: FastNoiseLite
 var _moisture_noise: FastNoiseLite
 var _temperature_noise: FastNoiseLite
+var _river_noise: FastNoiseLite
+var _lake_noise: FastNoiseLite
+var _puddle_noise: FastNoiseLite
 
 func generate(_map_width: int, _map_height: int, map_seed: int = 0, gen_settings: WorldGenerationSettings = null) -> void:
 	settings = gen_settings if gen_settings != null else WorldGenerationSettings.new()
@@ -52,6 +55,18 @@ func get_biome(tile: Vector2i) -> Biome:
 
 	if _biome_map.has(tile):
 		return _biome_map[tile]
+
+	if is_river(tile):
+		var river_biome := _find_biome(Biome.BiomeType.RIVER)
+		if river_biome != null:
+			_cache_biome(tile, river_biome)
+			return river_biome
+
+	if is_lake(tile):
+		var lake_biome := _find_biome(Biome.BiomeType.LAKE)
+		if lake_biome != null:
+			_cache_biome(tile, lake_biome)
+			return lake_biome
 
 	var height := height_at(tile)
 	var moisture := moisture_at(tile)
@@ -114,15 +129,42 @@ func is_spawnable(tile: Vector2i) -> bool:
 	return is_grass(tile)
 
 func is_path(tile: Vector2i) -> bool:
-	if is_water(tile):
+	if is_lake(tile) or is_river(tile) or _is_puddle_candidate(tile):
 		return false
+	return _path_noise_at(tile)
+
+func _path_noise_at(tile: Vector2i) -> bool:
 	var n := absf(_plaza_noise.get_noise_2d(tile.x, tile.y))
 	var v := absf(_vertical_noise.get_noise_2d(tile.x, tile.y))
 	var h := absf(_horizontal_noise.get_noise_2d(tile.x, tile.y))
 	return n < settings.path_density or v < settings.path_thickness or h < settings.path_thickness
 
 func is_water(tile: Vector2i) -> bool:
-	return height_at(tile) < settings.water_level
+	return is_lake(tile) or is_river(tile) or is_puddle(tile)
+
+func is_river(tile: Vector2i) -> bool:
+	return _is_river_channel(tile)
+
+func is_lake(tile: Vector2i) -> bool:
+	if _is_river_channel(tile):
+		return false
+	return _is_lake_basin(tile)
+
+func is_puddle(tile: Vector2i) -> bool:
+	if not _is_puddle_candidate(tile):
+		return false
+	return not _path_noise_at(tile)
+
+func _is_puddle_candidate(tile: Vector2i) -> bool:
+	if _is_river_channel(tile) or _is_lake_basin(tile):
+		return false
+	if height_at(tile) < settings.puddle_level:
+		return true
+	var n := _puddle_noise.get_noise_2d(tile.x, tile.y)
+	if n < settings.puddle_threshold:
+		return false
+	var roll := _tile_roll01(tile, 991)
+	return roll < settings.puddle_spawn_chance
 
 func is_grass(tile: Vector2i) -> bool:
 	return not is_water(tile) and not is_path(tile)
@@ -193,6 +235,24 @@ func _setup_noises(seed_value: int) -> void:
 	_temperature_noise.fractal_octaves = 2
 	_temperature_noise.fractal_gain = 0.5
 
+	_river_noise = FastNoiseLite.new()
+	_river_noise.seed = seed_value + 557
+	_river_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_river_noise.frequency = settings.river_frequency
+	_river_noise.fractal_octaves = 1
+
+	_lake_noise = FastNoiseLite.new()
+	_lake_noise.seed = seed_value + 593
+	_lake_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_lake_noise.frequency = settings.lake_frequency
+	_lake_noise.fractal_octaves = 2
+	_lake_noise.fractal_gain = 0.55
+
+	_puddle_noise = FastNoiseLite.new()
+	_puddle_noise.seed = seed_value + 661
+	_puddle_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_puddle_noise.frequency = settings.puddle_frequency
+
 func _find_spawn_tile_near(center: Vector2i) -> Vector2i:
 	if is_spawnable(center):
 		return center
@@ -218,10 +278,31 @@ func _pick_grass_for_biome(tile: Vector2i, biome: Biome) -> Vector2i:
 			return _pick_grass(tile)
 		Biome.BiomeType.FOREST:
 			return GrassTiles.pick_forest_grass(tile)
-		Biome.BiomeType.DESERT, Biome.BiomeType.SNOW, Biome.BiomeType.SWAMP:
+		Biome.BiomeType.DESERT, Biome.BiomeType.SNOW, Biome.BiomeType.SWAMP, Biome.BiomeType.RIVER, Biome.BiomeType.LAKE:
 			return GrassTiles.GRASS_PLAIN[abs(int(tile.x * 31 + tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()]
 		_:
 			return _pick_grass(tile)
 
 func _pick_grass_under_water(tile: Vector2i) -> Vector2i:
 	return GrassTiles.GRASS_UNDER_WATER[abs(int(tile.x * 13 + tile.y * 11)) % GrassTiles.GRASS_UNDER_WATER.size()]
+
+func _find_biome(target_type: Biome.BiomeType) -> Biome:
+	for biome in biomes:
+		if biome.biome_type == target_type:
+			return biome
+	return null
+
+func _tile_roll01(tile: Vector2i, salt: int) -> float:
+	var hash := absi(tile.x * 73856093 ^ tile.y * 19349663 ^ int(_rng.seed) ^ salt)
+	return float(hash % 10000) / 10000.0
+
+func _is_river_channel(tile: Vector2i) -> bool:
+	var n := absf(_river_noise.get_noise_2d(tile.x, tile.y))
+	return n < settings.river_width
+
+func _is_lake_basin(tile: Vector2i) -> bool:
+	var h := height_at(tile)
+	if h > settings.water_level + settings.lake_height_bias:
+		return false
+	var n := _lake_noise.get_noise_2d(tile.x, tile.y)
+	return n > settings.lake_threshold
