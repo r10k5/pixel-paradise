@@ -1,16 +1,28 @@
 extends Node2D
 
 # Время суток и дата
-var time_of_day : float = 0.0  # 0.0 - утро, 1.0 - ночь
+# time_of_day: 0.0 = 00:00, 1.0 = 24:00 (цикл)
+var time_of_day : float = 0.0
 var day_duration : float = 120.0  # Длительность одного дня в секундах
 var current_day : int = 1
 var current_month : int = 1
 var total_days_in_month : int = 30  # Можно сделать массив для разного количества дней в месяцах
 
+# Слегка затемняем кадр в лесу (поверх цикла день/ночь).
+const FOREST_DARKEN_BLEND := 0.38
+const FOREST_TINT := Color(0.063, 0.125, 0.059, 0.624)
+const FOREST_FADE_SPEED := 2.5
+
+var _forest_darkness_target: float = 0.0
+var _forest_darkness: float = 0.0
+
 # Ссылки на узлы
 @onready var canvas_modulate : CanvasModulate = $CanvasModulate
 @onready var time_label : Label = $"../UI/TimeLabel"
 @onready var date_label : Label = $"../UI/DateLabel"
+
+func set_forest_darkness(amount: float) -> void:
+	_forest_darkness_target = clampf(amount, 0.0, 1.0)
 
 func _ready():
 	# Устанавливаем начальное состояние освещения
@@ -28,6 +40,10 @@ func _process(delta):
 	if time_of_day >= 1.0:
 		time_of_day -= 1.0  # Начинаем новый цикл
 		increment_day()  # Переход на следующий день
+
+	_forest_darkness = move_toward(
+		_forest_darkness, _forest_darkness_target, FOREST_FADE_SPEED * delta
+	)
 
 	# Обновляем освещение
 	update_lighting()
@@ -58,28 +74,36 @@ func update_lighting():
 	# Определяем цвета для разных фаз суток (только RGB; alpha всегда 1).
 	var morning_color := Color(0.85, 0.88, 0.95, 1.0)
 	var day_color := Color(1.0, 1.0, 1.0, 1.0)
-	var evening_color := Color(1.0, 0.92, 0.82, 1.0)
-	var night_color := Color(0.55, 0.6, 0.85, 1.0)
+	var evening_color := Color(1.0, 0.829, 0.608, 1.0)
+	var night_color := Color(0.299, 0.34, 0.614, 1.0)
 
 	var color: Color
 
-	# Утро (0.0 - 0.25)
-	if time_of_day < 0.25:
-		color = morning_color.lerp(day_color, time_of_day / 0.25)
-
-	# День (0.25 - 0.5)
-	elif time_of_day < 0.5:
-		color = day_color.lerp(evening_color, (time_of_day - 0.25) / 0.25)
-
-	# Вечер (0.5 - 0.75)
-	elif time_of_day < 0.75:
-		color = evening_color.lerp(night_color, (time_of_day - 0.5) / 0.25)
-
-	# Ночь (0.75 - 1.0)
+	# Переходы по реальным окнам:
+	# ночь: 22:00–06:00
+	# утро: 06:00–09:00
+	# день: 09:00–18:00
+	# вечер: 18:00–22:00
+	var hour := time_of_day * 24.0
+	if hour < 6.0:
+		# 00:00–06:00: ночь -> утро
+		color = night_color.lerp(morning_color, hour / 6.0)
+	elif hour < 9.0:
+		# 06:00–09:00: утро -> день
+		color = morning_color.lerp(day_color, (hour - 6.0) / 3.0)
+	elif hour < 18.0:
+		# 09:00–18:00: день -> вечер
+		color = day_color.lerp(evening_color, (hour - 9.0) / 9.0)
+	elif hour < 22.0:
+		# 18:00–22:00: вечер -> ночь
+		color = evening_color.lerp(night_color, (hour - 18.0) / 4.0)
 	else:
-		color = night_color.lerp(morning_color, (time_of_day - 0.75) / 0.25)
+		# 22:00–24:00: вечер -> ночь (короткий отрезок)
+		color = evening_color.lerp(night_color, (hour - 22.0) / 2.0)
 
 	if color != color:
 		color = Color.WHITE
+	if _forest_darkness > 0.001:
+		color = color.lerp(FOREST_TINT, _forest_darkness * FOREST_DARKEN_BLEND)
 	color.a = 1.0
 	canvas_modulate.color = color

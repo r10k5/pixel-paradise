@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WorldGenerationSettings" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://world/procedural/world_generation_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enable_biomes = true
+enable_decorations = true
+global_decoration_multiplier = 1.0
+biome_precompute_radius = 64
+moisture_frequency = 0.004
+temperature_frequency = 0.0035
+water_level = -0.22
+decoration_spacing_tiles = 2

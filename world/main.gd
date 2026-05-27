@@ -17,6 +17,7 @@ const MAP_SCALE := 1.5
 @onready var world_generator: Node = $WorldGenerator
 @onready var seed_label: Label = $UI/WorldSeedLabel
 @onready var fps_label: Label = $UI/FpsLabel
+@onready var day_night: Node2D = $DayNight
 
 var world_map: WorldMap
 var _flora_spawned: Dictionary = {}
@@ -41,11 +42,23 @@ func _ready() -> void:
 	world_generator.chunk_generated.connect(_on_chunk_generated)
 
 func _process(_delta: float) -> void:
+	_update_forest_ambience()
 	if fps_label and world_generator.has_method("get_debug_chunk_info"):
 		fps_label.text = "FPS: %d  %s" % [
 			int(Engine.get_frames_per_second()),
 			world_generator.get_debug_chunk_info()
 		]
+
+func _update_forest_ambience() -> void:
+	if day_night == null or not day_night.has_method("set_forest_darkness"):
+		return
+	if world_map == null or not world_map.settings.enable_biomes:
+		day_night.set_forest_darkness(0.0)
+		return
+	var tile := grass_tilemap.local_to_map(grass_tilemap.to_local(player.global_position))
+	var biome := world_map.get_biome(tile)
+	var in_forest := biome != null and biome.biome_type == Biome.BiomeType.FOREST
+	day_night.set_forest_darkness(1.0 if in_forest else 0.0)
 
 func _on_world_generated(map: WorldMap) -> void:
 	world_map = map
@@ -78,13 +91,34 @@ func _spawn_flora_deferred(chunk: Vector2i) -> void:
 	if _flora_spawned.has(ck):
 		return
 	_flora_spawned[ck] = true
-	var placements := ChunkEntities.get_placements(
-		world_generator.get_map_seed(),
-		chunk,
-		world_generator.chunk_size,
-		world_map
-	)
-	_spawn_placements(chunk, placements)
+
+	if world_generator.uses_biome_decorations():
+		_spawn_biome_decorations(chunk)
+	else:
+		var placements := ChunkEntities.get_placements(
+			world_generator.get_map_seed(),
+			chunk,
+			world_generator.chunk_size,
+			world_map
+		)
+		_spawn_placements(chunk, placements)
+
+func _spawn_biome_decorations(chunk: Vector2i) -> void:
+	for entry in world_generator.get_placed_decorations(chunk):
+		var tile: Vector2i = entry.tile
+		var data: Dictionary = entry.data
+		var entity_id: String = data.get("entity_id", "")
+		if entity_id.is_empty():
+			continue
+		if _is_destroyed(entity_id, tile):
+			continue
+		var scene_path: String = data.get("scene", "")
+		if scene_path.is_empty():
+			continue
+		var packed := load(scene_path) as PackedScene
+		if packed == null:
+			continue
+		_spawn_entity(entity_id, packed, tile, chunk)
 
 func on_health_changed(current_health: int) -> void:
 	hp_bar.set_hp(current_health)
@@ -119,7 +153,7 @@ func _scene_for_entity(entity_id: String) -> PackedScene:
 			return MUSHROOM
 	return null
 
-func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk: Vector2i) -> void:
+func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, _chunk: Vector2i) -> Node:
 	var node := scene.instantiate()
 	var world_pos := grass_tilemap.to_global(grass_tilemap.map_to_local(tile))
 	node.position = world_pos
@@ -140,6 +174,7 @@ func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk:
 		node.pick_up.connect(_on_entity_picked_up.bind(entity_id, tile))
 
 	actors.add_child(node)
+	return node
 
 func _on_entity_death(entity_id: String, tile: Vector2i) -> void:
 	_mark_destroyed(entity_id, tile)
