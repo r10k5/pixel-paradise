@@ -5,6 +5,7 @@ extends Resource
 @export var seed: int = 0
 @export var map_scale: float = 1.5
 @export var chunk_size: int = 32
+@export var use_advanced_generator: bool = false
 
 @export_group("Параметры высот")
 @export var height_frequency: float = 0.035

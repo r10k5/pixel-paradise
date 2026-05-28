@@ -4,6 +4,7 @@ const LOG = preload("res://statics/drop/log.tscn")
 
 func _ready() -> void:
 	depth_sort_feet_bias = 52.0
+	fade_when_player_behind = true
 	super._ready()
 	id = "passive-entity:tree"
 	max_health = 10

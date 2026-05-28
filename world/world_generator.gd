@@ -121,6 +121,10 @@ func get_debug_biome_info(tile: Vector2i) -> String:
 	var height := world_map.height_at(tile)
 	var moisture := world_map.moisture_at(tile)
 	var temp := world_map.temperature_at(tile)
+	if generation_settings.use_advanced_generator:
+		var cont := world_map.continentalness_at(tile)
+		var er := world_map.erosion_at(tile)
+		return "%s H:%.2f C:%.2f E:%.2f M:%.2f T:%.2f" % [biome.display_name, height, cont, er, moisture, temp]
 	return "%s H:%.2f M:%.2f T:%.2f" % [biome.display_name, height, moisture, temp]
 
 func _ensure_chunks_around_player() -> void:

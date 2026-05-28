@@ -3,18 +3,22 @@
 [ext_resource type="Texture2D" uid="uid://bpvkswwhrosr6" path="res://assets/world/static/TX Tileset Grass.png" id="1_71ssx"]
 [ext_resource type="Script" uid="uid://cbenywix8na7x" path="res://world/main.gd" id="1_hhpii"]
 [ext_resource type="PackedScene" uid="uid://bq6p04xegy3wa" path="res://characters/player/player_v2.tscn" id="5_8m08q"]
+[ext_resource type="Texture2D" uid="uid://dhlont6cweo3q" path="res://assets/world/static/Sand Tile.png" id="5_8q2wj"]
 [ext_resource type="Texture2D" uid="uid://yo7iagcy30dc" path="res://assets/characters/player/light.png" id="5_32ub7"]
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" uid="uid://wy7y4bgolppp" path="res://ui/health.tscn" id="5_pijuu"]
 [ext_resource type="Script" uid="uid://cyhth6oy6eydl" path="res://world/player_light.gd" id="6_ab0jk"]
 [ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
 [ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
-[ext_resource type="Script" uid="uid://c3mf03r7tpuk7" path="res://world/set_time.gd" id="8_0iml5"]
+[ext_resource type="Script" uid="uid://bbjgy41qpenvj" path="res://world/set_time.gd" id="8_0iml5"]
 [ext_resource type="Script" uid="uid://dpousw67rkjyx" path="res://world/world_generator.gd" id="9_wgen"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w50e3"]
 texture = ExtResource("1_71ssx")
+0:0/next_alternative_id = 3
 0:0/0 = 0
+0:0/1 = 1
+0:0/2 = 2
 1:0/0 = 0
 2:0/0 = 0
 3:0/0 = 0
@@ -271,8 +275,16 @@ texture = ExtResource("1_71ssx")
 14:15/0 = 0
 15:15/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e63cu"]
+texture = ExtResource("5_8q2wj")
+0:0/0 = 0
+1:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+
 [sub_resource type="TileSet" id="TileSet_nxl3g"]
 sources/0 = SubResource("TileSetAtlasSource_w50e3")
+sources/3 = SubResource("TileSetAtlasSource_e63cu")
 
 [node name="Main" type="Node2D" unique_id=1367276529]
 script = ExtResource("1_hhpii")
@@ -281,7 +293,6 @@ script = ExtResource("1_hhpii")
 script = ExtResource("8_0iml5")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="DayNight" unique_id=1683613971]
-color = Color(1, 1, 1, 1)
 
 [node name="TileMap" type="TileMap" parent="." unique_id=829976937]
 scale = Vector2(1.5, 1.5)
@@ -299,16 +310,6 @@ y_sort_enabled = true
 
 [node name="Player" parent="Entities/Actors" unique_id=296055346 instance=ExtResource("5_8m08q")]
 
-[node name="Chests" type="Node2D" parent="Entities" unique_id=1282246665]
-
-[node name="ChestTimer" type="Timer" parent="Entities/Chests" unique_id=1725459481]
-wait_time = 2.0
-
-[node name="Bombs" type="Node2D" parent="Entities" unique_id=568578861]
-
-[node name="WorldGenerator" type="Node" parent="." unique_id=917723138]
-script = ExtResource("9_wgen")
-
 [node name="PointLight2D2" type="PointLight2D" parent="Entities/Actors/Player" unique_id=453368398]
 position = Vector2(-1.04904e-05, -1.00001)
 scale = Vector2(1.28869, 1.13988)
@@ -320,6 +321,16 @@ texture = ExtResource("5_32ub7")
 texture_scale = 6.69
 height = 12.0
 script = ExtResource("6_ab0jk")
+
+[node name="Chests" type="Node2D" parent="Entities" unique_id=1282246665]
+
+[node name="ChestTimer" type="Timer" parent="Entities/Chests" unique_id=1725459481]
+wait_time = 2.0
+
+[node name="Bombs" type="Node2D" parent="Entities" unique_id=568578861]
+
+[node name="WorldGenerator" type="Node" parent="." unique_id=917723138]
+script = ExtResource("9_wgen")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1797761756]
 

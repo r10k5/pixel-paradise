@@ -25,6 +25,7 @@ var _moisture_cache: Dictionary = {}
 var _temperature_cache: Dictionary = {}
 var _river_channel_cache: Dictionary = {}
 var _lake_channel_cache: Dictionary = {}
+var _advanced_params_cache: Dictionary = {}
 
 var _rng := RandomNumberGenerator.new()
 var _height_noise: FastNoiseLite
@@ -37,10 +38,15 @@ var _temperature_noise: FastNoiseLite
 var _river_noise: FastNoiseLite
 var _lake_noise: FastNoiseLite
 var _puddle_noise: FastNoiseLite
+var _advanced_generator: AdvancedWorldGenerator
 
 func generate(_map_width: int, _map_height: int, map_seed: int = 0, gen_settings: WorldGenerationSettings = null) -> void:
 	settings = gen_settings if gen_settings != null else WorldGenerationSettings.new()
 	_rng.seed = map_seed if map_seed != 0 else randi()
+	if settings.use_advanced_generator:
+		_advanced_generator = AdvancedWorldGenerator.new(int(_rng.seed), settings.height_frequency)
+	else:
+		_advanced_generator = null
 	_setup_noises(_rng.seed)
 	_clear_caches()
 
@@ -73,6 +79,11 @@ func get_biome(tile: Vector2i) -> Biome:
 	var height := height_at(tile)
 	var moisture := moisture_at(tile)
 	var temperature := temperature_at(tile)
+	if settings.use_advanced_generator:
+		var advanced_biome := _select_biome_advanced(tile, height, moisture, temperature)
+		if advanced_biome != null:
+			_cache_biome(tile, advanced_biome)
+			return advanced_biome
 
 	for biome in biomes:
 		if biome.matches(height, moisture, temperature):
@@ -101,7 +112,7 @@ func get_grass_atlas(tile: Vector2i) -> Vector2i:
 func height_at(tile: Vector2i) -> float:
 	if _height_cache.has(tile):
 		return _height_cache[tile]
-	var result := _height_noise.get_noise_2d(tile.x, tile.y)
+	var result := _sample_height(tile)
 	if _height_cache.size() >= CACHE_MAX_SIZE:
 		_height_cache.clear()
 	_height_cache[tile] = result
@@ -110,8 +121,7 @@ func height_at(tile: Vector2i) -> float:
 func moisture_at(tile: Vector2i) -> float:
 	if _moisture_cache.has(tile):
 		return _moisture_cache[tile]
-	var n := _moisture_noise.get_noise_2d(tile.x, tile.y)
-	var result := (n + 1.0) * 0.5
+	var result := _sample_moisture(tile)
 	if _moisture_cache.size() >= CACHE_MAX_SIZE:
 		_moisture_cache.clear()
 	_moisture_cache[tile] = result
@@ -120,12 +130,23 @@ func moisture_at(tile: Vector2i) -> float:
 func temperature_at(tile: Vector2i) -> float:
 	if _temperature_cache.has(tile):
 		return _temperature_cache[tile]
-	var n := _temperature_noise.get_noise_2d(tile.x, tile.y)
-	var result := (n + 1.0) * 0.5
+	var result := _sample_temperature(tile)
 	if _temperature_cache.size() >= CACHE_MAX_SIZE:
 		_temperature_cache.clear()
 	_temperature_cache[tile] = result
 	return result
+
+func continentalness_at(tile: Vector2i) -> float:
+	if _advanced_generator != null:
+		return clampf(_get_advanced_params(tile).get("continentalness", 0.0), -1.0, 1.0)
+	# Fallback: высота даёт грубую "континентальность".
+	return clampf(height_at(tile) * 0.9, -1.0, 1.0)
+
+func erosion_at(tile: Vector2i) -> float:
+	if _advanced_generator != null:
+		return clampf(_get_advanced_params(tile).get("erosion", 0.0), -1.0, 1.0)
+	# Fallback: используем дорожный шум как прокси неоднородности рельефа.
+	return clampf(_plaza_noise.get_noise_2d(tile.x, tile.y), -1.0, 1.0)
 
 func is_spawnable(tile: Vector2i) -> bool:
 	return is_grass(tile)
@@ -193,6 +214,7 @@ func _clear_caches() -> void:
 	_temperature_cache.clear()
 	_river_channel_cache.clear()
 	_lake_channel_cache.clear()
+	_advanced_params_cache.clear()
 
 func _setup_noises(seed_value: int) -> void:
 	_height_noise = FastNoiseLite.new()
@@ -427,3 +449,53 @@ func _is_water_mode_core(tile: Vector2i, mode: int) -> bool:
 
 func _tile_key(tile: Vector2i) -> String:
 	return "%d,%d" % [tile.x, tile.y]
+
+func _get_advanced_params(tile: Vector2i) -> Dictionary:
+	if _advanced_generator == null:
+		return {}
+	var key := _tile_key(tile)
+	if _advanced_params_cache.has(key):
+		return _advanced_params_cache[key]
+	var sample := _advanced_generator.sample(tile)
+	if _advanced_params_cache.size() >= CACHE_MAX_SIZE:
+		_advanced_params_cache.clear()
+	_advanced_params_cache[key] = sample
+	return sample
+
+func _sample_height(tile: Vector2i) -> float:
+	if _advanced_generator == null:
+		return _height_noise.get_noise_2d(tile.x, tile.y)
+	return _get_advanced_params(tile).get("height", 0.0)
+
+func _sample_moisture(tile: Vector2i) -> float:
+	if _advanced_generator == null:
+		var n := _moisture_noise.get_noise_2d(tile.x, tile.y)
+		return (n + 1.0) * 0.5
+	return _get_advanced_params(tile).get("wetness", 0.5)
+
+func _sample_temperature(tile: Vector2i) -> float:
+	if _advanced_generator == null:
+		var n := _temperature_noise.get_noise_2d(tile.x, tile.y)
+		return (n + 1.0) * 0.5
+	return _get_advanced_params(tile).get("temperature", 0.5)
+
+func _select_biome_advanced(tile: Vector2i, _height: float, moisture: float, temperature: float) -> Biome:
+	var cont := continentalness_at(tile)
+	var er := erosion_at(tile)
+
+	# Базовая многомерная классификация (этап 2): континентальность + эрозия + климат.
+	if temperature < 0.25:
+		return _find_land_biome(Biome.BiomeType.SNOW)
+	if temperature > 0.72 and moisture < 0.35:
+		return _find_land_biome(Biome.BiomeType.DESERT)
+	if moisture > 0.72 and cont < 0.15 and er < -0.1:
+		return _find_land_biome(Biome.BiomeType.SWAMP)
+	if moisture > 0.58 and temperature < 0.82 and er <= 0.45:
+		return _find_land_biome(Biome.BiomeType.FOREST)
+	return _find_land_biome(Biome.BiomeType.GRASSLAND)
+
+func _find_land_biome(target_type: Biome.BiomeType) -> Biome:
+	for biome in biomes:
+		if biome.biome_type == target_type:
+			return biome
+	return biomes[0] if not biomes.is_empty() else null
