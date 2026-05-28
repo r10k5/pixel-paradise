@@ -4,11 +4,13 @@ extends RefCounted
 const TREE_ID := "passive-entity:tree"
 const KUST_ID := "passive-entity:kust"
 const MUSHROOM_ID := "passive-entity:mushroom"
+const STONE_ID := "passive-entity:stone"
 
 # Вероятность на клетку травы (детерминированно по сиду + координатам).
 const TREE_TILE_CHANCE := 45
 const KUST_TILE_CHANCE := 28
 const MUSHROOM_TILE_CHANCE := 12
+const STONE_TILE_CHANCE := 35
 
 # Минимальная дистанция между любыми объектами (деревья/кусты/грибы) в клетках.
 # Это нужно, чтобы спрайты/хиты не накладывались друг на друга.
@@ -57,6 +59,7 @@ static func get_placements(
 		TREE_ID: [],
 		KUST_ID: [],
 		MUSHROOM_ID: [],
+		STONE_ID: [],
 	}
 
 	var start_x := chunk.x * chunk_size
@@ -86,6 +89,11 @@ static func get_placements(
 			var mushroom_roll: int = _tile_roll(world_seed, tile, 303)
 			if mushroom_roll < MUSHROOM_TILE_CHANCE and not used_tiles.has(tile):
 				placements[MUSHROOM_ID].append(tile)
+				_mark_blocked(used_tiles, tile)
+				
+			var stone_roll: int = _tile_roll(world_seed, tile, 404)
+			if stone_roll < STONE_TILE_CHANCE:
+				placements[STONE_ID].append(tile)
 				_mark_blocked(used_tiles, tile)
 
 	return placements

@@ -78,8 +78,13 @@ static func create_default_biomes() -> Array[Biome]:
 	swamp.min_moisture = 0.72
 	swamp.max_moisture = 1.0
 	swamp.temperature_range = Vector2(0.15, 0.95)
-	swamp.decoration_chance = 0.15
-	swamp.allowed_decorations = ["reed", "lilypad"]
+	swamp.decoration_chance = 0.42
+	# Много грибов, немного деревьев.
+	swamp.allowed_decorations = [
+		"mushroom", "mushroom", "mushroom", "mushroom", "mushroom",
+		"bush", "bush",
+		"tree",
+	]
 	biomes.append(swamp)
 
 	var grassland := Biome.new(BiomeType.GRASSLAND, "Grassland")
@@ -88,7 +93,13 @@ static func create_default_biomes() -> Array[Biome]:
 	grassland.min_moisture = 0.0
 	grassland.max_moisture = 1.0
 	grassland.temperature_range = Vector2(0.0, 1.0)
-	grassland.decoration_chance = 0.08
+	grassland.decoration_chance = 0.22
+	# В полях добавляем камни как основной декор.
+	grassland.allowed_decorations = [
+		"rock", "rock", "rock", "rock",
+		"bush",
+		"mushroom",
+	]
 	biomes.append(grassland)
 
 	return biomes

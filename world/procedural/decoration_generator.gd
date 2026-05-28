@@ -5,10 +5,10 @@ const DECORATION_TYPES := {
 	"tree": {"scenes": ["res://statics/tree/tree.tscn"], "chance": 0.02, "entity_id": "passive-entity:tree"},
 	"bush": {"scenes": ["res://statics/tree/kust.tscn"], "chance": 0.04, "entity_id": "passive-entity:kust"},
 	"mushroom": {"scenes": ["res://statics/mushrooms/mushroom.tscn"], "chance": 0.015, "entity_id": "passive-entity:mushroom"},
-	"rock": {"scenes": [], "chance": 0.03, "entity_id": ""},
+	"rock": {"scenes": ["res://statics/stone/stone.tscn"], "chance": 0.03, "entity_id": "passive-entity:stone"},
 	"cactus": {"scenes": [], "chance": 0.02, "entity_id": ""},
 	"pine_tree": {"scenes": [], "chance": 0.025, "entity_id": ""},
-	"ice_rock": {"scenes": [], "chance": 0.02, "entity_id": ""},
+	"ice_rock": {"scenes": ["res://statics/stone/stone.tscn"], "chance": 0.02, "entity_id": "passive-entity:stone"},
 	"reed": {"scenes": [], "chance": 0.04, "entity_id": ""},
 	"lilypad": {"scenes": [], "chance": 0.03, "entity_id": ""},
 }
@@ -71,15 +71,37 @@ static func spacing_for_biome(biome: Biome, default_spacing: int) -> int:
 static func _type_chance(biome: Biome, decor_type: String, default_chance: float) -> float:
 	if biome == null:
 		return default_chance
-	if biome.biome_type != Biome.BiomeType.FOREST:
-		return default_chance
-	match decor_type:
-		"tree":
-			return 0.28
-		"bush":
-			return 0.12
-		"mushroom":
-			return 0.04
+	match biome.biome_type:
+		Biome.BiomeType.FOREST:
+			match decor_type:
+				"tree":
+					return 0.28
+				"bush":
+					return 0.12
+				"mushroom":
+					return 0.04
+				_:
+					return default_chance
+		Biome.BiomeType.SWAMP:
+			match decor_type:
+				"mushroom":
+					return 0.32
+				"bush":
+					return 0.10
+				"tree":
+					return 0.05
+				_:
+					return default_chance
+		Biome.BiomeType.GRASSLAND:
+			match decor_type:
+				"rock":
+					return 0.35
+				"bush":
+					return 0.07
+				"mushroom":
+					return 0.05
+				_:
+					return default_chance
 		_:
 			return default_chance
 

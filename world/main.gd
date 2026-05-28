@@ -3,6 +3,7 @@ extends Node2D
 const TREE = preload("res://statics/tree/tree.tscn")
 const MUSHROOM = preload("res://statics/mushrooms/mushroom.tscn")
 const KUST = preload("res://statics/tree/kust.tscn")
+const STONE = preload("res://statics/stone/stone.tscn")
 
 const TILE_SIZE := 16
 const MAP_SCALE := 1.5
@@ -151,6 +152,8 @@ func _scene_for_entity(entity_id: String) -> PackedScene:
 			return KUST
 		ChunkEntities.MUSHROOM_ID:
 			return MUSHROOM
+		ChunkEntities.STONE_ID:
+			return STONE
 	return null
 
 func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, _chunk: Vector2i) -> Node:
@@ -187,6 +190,7 @@ func _reset_destroyed_tiles() -> void:
 		ChunkEntities.TREE_ID: {},
 		ChunkEntities.KUST_ID: {},
 		ChunkEntities.MUSHROOM_ID: {},
+		ChunkEntities.STONE_ID: {},
 	}
 
 func _mark_destroyed(entity_id: String, tile: Vector2i) -> void:
