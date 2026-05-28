@@ -302,7 +302,11 @@ func _pick_grass_for_biome(tile: Vector2i, biome: Biome) -> Vector2i:
 			return _pick_grass(tile)
 		Biome.BiomeType.FOREST:
 			return GrassTiles.pick_forest_grass(tile)
-		Biome.BiomeType.DESERT, Biome.BiomeType.SNOW, Biome.BiomeType.SWAMP:
+		Biome.BiomeType.DESERT:
+			return GrassTiles.BIOME_SAND
+		Biome.BiomeType.SNOW:
+			return GrassTiles.pick_snow_tile(tile)
+		Biome.BiomeType.SWAMP:
 			return GrassTiles.GRASS_PLAIN[abs(int(tile.x * 31 + tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()]
 		_:
 			return _pick_grass(tile)
@@ -484,9 +488,9 @@ func _select_biome_advanced(tile: Vector2i, _height: float, moisture: float, tem
 	var er := erosion_at(tile)
 
 	# Базовая многомерная классификация (этап 2): континентальность + эрозия + климат.
-	if temperature < 0.25:
+	if temperature < 0.35:
 		return _find_land_biome(Biome.BiomeType.SNOW)
-	if temperature > 0.72 and moisture < 0.35:
+	if temperature > 0.62 and moisture < 0.45:
 		return _find_land_biome(Biome.BiomeType.DESERT)
 	if moisture > 0.72 and cont < 0.15 and er < -0.1:
 		return _find_land_biome(Biome.BiomeType.SWAMP)

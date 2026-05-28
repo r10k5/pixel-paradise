@@ -2,8 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://bpvkswwhrosr6" path="res://assets/world/static/TX Tileset Grass.png" id="1_71ssx"]
 [ext_resource type="Script" uid="uid://cbenywix8na7x" path="res://world/main.gd" id="1_hhpii"]
+[ext_resource type="Texture2D" uid="uid://hjoslagflopa" path="res://assets/world/static/tileset.png" id="4_vid1e"]
 [ext_resource type="PackedScene" uid="uid://bq6p04xegy3wa" path="res://characters/player/player_v2.tscn" id="5_8m08q"]
-[ext_resource type="Texture2D" uid="uid://dhlont6cweo3q" path="res://assets/world/static/Sand Tile.png" id="5_8q2wj"]
 [ext_resource type="Texture2D" uid="uid://yo7iagcy30dc" path="res://assets/characters/player/light.png" id="5_32ub7"]
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" uid="uid://wy7y4bgolppp" path="res://ui/health.tscn" id="5_pijuu"]
@@ -275,16 +275,16 @@ texture = ExtResource("1_71ssx")
 14:15/0 = 0
 15:15/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e63cu"]
-texture = ExtResource("5_8q2wj")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tp5tb"]
+texture = ExtResource("4_vid1e")
+texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
-1:0/0 = 0
 0:1/0 = 0
-1:1/0 = 0
+0:2/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_nxl3g"]
 sources/0 = SubResource("TileSetAtlasSource_w50e3")
-sources/3 = SubResource("TileSetAtlasSource_e63cu")
+sources/1 = SubResource("TileSetAtlasSource_tp5tb")
 
 [node name="Main" type="Node2D" unique_id=1367276529]
 script = ExtResource("1_hhpii")

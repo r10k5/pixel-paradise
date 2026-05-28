@@ -50,6 +50,12 @@ const GRASS_UNDER_WATER: Array[Vector2i] = [
 	Vector2i(0, 2), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2),
 ]
 
+# Новые биомные тайлы:
+# (0,0) — снег, (0,1) — снег с травой, (0,2) — песок
+const BIOME_SNOW := Vector2i(0, 0)
+const BIOME_SNOW_GRASS := Vector2i(0, 1)
+const BIOME_SAND := Vector2i(0, 2)
+
 static func pick_grass(rng: RandomNumberGenerator) -> Vector2i:
 	if rng.randf() < FLOWER_CHANCE:
 		return GRASS_FLOWERS[rng.randi_range(0, GRASS_FLOWERS.size() - 1)]
@@ -60,3 +66,8 @@ static func pick_grass_under_water(rng: RandomNumberGenerator) -> Vector2i:
 
 static func pick_forest_grass(tile: Vector2i) -> Vector2i:
 	return GRASS_FOREST_DARK[abs(int(tile.x * 29 + tile.y * 37)) % GRASS_FOREST_DARK.size()]
+
+static func pick_snow_tile(tile: Vector2i) -> Vector2i:
+	# Немного вариативности: местами снег с травой.
+	var roll := absi(tile.x * 47 + tile.y * 61) % 100
+	return BIOME_SNOW_GRASS if roll < 30 else BIOME_SNOW

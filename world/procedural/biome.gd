@@ -54,21 +54,21 @@ static func create_default_biomes() -> Array[Biome]:
 
 	var desert := Biome.new(BiomeType.DESERT, "Desert")
 	desert.min_height = -0.1
-	desert.max_height = 0.6
+	desert.max_height = 0.8
 	desert.min_moisture = 0.0
-	desert.max_moisture = 0.28
-	desert.temperature_range = Vector2(0.68, 1.0)
-	desert.decoration_chance = 0.03
+	desert.max_moisture = 0.40
+	desert.temperature_range = Vector2(0.60, 1.0)
+	desert.decoration_chance = 0.06
 	desert.allowed_decorations = ["cactus", "rock"]
 	biomes.append(desert)
 
 	var snow := Biome.new(BiomeType.SNOW, "Snow")
-	snow.min_height = 0.38
+	snow.min_height = 0.2
 	snow.max_height = 1.0
 	snow.min_moisture = 0.0
 	snow.max_moisture = 1.0
-	snow.temperature_range = Vector2(0.0, 0.32)
-	snow.decoration_chance = 0.05
+	snow.temperature_range = Vector2(0.0, 0.42)
+	snow.decoration_chance = 0.08
 	snow.allowed_decorations = ["pine_tree", "ice_rock"]
 	biomes.append(snow)
 
