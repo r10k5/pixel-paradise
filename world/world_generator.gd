@@ -65,6 +65,7 @@ func generate_world() -> void:
 	_clear_chunk_nodes()
 	_setup_world_bounds()
 	world_generated.emit(world_map)
+	call_deferred("_apply_camera_limits")
 	if pre_generate_before_start:
 		_pregenerate_world()
 		_emit_chunks_around_player_for_entities()
@@ -89,6 +90,12 @@ func force_refresh_chunks_around_player() -> void:
 
 func get_chunk_entities_parent(chunk: Vector2i) -> Node2D:
 	return _get_or_create_entity_holder(chunk)
+
+func _physics_process(_delta: float) -> void:
+	if limit_world_size:
+		_apply_camera_limits()
+		clamp_player_to_world_bounds()
+
 
 func _process(_delta: float) -> void:
 	if pre_generate_before_start and limit_world_size:
@@ -119,12 +126,85 @@ func _chunk_dist_sq(a: Vector2i, b: Vector2i) -> int:
 	var dy := a.y - b.y
 	return dx * dx + dy * dy
 
-func _chunk_half_extents() -> Vector2i:
-	var cam := player.get_node_or_null("Camera2D") as Camera2D
+func get_world_bounds_rect() -> Rect2:
+	if world_map == null:
+		return Rect2()
+	var min_tile := Vector2i(
+		_world_min_chunk.x * chunk_size,
+		_world_min_chunk.y * chunk_size
+	)
+	var max_tile_exclusive := Vector2i(
+		(_world_max_chunk.x + 1) * chunk_size,
+		(_world_max_chunk.y + 1) * chunk_size
+	)
+	var origin := _tile_to_world(min_tile)
+	var corner := _tile_to_world(max_tile_exclusive)
+	return Rect2(origin, corner - origin)
+
+
+func _get_player_camera() -> Camera2D:
+	if player == null:
+		return null
+	return player.get_node_or_null("Camera2D") as Camera2D
+
+
+func _get_camera_half_extents(cam: Camera2D) -> Vector2:
 	var half := Vector2(400, 225)
 	if cam != null:
 		var vp := get_viewport().get_visible_rect().size
 		half = vp * 0.5 / cam.zoom
+	return half
+
+
+func _get_camera_center_limits() -> Rect2:
+	var bounds := get_world_bounds_rect()
+	var cam := _get_player_camera()
+	var half := _get_camera_half_extents(cam)
+	var min_c := bounds.position + half
+	var max_c := bounds.position + bounds.size - half
+	if min_c.x > max_c.x:
+		var mid_x := bounds.position.x + bounds.size.x * 0.5
+		min_c.x = mid_x
+		max_c.x = mid_x
+	if min_c.y > max_c.y:
+		var mid_y := bounds.position.y + bounds.size.y * 0.5
+		min_c.y = mid_y
+		max_c.y = mid_y
+	return Rect2(min_c, max_c - min_c)
+
+
+func _apply_camera_limits() -> void:
+	var cam := _get_player_camera()
+	if cam == null:
+		return
+	if not limit_world_size:
+		_clear_camera_limits(cam)
+		return
+	var limits := _get_camera_center_limits()
+	cam.limit_smoothed = false
+	cam.limit_left = int(floor(limits.position.x))
+	cam.limit_top = int(floor(limits.position.y))
+	cam.limit_right = int(ceil(limits.end.x))
+	cam.limit_bottom = int(ceil(limits.end.y))
+
+
+func _clear_camera_limits(cam: Camera2D) -> void:
+	cam.limit_left = -1_000_000_000
+	cam.limit_top = -1_000_000_000
+	cam.limit_right = 1_000_000_000
+	cam.limit_bottom = 1_000_000_000
+
+
+func clamp_player_to_world_bounds() -> void:
+	if player == null or not limit_world_size:
+		return
+	var limits := _get_camera_center_limits()
+	player.global_position = player.global_position.clamp(limits.position, limits.end)
+
+
+func _chunk_half_extents() -> Vector2i:
+	var cam := _get_player_camera()
+	var half := _get_camera_half_extents(cam)
 	var cell := Vector2(grass_tilemap.tile_set.tile_size) * grass_tilemap.scale
 	var tiles_half := Vector2(ceil(half.x / cell.x), ceil(half.y / cell.y))
 	return Vector2i(

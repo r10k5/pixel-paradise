@@ -64,6 +64,8 @@ func _update_forest_ambience() -> void:
 func _on_world_generated(map: WorldMap) -> void:
 	world_map = map
 	player.global_position = world_generator.get_player_spawn()
+	if world_generator.has_method("clamp_player_to_world_bounds"):
+		world_generator.clamp_player_to_world_bounds()
 	_clear_entities()
 	_reset_destroyed_tiles()
 	_update_seed_label()
