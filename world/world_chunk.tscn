@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cworldchunk01"]
+
+[ext_resource type="Script" path="res://world/world_chunk.gd" id="1_chunk"]
+
+[node name="WorldChunk" type="Node2D"]
+script = ExtResource("1_chunk")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[node name="GrassTileMap" type="TileMap" parent="."]
+scale = Vector2(1.5, 1.5)
+format = 2
+
+[node name="WaterTileMap" type="TileMap" parent="."]
+scale = Vector2(1.5, 1.5)
+format = 2

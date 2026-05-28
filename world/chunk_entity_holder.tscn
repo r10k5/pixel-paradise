@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://wiyxd4bc68ea"]
+
+[ext_resource type="Script" path="res://world/chunk_entity_holder.gd" id="1_holder"]
+
+[node name="ChunkEntityHolder" type="Node2D"]
+script = ExtResource("1_holder")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]

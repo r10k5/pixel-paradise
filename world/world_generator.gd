@@ -3,6 +3,9 @@ extends Node
 signal world_generated(world_map: WorldMap)
 signal chunk_generated(chunk: Vector2i)
 
+const WORLD_CHUNK_SCENE := preload("res://world/world_chunk.tscn")
+const CHUNK_ENTITY_HOLDER_SCENE := preload("res://world/chunk_entity_holder.tscn")
+
 const TILE_SIZE := 16
 const MAP_SCALE := 1.5
 const SCATTER_NEAR_PATH_CHANCE := 0.08
@@ -15,7 +18,8 @@ const BIOME_SOURCE_ID := 1
 @export var map_seed: int = 0
 @export var pre_generate_before_start: bool = true
 @export var limit_world_size: bool = true
-@export var world_chunk_radius: int = 12
+@export var world_chunk_radius: int = 10
+@export var use_screen_culling: bool = true
 
 var world_map: WorldMap
 var _world_seed: int = 0
@@ -25,14 +29,20 @@ var _decoration_generator: DecorationGenerator
 var _placed_decorations: Dictionary = {}
 var _world_min_chunk: Vector2i = Vector2i.ZERO
 var _world_max_chunk: Vector2i = Vector2i.ZERO
+var _chunk_nodes: Dictionary = {}
+var _entity_holders: Dictionary = {}
 
 @onready var grass_tilemap: TileMap = $"../TileMap"
 @onready var water_tilemap: TileMap = $"../WaterGenerator/TileMap"
+@onready var chunks_root: Node2D = $"../Chunks"
+@onready var actors: Node2D = $"../Entities/Actors"
 @onready var player: Node2D = $"../Entities/Actors/Player"
 
 func _ready() -> void:
 	if generation_settings == null:
 		generation_settings = WorldGenerationSettings.new()
+	grass_tilemap.visible = false
+	water_tilemap.visible = false
 	call_deferred("generate_world")
 
 func generate_world() -> void:
@@ -52,8 +62,7 @@ func generate_world() -> void:
 	_generated_chunks.clear()
 	_emitted_chunks.clear()
 	_placed_decorations.clear()
-	grass_tilemap.clear()
-	water_tilemap.clear()
+	_clear_chunk_nodes()
 	_setup_world_bounds()
 	world_generated.emit(world_map)
 	if pre_generate_before_start:
@@ -76,6 +85,10 @@ func get_placed_decorations(chunk: Vector2i) -> Array:
 
 func force_refresh_chunks_around_player() -> void:
 	_ensure_chunks_around_player()
+
+
+func get_chunk_entities_parent(chunk: Vector2i) -> Node2D:
+	return _get_or_create_entity_holder(chunk)
 
 func _process(_delta: float) -> void:
 	if pre_generate_before_start and limit_world_size:
@@ -220,15 +233,54 @@ func _emit_chunk_generated_once(chunk: Vector2i) -> void:
 	_emitted_chunks[chunk_ck] = true
 	chunk_generated.emit(chunk)
 
+func _clear_chunk_nodes() -> void:
+	for child in chunks_root.get_children():
+		child.queue_free()
+	_chunk_nodes.clear()
+	for key in _entity_holders.keys():
+		var holder: Node = _entity_holders[key]
+		if is_instance_valid(holder):
+			holder.queue_free()
+	_entity_holders.clear()
+
+
+func _get_or_create_world_chunk(chunk: Vector2i) -> WorldChunk:
+	var ck := ChunkEntities.world_chunk_key(chunk)
+	if _chunk_nodes.has(ck):
+		return _chunk_nodes[ck] as WorldChunk
+	var node := WORLD_CHUNK_SCENE.instantiate() as WorldChunk
+	node.cull_when_off_screen = use_screen_culling
+	chunks_root.add_child(node)
+	node.configure(chunk, chunk_size, grass_tilemap, water_tilemap)
+	_chunk_nodes[ck] = node
+	return node
+
+
+func _get_or_create_entity_holder(chunk: Vector2i) -> ChunkEntityHolder:
+	var ck := ChunkEntities.world_chunk_key(chunk)
+	if _entity_holders.has(ck):
+		return _entity_holders[ck] as ChunkEntityHolder
+	var holder := CHUNK_ENTITY_HOLDER_SCENE.instantiate() as ChunkEntityHolder
+	holder.cull_when_off_screen = use_screen_culling
+	actors.add_child(holder)
+	holder.configure(chunk, chunk_size, grass_tilemap)
+	_entity_holders[ck] = holder
+	return holder
+
+
 func _generate_chunk(chunk: Vector2i) -> void:
+	var world_chunk := _get_or_create_world_chunk(chunk)
 	var start_x := chunk.x * chunk_size
 	var start_y := chunk.y * chunk_size
 	for y in range(start_y, start_y + chunk_size):
 		for x in range(start_x, start_x + chunk_size):
-			_paint_ground_tile(Vector2i(x, y))
+			var local := world_chunk.world_tile_to_local(Vector2i(x, y))
+			_paint_ground_tile(world_chunk.grass_tilemap, Vector2i(x, y), local)
 	for y in range(start_y, start_y + chunk_size):
 		for x in range(start_x, start_x + chunk_size):
-			_paint_water_tile(Vector2i(x, y), GRASS_SOURCE_ID)
+			var local := world_chunk.world_tile_to_local(Vector2i(x, y))
+			_paint_water_tile(world_chunk.water_tilemap, Vector2i(x, y), local, GRASS_SOURCE_ID)
+	_get_or_create_entity_holder(chunk)
 	if uses_biome_decorations():
 		_generate_decorations(chunk)
 
@@ -264,21 +316,21 @@ func _generate_decorations(chunk: Vector2i) -> void:
 	if not decorations.is_empty():
 		_placed_decorations[chunk_ck] = decorations
 
-func _paint_ground_tile(tile: Vector2i) -> void:
-	var source_id := _ground_source_id_for_tile(tile)
-	var atlas: Vector2i = world_map.get_grass_atlas(tile)
-	grass_tilemap.set_cell(0, tile, source_id, atlas, 0)
-	if world_map.is_path(tile):
-		var style: int = world_map.get_path_style(tile)
-		var path_atlas: Vector2i = PathAutotile.resolve(tile, world_map, style)
+func _paint_ground_tile(tilemap: TileMap, world_tile: Vector2i, local_tile: Vector2i) -> void:
+	var source_id := _ground_source_id_for_tile(world_tile)
+	var atlas: Vector2i = world_map.get_grass_atlas(world_tile)
+	tilemap.set_cell(0, local_tile, source_id, atlas, 0)
+	if world_map.is_path(world_tile):
+		var style: int = world_map.get_path_style(world_tile)
+		var path_atlas: Vector2i = PathAutotile.resolve(world_tile, world_map, style)
 		# Дороги остаются в основном tileset (grass source).
-		grass_tilemap.set_cell(0, tile, GRASS_SOURCE_ID, path_atlas, 0)
-	elif _should_scatter_stone(tile):
-		var stone_roll: int = absi(tile.x * 95123841 ^ tile.y * 72545931 ^ _world_seed) % 1000
+		tilemap.set_cell(0, local_tile, GRASS_SOURCE_ID, path_atlas, 0)
+	elif _should_scatter_stone(world_tile):
+		var stone_roll: int = absi(world_tile.x * 95123841 ^ world_tile.y * 72545931 ^ _world_seed) % 1000
 		var stone_atlas: Vector2i = PathAutotile.SCATTER_STONE[
 			stone_roll % PathAutotile.SCATTER_STONE.size()
 		]
-		grass_tilemap.set_cell(0, tile, GRASS_SOURCE_ID, stone_atlas, 0)
+		tilemap.set_cell(0, local_tile, GRASS_SOURCE_ID, stone_atlas, 0)
 
 func _ground_source_id_for_tile(tile: Vector2i) -> int:
 	if world_map == null or not generation_settings.enable_biomes:
@@ -306,11 +358,11 @@ func _is_near_path(tile: Vector2i) -> bool:
 			return true
 	return false
 
-func _paint_water_tile(tile: Vector2i, source_id: int) -> void:
-	if not world_map.is_water(tile):
+func _paint_water_tile(tilemap: TileMap, world_tile: Vector2i, local_tile: Vector2i, source_id: int) -> void:
+	if not world_map.is_water(world_tile):
 		return
-	var tile_type = WaterTiles.get_tile_from_world_map(world_map, tile)
+	var tile_type = WaterTiles.get_tile_from_world_map(world_map, world_tile)
 	if tile_type == null:
 		return
 	var atlas: Vector2i = WaterTiles.tile_type_to_atlas(tile_type)
-	water_tilemap.set_cell(0, tile, source_id, atlas)
+	tilemap.set_cell(0, local_tile, source_id, atlas)

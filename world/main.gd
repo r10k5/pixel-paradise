@@ -156,10 +156,9 @@ func _scene_for_entity(entity_id: String) -> PackedScene:
 			return STONE
 	return null
 
-func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, _chunk: Vector2i) -> Node:
+func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk: Vector2i) -> Node:
 	var node := scene.instantiate()
 	var world_pos := grass_tilemap.to_global(grass_tilemap.map_to_local(tile))
-	node.position = world_pos
 
 	if node is BaseEntity:
 		node.death.connect(_on_entity_death.bind(entity_id, tile))
@@ -167,7 +166,7 @@ func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, _chunk
 	if entity_id == ChunkEntities.TREE_ID:
 		var tree := node as BaseEntity
 		tree.drop_item.connect(func(item):
-			item.position = tree.position
+			item.global_position = tree.global_position
 			if item is BaseEntity:
 				(item as BaseEntity).pick_up.connect(on_item_pick_up)
 				actors.add_child(item)
@@ -176,7 +175,9 @@ func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, _chunk
 		node.pick_up.connect(on_item_pick_up)
 		node.pick_up.connect(_on_entity_picked_up.bind(entity_id, tile))
 
-	actors.add_child(node)
+	var parent: Node = world_generator.get_chunk_entities_parent(chunk)
+	parent.add_child(node)
+	node.global_position = world_pos
 	return node
 
 func _on_entity_death(entity_id: String, tile: Vector2i) -> void:

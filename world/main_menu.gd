@@ -19,7 +19,6 @@ func _on_start_pressed() -> void:
 		# Временный "minecraft-style" режим: заранее генерируем ограниченный мир.
 		world_generator.pre_generate_before_start = true
 		world_generator.limit_world_size = true
-		world_generator.world_chunk_radius = 6
 
 	var tree := get_tree()
 	var old_scene := tree.current_scene

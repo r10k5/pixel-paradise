@@ -294,9 +294,12 @@ script = ExtResource("8_0iml5")
 [node name="CanvasModulate" type="CanvasModulate" parent="DayNight" unique_id=1683613971]
 
 [node name="TileMap" type="TileMap" parent="." unique_id=829976937]
+visible = false
 scale = Vector2(1.5, 1.5)
 tile_set = SubResource("TileSet_nxl3g")
 format = 2
+
+[node name="Chunks" type="Node2D" parent="." unique_id=829976938]
 
 [node name="WaterGenerator" parent="." unique_id=2093788957 instance=ExtResource("6_dnm44")]
 
