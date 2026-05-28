@@ -4,12 +4,10 @@ const WORLD_SCENE := preload("res://world/main.tscn")
 
 @onready var seed_input: LineEdit = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SeedInput
 @onready var start_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StartButton
-@onready var desert_seed_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/DesertSeedButton
 @onready var hint_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HintLabel
 
 func _ready() -> void:
 	start_button.pressed.connect(_on_start_pressed)
-	desert_seed_button.pressed.connect(_on_desert_seed_pressed)
 	seed_input.text_submitted.connect(func(_v: String): _on_start_pressed())
 
 func _on_start_pressed() -> void:
@@ -21,7 +19,7 @@ func _on_start_pressed() -> void:
 		# Временный "minecraft-style" режим: заранее генерируем ограниченный мир.
 		world_generator.pre_generate_before_start = true
 		world_generator.limit_world_size = true
-		world_generator.world_chunk_radius = 12
+		world_generator.world_chunk_radius = 6
 
 	var tree := get_tree()
 	var old_scene := tree.current_scene
@@ -29,24 +27,6 @@ func _on_start_pressed() -> void:
 	tree.current_scene = world
 	if old_scene != null:
 		old_scene.queue_free()
-
-func _on_desert_seed_pressed() -> void:
-	var desert_seed := _find_desert_spawn_seed(1, 100000)
-	if desert_seed == 0:
-		hint_label.text = "Пустынный сид не найден в диапазоне."
-		return
-	seed_input.text = str(desert_seed)
-	hint_label.text = "Найден сид пустыни: %d" % desert_seed
-
-func _find_desert_spawn_seed(start_seed: int, end_seed: int) -> int:
-	for s in range(start_seed, end_seed + 1):
-		var map := WorldMap.new()
-		map.generate(0, 0, s, null)
-		var spawn := map.spawn_tile
-		var biome := map.get_biome(spawn)
-		if biome != null and biome.biome_type == Biome.BiomeType.DESERT:
-			return s
-	return 0
 
 func _parse_seed(text: String) -> int:
 	var t := text.strip_edges()

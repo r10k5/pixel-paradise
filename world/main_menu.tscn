@@ -55,10 +55,6 @@ placeholder_text = "Введите seed (пусто = случайный)"
 layout_mode = 2
 text = "Создать мир"
 
-[node name="DesertSeedButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Подобрать сид пустыни"
-
 [node name="HintLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Сначала мир генерируется, потом вход."

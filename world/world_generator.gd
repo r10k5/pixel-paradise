@@ -20,6 +20,7 @@ const BIOME_SOURCE_ID := 1
 var world_map: WorldMap
 var _world_seed: int = 0
 var _generated_chunks: Dictionary = {}
+var _emitted_chunks: Dictionary = {}
 var _decoration_generator: DecorationGenerator
 var _placed_decorations: Dictionary = {}
 var _world_min_chunk: Vector2i = Vector2i.ZERO
@@ -49,6 +50,7 @@ func generate_world() -> void:
 		generation_settings.global_decoration_multiplier
 	)
 	_generated_chunks.clear()
+	_emitted_chunks.clear()
 	_placed_decorations.clear()
 	grass_tilemap.clear()
 	water_tilemap.clear()
@@ -56,6 +58,7 @@ func generate_world() -> void:
 	world_generated.emit(world_map)
 	if pre_generate_before_start:
 		_pregenerate_world()
+		_emit_chunks_around_player_for_entities()
 	if not pre_generate_before_start:
 		_ensure_chunks_around_player()
 
@@ -76,6 +79,7 @@ func force_refresh_chunks_around_player() -> void:
 
 func _process(_delta: float) -> void:
 	if pre_generate_before_start and limit_world_size:
+		_emit_chunks_around_player_for_entities()
 		return
 	_ensure_chunks_around_player()
 
@@ -162,7 +166,7 @@ func _ensure_chunks_around_player() -> void:
 		var chunk_ck := ChunkEntities.world_chunk_key(chunk)
 		_generate_chunk(chunk)
 		_generated_chunks[chunk_ck] = true
-		chunk_generated.emit(chunk)
+		_emit_chunk_generated_once(chunk)
 
 func _setup_world_bounds() -> void:
 	var spawn_chunk := _tile_to_chunk(world_map.spawn_tile)
@@ -192,7 +196,29 @@ func _pregenerate_world() -> void:
 			continue
 		_generate_chunk(chunk)
 		_generated_chunks[chunk_ck] = true
-		chunk_generated.emit(chunk)
+	# В прегене не спавним сущности для всего мира сразу — это и даёт просадки FPS.
+
+func _emit_chunks_around_player_for_entities() -> void:
+	if player == null or world_map == null:
+		return
+	var center_chunk := _tile_to_chunk(_world_to_tile(player.global_position))
+	var ext := _chunk_half_extents()
+	for cy in range(center_chunk.y - ext.y, center_chunk.y + ext.y + 1):
+		for cx in range(center_chunk.x - ext.x, center_chunk.x + ext.x + 1):
+			var chunk := Vector2i(cx, cy)
+			if not _is_chunk_allowed(chunk):
+				continue
+			var chunk_ck := ChunkEntities.world_chunk_key(chunk)
+			if not _generated_chunks.has(chunk_ck):
+				continue
+			_emit_chunk_generated_once(chunk)
+
+func _emit_chunk_generated_once(chunk: Vector2i) -> void:
+	var chunk_ck := ChunkEntities.world_chunk_key(chunk)
+	if _emitted_chunks.has(chunk_ck):
+		return
+	_emitted_chunks[chunk_ck] = true
+	chunk_generated.emit(chunk)
 
 func _generate_chunk(chunk: Vector2i) -> void:
 	var start_x := chunk.x * chunk_size
