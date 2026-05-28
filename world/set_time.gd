@@ -85,21 +85,24 @@ func update_lighting():
 	# день: 09:00–18:00
 	# вечер: 18:00–22:00
 	var hour := time_of_day * 24.0
-	if hour < 6.0:
-		# 00:00–06:00: ночь -> утро
-		color = night_color.lerp(morning_color, hour / 6.0)
+	if hour >= 22.0 or hour < 6.0:
+		# Ночной отрезок 22:00–06:00 без скачка в 22:00:
+		# в 22:00 сразу night_color, к 06:00 плавно к morning_color.
+		var night_progress := 0.0
+		if hour >= 22.0:
+			night_progress = (hour - 22.0) / 8.0
+		else:
+			night_progress = (hour + 2.0) / 8.0
+		color = night_color.lerp(morning_color, night_progress)
 	elif hour < 9.0:
 		# 06:00–09:00: утро -> день
 		color = morning_color.lerp(day_color, (hour - 6.0) / 3.0)
 	elif hour < 18.0:
 		# 09:00–18:00: день -> вечер
 		color = day_color.lerp(evening_color, (hour - 9.0) / 9.0)
-	elif hour < 22.0:
+	else:
 		# 18:00–22:00: вечер -> ночь
 		color = evening_color.lerp(night_color, (hour - 18.0) / 4.0)
-	else:
-		# 22:00–24:00: вечер -> ночь (короткий отрезок)
-		color = evening_color.lerp(night_color, (hour - 22.0) / 2.0)
 
 	if color != color:
 		color = Color.WHITE
