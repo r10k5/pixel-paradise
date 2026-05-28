@@ -19,6 +19,7 @@ var _temperature_noise: FastNoiseLite
 var _warp_x_noise: FastNoiseLite
 var _warp_y_noise: FastNoiseLite
 var _warp_offset_noise: FastNoiseLite
+var _detail_noise: FastNoiseLite
 
 func _init(seed_value: int, base_scale: float = 0.05) -> void:
 	seed = seed_value if seed_value != 0 else randi()
@@ -44,6 +45,7 @@ func _setup_noises() -> void:
 	_warp_x_noise = _create_noise(seed + 500, warp_scale, 2)
 	_warp_y_noise = _create_noise(seed + 600, warp_scale, 2)
 	_warp_offset_noise = _create_noise(seed + 700, warp_scale * 2.0, 1)
+	_detail_noise = _create_noise(seed + 999, scale * 3.0, 2)
 
 func _create_noise(seed_val: int, freq: float, octaves: int) -> FastNoiseLite:
 	var noise := FastNoiseLite.new()
@@ -68,14 +70,7 @@ func _apply_domain_warping(coords: Vector2) -> Vector2:
 
 func _generate_height(coords: Vector2) -> float:
 	var base_height := _height_noise.get_noise_2d(coords.x, coords.y)
-
-	var detail_noise := FastNoiseLite.new()
-	detail_noise.seed = seed + 999
-	detail_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	detail_noise.frequency = scale * 3.0
-	detail_noise.fractal_octaves = 2
-
-	var detail := detail_noise.get_noise_2d(coords.x, coords.y) * 0.3
+	var detail := _detail_noise.get_noise_2d(coords.x, coords.y) * 0.3
 	return clampf(base_height + detail, -1.0, 1.0)
 
 func _generate_continentalness(coords: Vector2) -> float:

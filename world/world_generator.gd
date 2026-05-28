@@ -354,12 +354,10 @@ func _generate_chunk(chunk: Vector2i) -> void:
 	var start_y := chunk.y * chunk_size
 	for y in range(start_y, start_y + chunk_size):
 		for x in range(start_x, start_x + chunk_size):
-			var local := world_chunk.world_tile_to_local(Vector2i(x, y))
-			_paint_ground_tile(world_chunk.grass_tilemap, Vector2i(x, y), local)
-	for y in range(start_y, start_y + chunk_size):
-		for x in range(start_x, start_x + chunk_size):
-			var local := world_chunk.world_tile_to_local(Vector2i(x, y))
-			_paint_water_tile(world_chunk.water_tilemap, Vector2i(x, y), local, GRASS_SOURCE_ID)
+			var world_tile := Vector2i(x, y)
+			var local := world_chunk.world_tile_to_local(world_tile)
+			_paint_ground_tile(world_chunk.grass_tilemap, world_tile, local)
+			_paint_water_tile(world_chunk.water_tilemap, world_tile, local, GRASS_SOURCE_ID)
 	_get_or_create_entity_holder(chunk)
 	if uses_biome_decorations():
 		_generate_decorations(chunk)
@@ -371,7 +369,7 @@ func _generate_decorations(chunk: Vector2i) -> void:
 	var decorations: Array = []
 	var used_tiles: Dictionary = {}
 	var spacing := generation_settings.decoration_spacing_tiles
-	var margin := spacing
+	var margin := DecorationGenerator.chunk_neighbor_margin(spacing)
 
 	for y in range(start_y - margin, start_y + chunk_size + margin):
 		for x in range(start_x - margin, start_x + chunk_size + margin):

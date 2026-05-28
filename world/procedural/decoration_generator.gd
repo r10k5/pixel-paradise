@@ -68,6 +68,10 @@ static func spacing_for_biome(biome: Biome, default_spacing: int) -> int:
 		return maxi(1, default_spacing - 1)
 	return default_spacing
 
+## Минимальный отступ за границу чанка: радиус mark_blocked (не шире spacing).
+static func chunk_neighbor_margin(default_spacing: int) -> int:
+	return maxi(1, default_spacing)
+
 static func _type_chance(biome: Biome, decor_type: String, default_chance: float) -> float:
 	if biome == null:
 		return default_chance

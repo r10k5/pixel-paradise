@@ -28,7 +28,7 @@ extends Resource
 
 @export_group("Биомы")
 @export var enable_biomes: bool = true
-@export var biome_precompute_radius: int = 64
+@export var biome_precompute_radius: int = 20
 ## Чем меньше — тем крупнее пятна биомов (шум влажности/температуры).
 @export var moisture_frequency: float = 0.004
 @export var temperature_frequency: float = 0.0035

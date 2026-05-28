@@ -10,8 +10,7 @@ enum Terrain {
 	SWAMP_GRASS,
 }
 
-const CACHE_MAX_SIZE := 4096
-const WATER_MODE_LAKE := 2
+const CACHE_MAX_SIZE := 65535
 
 var spawn_tile: Vector2i = Vector2i.ZERO
 var biomes: Array[Biome] = []
@@ -198,6 +197,7 @@ func world_to_tile(world_pos: Vector2, tile_size: int, map_scale: float) -> Vect
 	return Vector2i(floori(local.x), floori(local.y))
 
 func _precompute_biome_map(radius: int) -> void:
+	_precompute_lake_clusters_in_rect(-radius, radius, -radius, radius)
 	for y in range(-radius, radius):
 		for x in range(-radius, radius):
 			get_biome(Vector2i(x, y))
@@ -347,20 +347,13 @@ func _is_river_channel(tile: Vector2i) -> bool:
 	return result
 
 func _is_lake_cluster(tile: Vector2i) -> bool:
-	var key := "%d,%d" % [tile.x, tile.y]
+	var key := _tile_key(tile)
 	if _lake_channel_cache.has(key):
 		return _lake_channel_cache[key]
-
-	var result := _water_component_size_at_least(
-		tile,
-		WATER_MODE_LAKE,
-		maxi(settings.lake_min_size_tiles, 1)
-	)
-
-	if _lake_channel_cache.size() >= CACHE_MAX_SIZE:
-		_lake_channel_cache.clear()
-	_lake_channel_cache[key] = result
-	return result
+	if not _is_lake_core(tile):
+		_cache_lake_cluster_result(key, false)
+		return false
+	return _label_lake_component(tile)
 
 func _is_lake_basin(tile: Vector2i) -> bool:
 	var h := height_at(tile)
@@ -415,41 +408,50 @@ func _is_lake_core(tile: Vector2i) -> bool:
 		return false
 	return _is_lake_basin(tile)
 
-func _water_component_size_at_least(start: Vector2i, mode: int, required: int) -> bool:
-	if required <= 1:
-		return _is_water_mode_core(start, mode)
-	if not _is_water_mode_core(start, mode):
-		return false
+func _precompute_lake_clusters_in_rect(x_min: int, x_max: int, y_min: int, y_max: int) -> void:
+	for y in range(y_min, y_max):
+		for x in range(x_min, x_max):
+			var tile := Vector2i(x, y)
+			if _lake_channel_cache.has(_tile_key(tile)):
+				continue
+			if _is_lake_core(tile):
+				_label_lake_component(tile)
 
+func _label_lake_component(start: Vector2i) -> bool:
+	var start_key := _tile_key(start)
+	if _lake_channel_cache.has(start_key):
+		return _lake_channel_cache[start_key]
+
+	var required := maxi(settings.lake_min_size_tiles, 1)
+	var component: Array[Vector2i] = []
 	var queue: Array[Vector2i] = [start]
-	var visited: Dictionary = { _tile_key(start): true }
-	var count := 0
+	var visited: Dictionary = {start_key: true}
 	var dirs: Array[Vector2i] = [
 		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
 	]
 
 	while not queue.is_empty():
-		var tile: Vector2i = queue[0]
-		queue.remove_at(0)
-		count += 1
-		if count >= required:
-			return true
-
+		var tile: Vector2i = queue.pop_back()
+		component.append(tile)
 		for d in dirs:
 			var next: Vector2i = tile + d
-			var key: String = _tile_key(next)
+			var key := _tile_key(next)
 			if visited.has(key):
 				continue
+			if not _is_lake_core(next):
+				continue
 			visited[key] = true
-			if _is_water_mode_core(next, mode):
-				queue.append(next)
+			queue.append(next)
 
-	return false
+	var is_lake := component.size() >= required
+	for labeled in component:
+		_cache_lake_cluster_result(_tile_key(labeled), is_lake)
+	return is_lake
 
-func _is_water_mode_core(tile: Vector2i, mode: int) -> bool:
-	if mode == WATER_MODE_LAKE:
-		return _is_lake_core(tile)
-	return false
+func _cache_lake_cluster_result(key: String, is_lake: bool) -> void:
+	if _lake_channel_cache.size() >= CACHE_MAX_SIZE:
+		_lake_channel_cache.clear()
+	_lake_channel_cache[key] = is_lake
 
 func _tile_key(tile: Vector2i) -> String:
 	return "%d,%d" % [tile.x, tile.y]
