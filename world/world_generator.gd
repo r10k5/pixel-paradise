@@ -6,17 +6,24 @@ signal chunk_generated(chunk: Vector2i)
 const TILE_SIZE := 16
 const MAP_SCALE := 1.5
 const SCATTER_NEAR_PATH_CHANCE := 0.08
+const GRASS_SOURCE_ID := 0
+const BIOME_SOURCE_ID := 1
 
 @export var generation_settings: WorldGenerationSettings
 @export var active_chunk_radius: int = 4
 @export var chunk_size: int = 32
 @export var map_seed: int = 0
+@export var pre_generate_before_start: bool = true
+@export var limit_world_size: bool = true
+@export var world_chunk_radius: int = 12
 
 var world_map: WorldMap
 var _world_seed: int = 0
 var _generated_chunks: Dictionary = {}
 var _decoration_generator: DecorationGenerator
 var _placed_decorations: Dictionary = {}
+var _world_min_chunk: Vector2i = Vector2i.ZERO
+var _world_max_chunk: Vector2i = Vector2i.ZERO
 
 @onready var grass_tilemap: TileMap = $"../TileMap"
 @onready var water_tilemap: TileMap = $"../WaterGenerator/TileMap"
@@ -45,8 +52,12 @@ func generate_world() -> void:
 	_placed_decorations.clear()
 	grass_tilemap.clear()
 	water_tilemap.clear()
+	_setup_world_bounds()
 	world_generated.emit(world_map)
-	_ensure_chunks_around_player()
+	if pre_generate_before_start:
+		_pregenerate_world()
+	if not pre_generate_before_start:
+		_ensure_chunks_around_player()
 
 func get_map_seed() -> int:
 	return _world_seed
@@ -64,6 +75,8 @@ func force_refresh_chunks_around_player() -> void:
 	_ensure_chunks_around_player()
 
 func _process(_delta: float) -> void:
+	if pre_generate_before_start and limit_world_size:
+		return
 	_ensure_chunks_around_player()
 
 func get_player_spawn() -> Vector2:
@@ -136,6 +149,8 @@ func _ensure_chunks_around_player() -> void:
 	for cy in range(center_chunk.y - ext.y, center_chunk.y + ext.y + 1):
 		for cx in range(center_chunk.x - ext.x, center_chunk.x + ext.x + 1):
 			var chunk := Vector2i(cx, cy)
+			if not _is_chunk_allowed(chunk):
+				continue
 			var chunk_ck := ChunkEntities.world_chunk_key(chunk)
 			if _generated_chunks.has(chunk_ck):
 				continue
@@ -149,16 +164,45 @@ func _ensure_chunks_around_player() -> void:
 		_generated_chunks[chunk_ck] = true
 		chunk_generated.emit(chunk)
 
+func _setup_world_bounds() -> void:
+	var spawn_chunk := _tile_to_chunk(world_map.spawn_tile)
+	_world_min_chunk = spawn_chunk - Vector2i(world_chunk_radius, world_chunk_radius)
+	_world_max_chunk = spawn_chunk + Vector2i(world_chunk_radius, world_chunk_radius)
+
+func _is_chunk_allowed(chunk: Vector2i) -> bool:
+	if not limit_world_size:
+		return true
+	return (
+		chunk.x >= _world_min_chunk.x and chunk.x <= _world_max_chunk.x
+		and chunk.y >= _world_min_chunk.y and chunk.y <= _world_max_chunk.y
+	)
+
+func _pregenerate_world() -> void:
+	var pending: Array[Vector2i] = []
+	for cy in range(_world_min_chunk.y, _world_max_chunk.y + 1):
+		for cx in range(_world_min_chunk.x, _world_max_chunk.x + 1):
+			pending.append(Vector2i(cx, cy))
+	var center := _tile_to_chunk(world_map.spawn_tile)
+	pending.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return _chunk_dist_sq(a, center) < _chunk_dist_sq(b, center)
+	)
+	for chunk in pending:
+		var chunk_ck := ChunkEntities.world_chunk_key(chunk)
+		if _generated_chunks.has(chunk_ck):
+			continue
+		_generate_chunk(chunk)
+		_generated_chunks[chunk_ck] = true
+		chunk_generated.emit(chunk)
+
 func _generate_chunk(chunk: Vector2i) -> void:
-	var source_id := 0
 	var start_x := chunk.x * chunk_size
 	var start_y := chunk.y * chunk_size
 	for y in range(start_y, start_y + chunk_size):
 		for x in range(start_x, start_x + chunk_size):
-			_paint_ground_tile(Vector2i(x, y), source_id)
+			_paint_ground_tile(Vector2i(x, y))
 	for y in range(start_y, start_y + chunk_size):
 		for x in range(start_x, start_x + chunk_size):
-			_paint_water_tile(Vector2i(x, y), source_id)
+			_paint_water_tile(Vector2i(x, y), GRASS_SOURCE_ID)
 	if uses_biome_decorations():
 		_generate_decorations(chunk)
 
@@ -194,19 +238,33 @@ func _generate_decorations(chunk: Vector2i) -> void:
 	if not decorations.is_empty():
 		_placed_decorations[chunk_ck] = decorations
 
-func _paint_ground_tile(tile: Vector2i, source_id: int) -> void:
+func _paint_ground_tile(tile: Vector2i) -> void:
+	var source_id := _ground_source_id_for_tile(tile)
 	var atlas: Vector2i = world_map.get_grass_atlas(tile)
 	grass_tilemap.set_cell(0, tile, source_id, atlas, 0)
 	if world_map.is_path(tile):
 		var style: int = world_map.get_path_style(tile)
 		var path_atlas: Vector2i = PathAutotile.resolve(tile, world_map, style)
-		grass_tilemap.set_cell(0, tile, source_id, path_atlas, 0)
+		# Дороги остаются в основном tileset (grass source).
+		grass_tilemap.set_cell(0, tile, GRASS_SOURCE_ID, path_atlas, 0)
 	elif _should_scatter_stone(tile):
 		var stone_roll: int = absi(tile.x * 95123841 ^ tile.y * 72545931 ^ _world_seed) % 1000
 		var stone_atlas: Vector2i = PathAutotile.SCATTER_STONE[
 			stone_roll % PathAutotile.SCATTER_STONE.size()
 		]
-		grass_tilemap.set_cell(0, tile, source_id, stone_atlas, 0)
+		grass_tilemap.set_cell(0, tile, GRASS_SOURCE_ID, stone_atlas, 0)
+
+func _ground_source_id_for_tile(tile: Vector2i) -> int:
+	if world_map == null or not generation_settings.enable_biomes:
+		return GRASS_SOURCE_ID
+	if world_map.is_water(tile):
+		return GRASS_SOURCE_ID
+	var biome := world_map.get_biome(tile)
+	if biome == null:
+		return GRASS_SOURCE_ID
+	if biome.biome_type == Biome.BiomeType.SNOW or biome.biome_type == Biome.BiomeType.DESERT:
+		return BIOME_SOURCE_ID
+	return GRASS_SOURCE_ID
 
 func _should_scatter_stone(tile: Vector2i) -> bool:
 	if not world_map.is_grass(tile):
