@@ -4,6 +4,10 @@ const TREE = preload("res://statics/tree/tree.tscn")
 const MUSHROOM = preload("res://statics/mushrooms/mushroom.tscn")
 const KUST = preload("res://statics/tree/kust.tscn")
 const STONE = preload("res://statics/stone/stone.tscn")
+const BOMB_SCENE = preload("res://statics/bomb/bomb.tscn")
+const BOMB_ITEM_SCENE = preload("res://statics/bomb/bomb_item.tscn")
+const BOMB_ITEM_ID := "item:bomb"
+const MAIN_MENU_SCENE := "res://world/main_menu.tscn"
 
 const TILE_SIZE := 16
 const MAP_SCALE := 1.5
@@ -31,14 +35,26 @@ var _destroyed_tiles: Dictionary = {
 
 const MIN_DISTANCE_FROM_WATER_TILES := 1
 
+@export var debug_start_bombs: int = 3
+
+var _player_dying: bool = false
+
+@onready var bombs: Node2D = $Entities/Bombs
+@onready var screen_fade: ColorRect = $UI/ScreenFade
+
 func _input(event: InputEvent) -> void:
+	if _player_dying or player.is_dead:
+		return
 	if event.is_action_pressed("inventory"):
 		full_inventory.toggle()
+	if event.is_action_pressed("bomb"):
+		_try_place_bomb()
 
 func _ready() -> void:
 	player.health_changed.connect(on_health_changed)
 	inventory.setup(player.inventory)
 	full_inventory.connect_inventory(player.inventory)
+	_give_debug_bombs()
 	on_health_changed(player.health)
 	world_generator.world_generated.connect(_on_world_generated)
 	world_generator.chunk_generated.connect(_on_chunk_generated)
@@ -157,6 +173,32 @@ func _spawn_biome_decorations(chunk: Vector2i) -> void:
 
 func on_health_changed(current_health: int) -> void:
 	hp_bar.set_hp(current_health)
+
+func _give_debug_bombs() -> void:
+	if debug_start_bombs <= 0:
+		return
+	for _i in debug_start_bombs:
+		var item := BOMB_ITEM_SCENE.instantiate() as BaseEntity
+		if not player.inventory.add_item(item):
+			break
+
+func _try_place_bomb() -> void:
+	if _player_dying or player.is_dead:
+		return
+	if not player.inventory.consume_one_by_item_id(BOMB_ITEM_ID):
+		return
+	var bomb := BOMB_SCENE.instantiate()
+	var offset := Vector2(-40.0, 0.0) if player.facing_left else Vector2(40.0, 0.0)
+	bombs.add_child(bomb)
+	bomb.global_position = player.global_position + offset
+
+func on_player_died() -> void:
+	if _player_dying:
+		return
+	_player_dying = true
+	if screen_fade != null:
+		await screen_fade.await_fade_out()
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 func _spawn_placements(chunk: Vector2i, placements: Dictionary) -> void:
 	for entity_id in [ChunkEntities.TREE_ID, ChunkEntities.KUST_ID, ChunkEntities.MUSHROOM_ID]:

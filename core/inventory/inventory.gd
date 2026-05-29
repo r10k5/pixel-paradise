@@ -25,6 +25,21 @@ func get_item(id: int) -> InventoryItem:
 func get_items() -> Array:
 	return _items.values()
 	
+func consume_one_by_item_id(item_id: String) -> bool:
+	for slot_id in _items:
+		var inventory_item: InventoryItem = _items[slot_id]
+		if inventory_item.is_empty() or inventory_item.item.id != item_id:
+			continue
+		if inventory_item.count <= 1:
+			_item_id_index_map.erase(inventory_item.item.id)
+			_items[slot_id] = InventoryItem.new()
+			_items[slot_id].id = slot_id
+		else:
+			inventory_item.count -= 1
+		item_add.emit(_items[slot_id])
+		return true
+	return false
+
 func add_item(item: BaseEntity) -> bool:
 	if item.id in _item_id_index_map:
 		var index = _item_id_index_map[item.id]

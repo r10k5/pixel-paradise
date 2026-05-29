@@ -12,6 +12,7 @@ const MAP_SCALE := 1.5
 @export var jump_animation_speed_scale: float = 2.5
 
 var inventory: Inventory = Inventory.new()
+var is_dead: bool = false
 var _steps_player: AudioStreamPlayer
 var _was_moving: bool = false
 var _is_jumping: bool = false
@@ -88,11 +89,25 @@ func _animation_duration(sprite: AnimatedSprite2D, animation_name: String) -> fl
 		duration /= sprite.speed_scale
 	return duration
 
+func take_damage(amount: int) -> void:
+	if is_dead:
+		return
+	super.take_damage(amount)
+
+func die() -> void:
+	if is_dead:
+		return
+	super.die()
+
 func use() -> void:
+	if is_dead:
+		return
 	if Input.is_action_just_pressed("use"):
 		pass
 
 func _physics_process(_delta: float) -> void:
+	if is_dead:
+		return
 	use()
 	move_and_slide()
 	_process_steps(_delta)
