@@ -13,6 +13,8 @@ enum Terrain {
 const CACHE_MAX_SIZE := 65535
 
 var spawn_tile: Vector2i = Vector2i.ZERO
+## Смещение локальных тайлов в глобальные координаты одной вселенной (для мультивселенной).
+var global_offset: Vector2i = Vector2i.ZERO
 var biomes: Array[Biome] = []
 var settings: WorldGenerationSettings
 var _river_biome: Biome
@@ -38,6 +40,15 @@ var _river_noise: FastNoiseLite
 var _lake_noise: FastNoiseLite
 var _puddle_noise: FastNoiseLite
 var _advanced_generator: AdvancedWorldGenerator
+
+func to_global_tile(local: Vector2i) -> Vector2i:
+	return local + global_offset
+
+
+func _noise_2d(noise: FastNoiseLite, local: Vector2i) -> float:
+	var global_tile := to_global_tile(local)
+	return noise.get_noise_2d(global_tile.x, global_tile.y)
+
 
 func generate(_map_width: int, _map_height: int, map_seed: int = 0, gen_settings: WorldGenerationSettings = null) -> void:
 	settings = gen_settings if gen_settings != null else WorldGenerationSettings.new()
@@ -93,8 +104,8 @@ func get_biome(tile: Vector2i) -> Biome:
 	return biomes[0]
 
 func get_path_style(tile: Vector2i) -> int:
-	var v := absf(_vertical_noise.get_noise_2d(tile.x, tile.y))
-	var h := absf(_horizontal_noise.get_noise_2d(tile.x, tile.y))
+	var v := absf(_noise_2d(_vertical_noise, tile))
+	var h := absf(_noise_2d(_horizontal_noise, tile))
 	if v < settings.path_thickness:
 		return PathAutotile.Style.VERTICAL
 	if h < settings.path_thickness:
@@ -145,7 +156,7 @@ func erosion_at(tile: Vector2i) -> float:
 	if _advanced_generator != null:
 		return clampf(_get_advanced_params(tile).get("erosion", 0.0), -1.0, 1.0)
 	# Fallback: используем дорожный шум как прокси неоднородности рельефа.
-	return clampf(_plaza_noise.get_noise_2d(tile.x, tile.y), -1.0, 1.0)
+	return clampf(_noise_2d(_plaza_noise, tile), -1.0, 1.0)
 
 func is_spawnable(tile: Vector2i) -> bool:
 	return is_grass(tile)
@@ -156,9 +167,9 @@ func is_path(tile: Vector2i) -> bool:
 	return _path_noise_at(tile)
 
 func _path_noise_at(tile: Vector2i) -> bool:
-	var n := absf(_plaza_noise.get_noise_2d(tile.x, tile.y))
-	var v := absf(_vertical_noise.get_noise_2d(tile.x, tile.y))
-	var h := absf(_horizontal_noise.get_noise_2d(tile.x, tile.y))
+	var n := absf(_noise_2d(_plaza_noise, tile))
+	var v := absf(_noise_2d(_vertical_noise, tile))
+	var h := absf(_noise_2d(_horizontal_noise, tile))
 	return n < settings.path_density or v < settings.path_thickness or h < settings.path_thickness
 
 func is_water(tile: Vector2i) -> bool:
@@ -180,7 +191,7 @@ func _is_puddle_candidate(tile: Vector2i) -> bool:
 		return false
 	if height_at(tile) < settings.puddle_level:
 		return true
-	var n := _puddle_noise.get_noise_2d(tile.x, tile.y)
+	var n := _noise_2d(_puddle_noise, tile)
 	if n < settings.puddle_threshold:
 		return false
 	var roll := _tile_roll01(tile, 991)
@@ -289,10 +300,15 @@ func _find_spawn_tile_near(center: Vector2i) -> Vector2i:
 	return center
 
 func _pick_grass(tile: Vector2i) -> Vector2i:
-	var n := _flower_noise.get_noise_2d(tile.x, tile.y)
+	var global_tile := to_global_tile(tile)
+	var n := _noise_2d(_flower_noise, tile)
 	if n > 0.62:
-		return GrassTiles.GRASS_FLOWERS[abs(int(tile.x * 17 + tile.y * 23)) % GrassTiles.GRASS_FLOWERS.size()]
-	return GrassTiles.GRASS_PLAIN[abs(int(tile.x * 31 + tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()]
+		return GrassTiles.GRASS_FLOWERS[
+			abs(int(global_tile.x * 17 + global_tile.y * 23)) % GrassTiles.GRASS_FLOWERS.size()
+		]
+	return GrassTiles.GRASS_PLAIN[
+		abs(int(global_tile.x * 31 + global_tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()
+	]
 
 func _pick_grass_for_biome(tile: Vector2i, biome: Biome) -> Vector2i:
 	if biome == null:
@@ -301,21 +317,28 @@ func _pick_grass_for_biome(tile: Vector2i, biome: Biome) -> Vector2i:
 		Biome.BiomeType.GRASSLAND:
 			return _pick_grass(tile)
 		Biome.BiomeType.FOREST:
-			return GrassTiles.pick_forest_grass(tile)
+			return GrassTiles.pick_forest_grass(to_global_tile(tile))
 		Biome.BiomeType.DESERT:
 			return GrassTiles.BIOME_SAND
 		Biome.BiomeType.SNOW:
-			return GrassTiles.pick_snow_tile(tile)
+			return GrassTiles.pick_snow_tile(to_global_tile(tile))
 		Biome.BiomeType.SWAMP:
-			return GrassTiles.GRASS_PLAIN[abs(int(tile.x * 31 + tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()]
+			var global_tile := to_global_tile(tile)
+			return GrassTiles.GRASS_PLAIN[
+				abs(int(global_tile.x * 31 + global_tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()
+			]
 		_:
 			return _pick_grass(tile)
 
 func _pick_grass_under_water(tile: Vector2i) -> Vector2i:
-	return GrassTiles.GRASS_UNDER_WATER[abs(int(tile.x * 13 + tile.y * 11)) % GrassTiles.GRASS_UNDER_WATER.size()]
+	var global_tile := to_global_tile(tile)
+	return GrassTiles.GRASS_UNDER_WATER[
+		abs(int(global_tile.x * 13 + global_tile.y * 11)) % GrassTiles.GRASS_UNDER_WATER.size()
+	]
 
 func _tile_roll01(tile: Vector2i, salt: int) -> float:
-	var hash := absi(tile.x * 73856093 ^ tile.y * 19349663 ^ int(_rng.seed) ^ salt)
+	var global_tile := to_global_tile(tile)
+	var hash := absi(global_tile.x * 73856093 ^ global_tile.y * 19349663 ^ int(_rng.seed) ^ salt)
 	return float(hash % 10000) / 10000.0
 
 func _is_river_channel(tile: Vector2i) -> bool:
@@ -359,7 +382,7 @@ func _is_lake_basin(tile: Vector2i) -> bool:
 	var h := height_at(tile)
 	if h > settings.water_level + settings.lake_height_bias:
 		return false
-	var n := _lake_noise.get_noise_2d(tile.x, tile.y)
+	var n := _noise_2d(_lake_noise, tile)
 	return n > settings.lake_threshold
 
 func _is_base_water(tile: Vector2i) -> bool:
@@ -374,7 +397,7 @@ func _init_water_biomes() -> void:
 func _is_river_core(tile: Vector2i) -> bool:
 	if not _is_base_water(tile):
 		return false
-	var n := absf(_river_noise.get_noise_2d(tile.x, tile.y))
+	var n := absf(_noise_2d(_river_noise, tile))
 	return n < settings.river_width
 
 func _river_line_core_length(tile: Vector2i, dir: Vector2i, target_len: int, max_gap: int) -> int:
@@ -462,7 +485,7 @@ func _get_advanced_params(tile: Vector2i) -> Dictionary:
 	var key := _tile_key(tile)
 	if _advanced_params_cache.has(key):
 		return _advanced_params_cache[key]
-	var sample := _advanced_generator.sample(tile)
+	var sample := _advanced_generator.sample(to_global_tile(tile))
 	if _advanced_params_cache.size() >= CACHE_MAX_SIZE:
 		_advanced_params_cache.clear()
 	_advanced_params_cache[key] = sample
@@ -470,18 +493,18 @@ func _get_advanced_params(tile: Vector2i) -> Dictionary:
 
 func _sample_height(tile: Vector2i) -> float:
 	if _advanced_generator == null:
-		return _height_noise.get_noise_2d(tile.x, tile.y)
+		return _noise_2d(_height_noise, tile)
 	return _get_advanced_params(tile).get("height", 0.0)
 
 func _sample_moisture(tile: Vector2i) -> float:
 	if _advanced_generator == null:
-		var n := _moisture_noise.get_noise_2d(tile.x, tile.y)
+		var n := _noise_2d(_moisture_noise, tile)
 		return (n + 1.0) * 0.5
 	return _get_advanced_params(tile).get("wetness", 0.5)
 
 func _sample_temperature(tile: Vector2i) -> float:
 	if _advanced_generator == null:
-		var n := _temperature_noise.get_noise_2d(tile.x, tile.y)
+		var n := _noise_2d(_temperature_noise, tile)
 		return (n + 1.0) * 0.5
 	return _get_advanced_params(tile).get("temperature", 0.5)
 

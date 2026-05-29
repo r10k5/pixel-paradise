@@ -74,24 +74,25 @@ static func get_placements(
 			if not _is_spawn_surface(world_map, tile):
 				continue
 
-			var tree_roll: int = _tile_roll(world_seed, tile, 101)
+			var global_tile := world_map.to_global_tile(tile)
+			var tree_roll: int = _tile_roll(world_seed, global_tile, 101)
 			if tree_roll < TREE_TILE_CHANCE:
 				placements[TREE_ID].append(tile)
 				_mark_blocked(used_tiles, tile)
 				continue
 
-			var kust_roll: int = _tile_roll(world_seed, tile, 202)
+			var kust_roll: int = _tile_roll(world_seed, global_tile, 202)
 			if kust_roll < KUST_TILE_CHANCE:
 				placements[KUST_ID].append(tile)
 				_mark_blocked(used_tiles, tile)
 				continue
 
-			var mushroom_roll: int = _tile_roll(world_seed, tile, 303)
+			var mushroom_roll: int = _tile_roll(world_seed, global_tile, 303)
 			if mushroom_roll < MUSHROOM_TILE_CHANCE and not used_tiles.has(tile):
 				placements[MUSHROOM_ID].append(tile)
 				_mark_blocked(used_tiles, tile)
 				
-			var stone_roll: int = _tile_roll(world_seed, tile, 404)
+			var stone_roll: int = _tile_roll(world_seed, global_tile, 404)
 			if stone_roll < STONE_TILE_CHANCE:
 				placements[STONE_ID].append(tile)
 				_mark_blocked(used_tiles, tile)

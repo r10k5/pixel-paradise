@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
 [ext_resource type="Script" uid="uid://bbjgy41qpenvj" path="res://world/set_time.gd" id="8_0iml5"]
 [ext_resource type="Script" uid="uid://dpousw67rkjyx" path="res://world/world_generator.gd" id="9_wgen"]
+[ext_resource type="Script" path="res://world/multiverse/multiverse_manager.gd" id="10_mv"]
+[ext_resource type="Script" path="res://world/ui/screen_fade.gd" id="11_fade"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w50e3"]
 texture = ExtResource("1_71ssx")
@@ -332,7 +334,11 @@ wait_time = 2.0
 [node name="Bombs" type="Node2D" parent="Entities" unique_id=568578861]
 
 [node name="WorldGenerator" type="Node" parent="." unique_id=917723138]
+auto_generate_on_ready = false
 script = ExtResource("9_wgen")
+
+[node name="MultiverseManager" type="Node" parent="."]
+script = ExtResource("10_mv")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1797761756]
 
@@ -379,3 +385,13 @@ text = "FPS: 0"
 horizontal_alignment = 2
 
 [node name="FullInventory" parent="UI" unique_id=908056701 instance=ExtResource("7_p1uhn")]
+
+[node name="ScreenFade" type="ColorRect" parent="UI"]
+z_index = 100
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("11_fade")

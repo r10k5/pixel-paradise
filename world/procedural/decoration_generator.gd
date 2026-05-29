@@ -33,7 +33,8 @@ func should_place_decoration(
 	if _is_near_water(tile, world_map):
 		return {}
 
-	var roll := randf_from_seed(tile, _world_seed)
+	var global_tile := world_map.to_global_tile(tile)
+	var roll := randf_from_seed(global_tile, _world_seed)
 	var chance := biome.decoration_chance * _decoration_multiplier
 	if roll > chance:
 		return {}
@@ -41,7 +42,9 @@ func should_place_decoration(
 	if biome.allowed_decorations.is_empty():
 		return {}
 
-	var decor_index := absi(tile.x * 73856093 ^ tile.y * 19349663 ^ _world_seed) % biome.allowed_decorations.size()
+	var decor_index := absi(
+		global_tile.x * 73856093 ^ global_tile.y * 19349663 ^ _world_seed
+	) % biome.allowed_decorations.size()
 	var decor_type: String = biome.allowed_decorations[decor_index]
 
 	if not DECORATION_TYPES.has(decor_type):
@@ -49,7 +52,7 @@ func should_place_decoration(
 
 	var decor_data: Dictionary = DECORATION_TYPES[decor_type]
 	var type_chance := _type_chance(biome, decor_type, float(decor_data.chance))
-	var decor_chance := randf_from_seed(tile, _world_seed + 1000)
+	var decor_chance := randf_from_seed(global_tile, _world_seed + 1000)
 	if decor_chance > type_chance:
 		return {}
 

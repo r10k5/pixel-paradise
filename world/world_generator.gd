@@ -1,4 +1,5 @@
 extends Node
+class_name WorldGenerator
 
 signal world_generated(world_map: WorldMap)
 signal chunk_generated(chunk: Vector2i)
@@ -20,8 +21,11 @@ const BIOME_SOURCE_ID := 1
 @export var limit_world_size: bool = true
 @export var world_chunk_radius: int = 10
 @export var use_screen_culling: bool = true
+@export var auto_generate_on_ready: bool = true
 
 var world_map: WorldMap
+var _multiverse_boundary_check: Callable = Callable()
+var _active_grid_pos: Vector2i = Vector2i.ZERO
 var _world_seed: int = 0
 var _generated_chunks: Dictionary = {}
 var _emitted_chunks: Dictionary = {}
@@ -43,7 +47,68 @@ func _ready() -> void:
 		generation_settings = WorldGenerationSettings.new()
 	grass_tilemap.visible = false
 	water_tilemap.visible = false
-	call_deferred("generate_world")
+	if auto_generate_on_ready:
+		call_deferred("generate_world")
+
+
+func set_auto_generate_on_ready(enabled: bool) -> void:
+	auto_generate_on_ready = enabled
+
+
+func set_multiverse_boundary_check(callback: Callable) -> void:
+	_multiverse_boundary_check = callback
+
+
+func unload_world() -> void:
+	world_map = null
+	_decoration_generator = null
+	_generated_chunks.clear()
+	_emitted_chunks.clear()
+	_placed_decorations.clear()
+	_clear_chunk_nodes()
+
+
+func get_cell_stride_tiles() -> Vector2i:
+	var side := (world_chunk_radius * 2 + 1) * chunk_size
+	return Vector2i(side, side)
+
+
+func global_offset_for_grid(grid_pos: Vector2i) -> Vector2i:
+	var stride := get_cell_stride_tiles()
+	return Vector2i(grid_pos.x * stride.x, grid_pos.y * stride.y)
+
+
+func get_active_grid_pos() -> Vector2i:
+	return _active_grid_pos
+
+
+func generate_for_cell(grid_pos: Vector2i, universe_seed: int) -> void:
+	_active_grid_pos = grid_pos
+	_world_seed = universe_seed
+	generation_settings.seed = _world_seed
+	generation_settings.chunk_size = chunk_size
+
+	world_map = WorldMap.new()
+	world_map.global_offset = global_offset_for_grid(grid_pos)
+	world_map.generate(0, 0, _world_seed, generation_settings)
+
+	_decoration_generator = DecorationGenerator.new(
+		_world_seed,
+		generation_settings.global_decoration_multiplier
+	)
+	_generated_chunks.clear()
+	_emitted_chunks.clear()
+	_placed_decorations.clear()
+	_clear_chunk_nodes()
+	_setup_world_bounds()
+	world_generated.emit(world_map)
+	call_deferred("_apply_camera_limits")
+	if pre_generate_before_start:
+		_pregenerate_world()
+		_emit_chunks_around_player_for_entities()
+	if not pre_generate_before_start:
+		_ensure_chunks_around_player()
+
 
 func generate_world() -> void:
 	_world_seed = map_seed if map_seed != 0 else generation_settings.seed
@@ -106,8 +171,34 @@ func _process(_delta: float) -> void:
 func get_player_spawn() -> Vector2:
 	return _tile_to_world(world_map.spawn_tile)
 
+
+func world_to_tile(world_pos: Vector2) -> Vector2i:
+	return _world_to_tile(world_pos)
+
+
+func tile_to_world(tile: Vector2i) -> Vector2:
+	return _tile_to_world(tile)
+
+
+func get_world_tile_bounds() -> Rect2i:
+	if world_map == null:
+		return Rect2i()
+	var min_tile := Vector2i(
+		_world_min_chunk.x * chunk_size,
+		_world_min_chunk.y * chunk_size
+	)
+	var max_tile := Vector2i(
+		(_world_max_chunk.x + 1) * chunk_size - 1,
+		(_world_max_chunk.y + 1) * chunk_size - 1
+	)
+	return Rect2i(min_tile, max_tile - min_tile + Vector2i.ONE)
+
+
 func regenerate() -> void:
-	generate_world()
+	if world_map != null and _world_seed != 0:
+		generate_for_cell(_active_grid_pos, _world_seed)
+	else:
+		generate_world()
 
 func _world_to_tile(world_pos: Vector2) -> Vector2i:
 	return grass_tilemap.local_to_map(grass_tilemap.to_local(world_pos))
@@ -156,12 +247,26 @@ func _get_camera_half_extents(cam: Camera2D) -> Vector2:
 	return half
 
 
+func _is_multiverse_edge_open(edge: Vector2i) -> bool:
+	if not _multiverse_boundary_check.is_valid():
+		return false
+	return bool(_multiverse_boundary_check.call(edge))
+
+
 func _get_camera_center_limits() -> Rect2:
 	var bounds := get_world_bounds_rect()
 	var cam := _get_player_camera()
 	var half := _get_camera_half_extents(cam)
-	var min_c := bounds.position + half
-	var max_c := bounds.position + bounds.size - half
+	var min_c := bounds.position
+	var max_c := bounds.position + bounds.size
+	if not _is_multiverse_edge_open(Vector2i(-1, 0)):
+		min_c.x += half.x
+	if not _is_multiverse_edge_open(Vector2i(1, 0)):
+		max_c.x -= half.x
+	if not _is_multiverse_edge_open(Vector2i(0, -1)):
+		min_c.y += half.y
+	if not _is_multiverse_edge_open(Vector2i(0, 1)):
+		max_c.y -= half.y
 	if min_c.x > max_c.x:
 		var mid_x := bounds.position.x + bounds.size.x * 0.5
 		min_c.x = mid_x
@@ -404,7 +509,10 @@ func _paint_ground_tile(tilemap: TileMap, world_tile: Vector2i, local_tile: Vect
 		# Дороги остаются в основном tileset (grass source).
 		tilemap.set_cell(0, local_tile, GRASS_SOURCE_ID, path_atlas, 0)
 	elif _should_scatter_stone(world_tile):
-		var stone_roll: int = absi(world_tile.x * 95123841 ^ world_tile.y * 72545931 ^ _world_seed) % 1000
+		var global_tile := world_map.to_global_tile(world_tile)
+		var stone_roll: int = absi(
+			global_tile.x * 95123841 ^ global_tile.y * 72545931 ^ _world_seed
+		) % 1000
 		var stone_atlas: Vector2i = PathAutotile.SCATTER_STONE[
 			stone_roll % PathAutotile.SCATTER_STONE.size()
 		]
@@ -427,7 +535,10 @@ func _should_scatter_stone(tile: Vector2i) -> bool:
 		return false
 	if not _is_near_path(tile):
 		return false
-	var stone_roll: int = absi(tile.x * 95123841 ^ tile.y * 72545931 ^ _world_seed) % 1000
+	var global_tile := world_map.to_global_tile(tile)
+	var stone_roll: int = absi(
+		global_tile.x * 95123841 ^ global_tile.y * 72545931 ^ _world_seed
+	) % 1000
 	return stone_roll < int(SCATTER_NEAR_PATH_CHANCE * 1000.0)
 
 func _is_near_path(tile: Vector2i) -> bool:

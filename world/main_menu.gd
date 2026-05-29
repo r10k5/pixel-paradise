@@ -12,13 +12,17 @@ func _ready() -> void:
 
 func _on_start_pressed() -> void:
 	var world := WORLD_SCENE.instantiate()
+	var parsed_seed := _parse_seed(seed_input.text)
 	var world_generator := world.get_node_or_null("WorldGenerator")
 	if world_generator != null:
-		var parsed_seed := _parse_seed(seed_input.text)
 		world_generator.map_seed = parsed_seed
-		# Временный "minecraft-style" режим: заранее генерируем ограниченный мир.
+		world_generator.auto_generate_on_ready = false
 		world_generator.pre_generate_before_start = true
 		world_generator.limit_world_size = true
+
+	var multiverse := world.get_node_or_null("MultiverseManager")
+	if multiverse != null:
+		multiverse.base_seed = parsed_seed
 
 	var tree := get_tree()
 	var old_scene := tree.current_scene

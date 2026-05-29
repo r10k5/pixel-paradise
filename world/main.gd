@@ -15,10 +15,11 @@ const MAP_SCALE := 1.5
 @onready var inventory = $UI/Inventory
 @onready var full_inventory: Control = $UI/FullInventory
 @onready var grass_tilemap: TileMap = $TileMap
-@onready var world_generator: Node = $WorldGenerator
+@onready var world_generator: WorldGenerator = $WorldGenerator
 @onready var seed_label: Label = $UI/WorldSeedLabel
 @onready var fps_label: Label = $UI/FpsLabel
 @onready var day_night: Node2D = $DayNight
+@onready var multiverse_manager: Node = $MultiverseManager
 
 var world_map: WorldMap
 var _flora_spawned: Dictionary = {}
@@ -63,6 +64,9 @@ func _update_forest_ambience() -> void:
 
 func _on_world_generated(map: WorldMap) -> void:
 	world_map = map
+	if multiverse_manager != null:
+		update_multiverse_label()
+		return
 	player.global_position = world_generator.get_player_spawn()
 	if world_generator.has_method("clamp_player_to_world_bounds"):
 		world_generator.clamp_player_to_world_bounds()
@@ -71,9 +75,37 @@ func _on_world_generated(map: WorldMap) -> void:
 	_update_seed_label()
 	world_generator.force_refresh_chunks_around_player()
 
+
+func prepare_cell_load(_from_cache: bool) -> void:
+	_clear_entities()
+	_flora_spawned.clear()
+
+
+func export_cell_state() -> Dictionary:
+	return {
+		"destroyed_tiles": WorldCellState.copy_destroyed_tiles(_destroyed_tiles),
+		"flora_spawned": _flora_spawned.duplicate(true),
+	}
+
+
+func import_cell_state(state: WorldCellState) -> void:
+	_destroyed_tiles = WorldCellState.copy_destroyed_tiles(state.destroyed_tiles)
+
+
+func update_multiverse_label() -> void:
+	if seed_label == null:
+		return
+	var grid := Vector2i.ZERO
+	var world_seed: int = 0
+	if world_generator.has_method("get_map_seed"):
+		world_seed = world_generator.get_map_seed()
+	if multiverse_manager != null and multiverse_manager.has_method("get_current_grid_pos"):
+		grid = multiverse_manager.get_current_grid_pos()
+	seed_label.text = "Cell (%d,%d) · Universe seed %d" % [grid.x, grid.y, world_seed]
+
+
 func _update_seed_label() -> void:
-	if seed_label:
-		seed_label.text = "Seed: %d" % world_generator.get_map_seed()
+	update_multiverse_label()
 
 func _clear_entities() -> void:
 	for node in actors.get_children():
