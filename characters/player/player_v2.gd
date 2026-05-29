@@ -12,7 +12,16 @@ const MAP_SCALE := 1.5
 @export var jump_arc_tiles: float = 1.0
 @export var jump_animation_speed_scale: float = 2.5
 
+enum HandToolKind { NONE, AXE, PICKAXE }
+
+const AXE_ITEM_ID := "item:axe"
+const PICKAXE_ITEM_ID := "item:pickaxe"
+const HOTBAR_SLOT_COUNT := 7
+
+signal hotbar_slot_changed(slot: int)
+
 var inventory: Inventory = Inventory.new()
+var selected_hotbar_slot: int = 0
 var is_dead: bool = false
 var _steps_player: AudioStreamPlayer
 var _was_moving: bool = false
@@ -38,6 +47,9 @@ func _ready() -> void:
 		"axe_up": "axe_up",
 		"axe_down": "axe_down",
 		"axe_right": "axe_right",
+		"pickaxe_up": "pickaxe_up",
+		"pickaxe_down": "pickaxe_down",
+		"pickaxe_right": "pickaxe_right",
 	}
 	_setup_steps_player()
 
@@ -66,14 +78,49 @@ static func jump_state_for(state_name: String) -> String:
 		_:
 			return "jump_side"
 
-static func axe_state_for(state_name: String) -> String:
+func get_selected_hand_tool() -> HandToolKind:
+	var slot_item := inventory.get_item(selected_hotbar_slot)
+	if slot_item == null or slot_item.is_empty():
+		return HandToolKind.NONE
+	match slot_item.item.id:
+		AXE_ITEM_ID:
+			return HandToolKind.AXE
+		PICKAXE_ITEM_ID:
+			return HandToolKind.PICKAXE
+		_:
+			return HandToolKind.NONE
+
+func select_hotbar_slot(slot: int) -> void:
+	slot = clampi(slot, 0, HOTBAR_SLOT_COUNT - 1)
+	if slot == selected_hotbar_slot:
+		return
+	selected_hotbar_slot = slot
+	hotbar_slot_changed.emit(selected_hotbar_slot)
+
+func scroll_hotbar(direction: int) -> void:
+	if direction == 0:
+		return
+	var next := (selected_hotbar_slot + direction) % HOTBAR_SLOT_COUNT
+	if next < 0:
+		next += HOTBAR_SLOT_COUNT
+	select_hotbar_slot(next)
+
+func get_tool_attack_state(state_name: String) -> String:
+	var prefix := ""
+	match get_selected_hand_tool():
+		HandToolKind.AXE:
+			prefix = "axe"
+		HandToolKind.PICKAXE:
+			prefix = "pickaxe"
+		_:
+			return ""
 	match state_name:
 		"idle_up", "walk_up":
-			return "axe_up"
+			return prefix + "_up"
 		"idle_down", "walk_down":
-			return "axe_down"
+			return prefix + "_down"
 		_:
-			return "axe_side"
+			return prefix + "_side"
 
 func get_jump_distance() -> float:
 	return jump_tiles * TILE_SIZE * MAP_SCALE

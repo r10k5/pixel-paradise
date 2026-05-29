@@ -13,7 +13,8 @@
 [ext_resource type="Script" uid="uid://n15l6afrsux6" path="res://characters/player/player_jump.gd" id="11_jump"]
 [ext_resource type="Script" path="res://characters/player/player_death.gd" id="12_death"]
 [ext_resource type="Texture2D" uid="uid://djwfljytos654" path="res://assets/characters/player/Farming/axe.png" id="13_axe"]
-[ext_resource type="Script" path="res://characters/player/player_axe.gd" id="14_axe_script"]
+[ext_resource type="Script" path="res://characters/player/player_hand_tool.gd" id="14_hand_tool_script"]
+[ext_resource type="Texture2D" uid="uid://bi525q3g2alw8" path="res://assets/characters/player/Farming/pickaxe.png" id="15_pickaxe"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_don1g"]
 atlas = ExtResource("3_50m08")
@@ -375,6 +376,78 @@ region = Rect2(316, 158, 79, 79)
 atlas = ExtResource("13_axe")
 region = Rect2(395, 158, 79, 79)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_px0"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(0, 0, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px1"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(79, 0, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px2"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(158, 0, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px3"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(237, 0, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px4"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(316, 0, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px5"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(395, 0, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px6"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(0, 79, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px7"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(79, 79, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px8"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(158, 79, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px9"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(237, 79, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px10"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(316, 79, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px11"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(395, 79, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px12"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(0, 158, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px13"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(79, 158, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px14"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(158, 158, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px15"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(237, 158, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px16"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(316, 158, 79, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_px17"]
+atlas = ExtResource("15_pickaxe")
+region = Rect2(395, 158, 79, 79)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_hr3hw"]
 animations = [{
 "frames": [{
@@ -721,13 +794,82 @@ animations = [{
 "loop": false,
 "name": &"axe_up",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px5")
+}],
+"loop": false,
+"name": &"pickaxe_right",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px9")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px11")
+}],
+"loop": false,
+"name": &"pickaxe_down",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px12")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px13")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px14")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px15")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px16")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_px17")
+}],
+"loop": false,
+"name": &"pickaxe_up",
+"speed": 10.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fuh5h"]
 radius = 9.0
 height = 24.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_axe"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hand_tool"]
 size = Vector2(20, 24)
 
 [node name="Player" unique_id=450980070 instance=ExtResource("1_3rgay")]
@@ -754,13 +896,13 @@ shape = SubResource("CapsuleShape2D_fuh5h")
 [node name="CollisionShape2D" parent="Area2D" index="0"]
 position = Vector2(1, 0)
 
-[node name="AxeHitArea" type="Area2D" parent="."]
+[node name="HandToolHitArea" type="Area2D" parent="."]
 collision_mask = 4
 monitorable = false
 
-[node name="AxeCollision" type="CollisionShape2D" parent="AxeHitArea"]
+[node name="HandToolCollision" type="CollisionShape2D" parent="HandToolHitArea"]
 position = Vector2(28, -8)
-shape = SubResource("RectangleShape2D_axe")
+shape = SubResource("RectangleShape2D_hand_tool")
 disabled = true
 
 [node name="idle_side" parent="FSM" index="0"]
@@ -798,22 +940,46 @@ animation = "jump_right"
 return_idle_state = "idle_side"
 
 [node name="axe_up" type="Node" parent="FSM" index="9" node_paths=PackedStringArray("base_body")]
-script = ExtResource("14_axe_script")
+script = ExtResource("14_hand_tool_script")
 base_body = NodePath("../..")
 animation = "axe_up"
 return_idle_state = "idle_up"
+target_group = "choppable"
 
 [node name="axe_down" type="Node" parent="FSM" index="10" node_paths=PackedStringArray("base_body")]
-script = ExtResource("14_axe_script")
+script = ExtResource("14_hand_tool_script")
 base_body = NodePath("../..")
 animation = "axe_down"
 return_idle_state = "idle_down"
+target_group = "choppable"
 
 [node name="axe_side" type="Node" parent="FSM" index="11" node_paths=PackedStringArray("base_body")]
-script = ExtResource("14_axe_script")
+script = ExtResource("14_hand_tool_script")
 base_body = NodePath("../..")
 animation = "axe_right"
 return_idle_state = "idle_side"
+target_group = "choppable"
+
+[node name="pickaxe_up" type="Node" parent="FSM" index="12" node_paths=PackedStringArray("base_body")]
+script = ExtResource("14_hand_tool_script")
+base_body = NodePath("../..")
+animation = "pickaxe_up"
+return_idle_state = "idle_up"
+target_group = "mineable"
+
+[node name="pickaxe_down" type="Node" parent="FSM" index="13" node_paths=PackedStringArray("base_body")]
+script = ExtResource("14_hand_tool_script")
+base_body = NodePath("../..")
+animation = "pickaxe_down"
+return_idle_state = "idle_down"
+target_group = "mineable"
+
+[node name="pickaxe_side" type="Node" parent="FSM" index="14" node_paths=PackedStringArray("base_body")]
+script = ExtResource("14_hand_tool_script")
+base_body = NodePath("../..")
+animation = "pickaxe_right"
+return_idle_state = "idle_side"
+target_group = "mineable"
 
 [node name="death_side" parent="FSM"]
 script = ExtResource("12_death")

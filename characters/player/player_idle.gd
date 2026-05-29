@@ -2,8 +2,10 @@ extends BaseIdle
 
 func update(_delta: float) -> void:
 	if Input.is_action_just_pressed("attack"):
-		transition.emit(self, Player.axe_state_for(name))
-		return
+		var tool_state := (base_body as Player).get_tool_attack_state(name)
+		if not tool_state.is_empty():
+			transition.emit(self, tool_state)
+			return
 	if Input.is_action_just_pressed("jump"):
 		transition.emit(self, Player.jump_state_for(name))
 		return

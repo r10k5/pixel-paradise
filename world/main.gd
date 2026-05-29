@@ -6,6 +6,8 @@ const KUST = preload("res://statics/tree/kust.tscn")
 const STONE = preload("res://statics/stone/stone.tscn")
 const BOMB_SCENE = preload("res://statics/bomb/bomb.tscn")
 const BOMB_ITEM_SCENE = preload("res://statics/bomb/bomb_item.tscn")
+const AXE_ITEM_SCENE = preload("res://statics/tools/axe_base.tscn")
+const PICKAXE_ITEM_SCENE = preload("res://statics/tools/pickaxe_base.tscn")
 const BOMB_ITEM_ID := "item:bomb"
 const MAIN_MENU_SCENE := "res://world/main_menu.tscn"
 
@@ -45,6 +47,11 @@ var _player_dying: bool = false
 func _input(event: InputEvent) -> void:
 	if _player_dying or player.is_dead:
 		return
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			player.scroll_hotbar(-1)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			player.scroll_hotbar(1)
 	if event.is_action_pressed("inventory"):
 		full_inventory.toggle()
 	if event.is_action_pressed("bomb"):
@@ -52,8 +59,9 @@ func _input(event: InputEvent) -> void:
 
 func _ready() -> void:
 	player.health_changed.connect(on_health_changed)
-	inventory.setup(player.inventory)
+	inventory.setup(player.inventory, player)
 	full_inventory.connect_inventory(player.inventory)
+	_give_starting_tools()
 	_give_debug_bombs()
 	on_health_changed(player.health)
 	world_generator.world_generated.connect(_on_world_generated)
@@ -173,6 +181,12 @@ func _spawn_biome_decorations(chunk: Vector2i) -> void:
 
 func on_health_changed(current_health: int) -> void:
 	hp_bar.set_hp(current_health)
+
+func _give_starting_tools() -> void:
+	var axe := AXE_ITEM_SCENE.instantiate() as BaseEntity
+	var pickaxe := PICKAXE_ITEM_SCENE.instantiate() as BaseEntity
+	player.inventory.add_item(axe)
+	player.inventory.add_item(pickaxe)
 
 func _give_debug_bombs() -> void:
 	if debug_start_bombs <= 0:

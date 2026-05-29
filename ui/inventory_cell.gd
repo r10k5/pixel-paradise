@@ -6,6 +6,10 @@ var inventory_item: InventoryItem
 
 @onready var item_count_lable = $ItemCount
 @onready var item_texture_node = $TextureRect
+@onready var background = $Background
+
+const SELECTED_TINT := Color(1.15, 1.15, 0.75)
+const NORMAL_TINT := Color.WHITE
 
 func _ready():
 	item_texture_node.texture = ImageTexture.new()
@@ -22,4 +26,8 @@ func replace(item: InventoryItem):
 	else:
 		item_texture_node.texture = ImageTexture.new()
 		item_count_lable.text = ""
+
+func set_selected(selected: bool) -> void:
+	if background:
+		background.modulate = SELECTED_TINT if selected else NORMAL_TINT
 

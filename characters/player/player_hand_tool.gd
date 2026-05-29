@@ -1,4 +1,4 @@
-extends BaseAxe
+extends BaseHandTool
 
 func _return_to_movement() -> void:
 	if Input.is_action_pressed("move_up"):

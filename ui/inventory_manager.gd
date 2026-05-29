@@ -6,10 +6,12 @@ const HOTBAR_SLOTS := 7
 @onready var container: HBoxContainer = $HBoxContainer
 
 var _inventory: Inventory
+var _player: Player
 var _hotbar_cells: Array[InventoryCell] = []
 
-func setup(inventory: Inventory) -> void:
+func setup(inventory: Inventory, player: Player) -> void:
 	_inventory = inventory
+	_player = player
 	for child in container.get_children():
 		child.queue_free()
 	_hotbar_cells.clear()
@@ -24,6 +26,9 @@ func setup(inventory: Inventory) -> void:
 		inventory.item_add.connect(_on_item_add)
 	if not inventory.item_drop.is_connected(_on_item_drop):
 		inventory.item_drop.connect(_on_item_drop)
+	if _player and not _player.hotbar_slot_changed.is_connected(_on_hotbar_slot_changed):
+		_player.hotbar_slot_changed.connect(_on_hotbar_slot_changed)
+	_update_selection_highlight()
 
 func _on_item_add(item: InventoryItem) -> void:
 	_refresh_slot(item.id)
@@ -36,3 +41,12 @@ func _refresh_slot(slot: int) -> void:
 	if slot < 0 or slot >= _hotbar_cells.size():
 		return
 	_hotbar_cells[slot].replace(_inventory.get_item(slot))
+
+func _on_hotbar_slot_changed(_slot: int) -> void:
+	_update_selection_highlight()
+
+func _update_selection_highlight() -> void:
+	if _player == null:
+		return
+	for slot in range(_hotbar_cells.size()):
+		_hotbar_cells[slot].set_selected(slot == _player.selected_hotbar_slot)

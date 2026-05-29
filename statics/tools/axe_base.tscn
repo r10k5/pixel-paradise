@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://dap7ndb01mj5h"]
+
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_entity"]
+[ext_resource type="Script" path="res://statics/tools/axe_base.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://ctikh4ntg7oo" path="res://assets/icons/32x32.png" id="3_atlas"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_icon"]
+atlas = ExtResource("3_atlas")
+region = Rect2(64, 2912, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_axe"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_icon")
+}],
+"loop": true,
+"name": &"axe",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 20.0
+
+[node name="AxeBase" instance=ExtResource("1_entity")]
+script = ExtResource("2_script")
+texture = SubResource("AtlasTexture_icon")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_axe")
+animation = &"axe"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_body")
+
+[node name="CollisionShape2D" parent="Area2D" index="0"]
+shape = SubResource("CircleShape2D_area")

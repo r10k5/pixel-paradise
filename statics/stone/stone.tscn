@@ -1,43 +1,38 @@
-[gd_scene format=3 uid="uid://bi77aifuvt1f3"]
+[gd_scene load_steps=6 format=3 uid="uid://bi77aifuvt1f3"]
 
-[ext_resource type="Texture2D" uid="uid://bbtpoqxkldccs" path="res://assets/world/static/TX Village Props.png" id="1_c5yal"]
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_entity"]
+[ext_resource type="Script" path="res://statics/stone/stone.gd" id="2_stone"]
+[ext_resource type="Texture2D" uid="uid://bbtpoqxkldccs" path="res://assets/world/static/TX Village Props.png" id="3_texture"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_dg0uf"]
-atlas = ExtResource("1_c5yal")
+[sub_resource type="AtlasTexture" id="AtlasTexture_stone"]
+atlas = ExtResource("3_texture")
 region = Rect2(928, 352, 32, 32)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_6coto"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_stone"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_dg0uf")
+"texture": SubResource("AtlasTexture_stone")
 }],
 "loop": true,
 "name": &"default",
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_yudq3"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_stone"]
 size = Vector2(17, 12)
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c5yal"]
-radius = 8.0
-height = 28.0
+[node name="Stone" instance=ExtResource("1_entity")]
+collision_layer = 4
+script = ExtResource("2_stone")
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=368728263]
-collision_layer = 2
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_stone")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=404850334]
-sprite_frames = SubResource("SpriteFrames_6coto")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1606089147]
+[node name="CollisionShape2D" parent="." index="1"]
 position = Vector2(0.5, 9)
-shape = SubResource("RectangleShape2D_yudq3")
+shape = SubResource("RectangleShape2D_stone")
 
-[node name="Area2D" type="Area2D" parent="." unique_id=1086330045]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1743821570]
+[node name="CollisionShape2D" parent="Area2D" index="0"]
 position = Vector2(0, 8)
-rotation = -1.5707964
-shape = SubResource("CapsuleShape2D_c5yal")
-debug_color = Color(0.6326966, 0.451173, 0.72740424, 0.41960785)
+shape = SubResource("RectangleShape2D_stone")
