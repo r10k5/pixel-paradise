@@ -44,7 +44,9 @@ func _compute_jump_velocity(progress: float) -> Vector2:
 	var velocity := _jump_direction * _jump_speed
 	if _arc_height <= 0.0 or _jump_duration <= 0.0:
 		return velocity
-	# Параболическая дуга по Y: подъём в начале, возврат к траектории в конце.
+	# Дуга только для бокового прыжка — иначе jump_down сначала тянет вверх.
+	if absf(_jump_direction.y) >= 0.99:
+		return velocity
 	var arc_velocity_y := -_arc_height * PI / _jump_duration * cos(PI * progress)
 	return velocity + Vector2(0.0, arc_velocity_y)
 

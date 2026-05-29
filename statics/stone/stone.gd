@@ -1,6 +1,7 @@
 extends BaseEntity
 
 func _ready() -> void:
+	collision_layer = PhysicsLayers.JUMPABLE
 	add_to_group("mineable")
 	super._ready()
 	id = "passive-entity:stone"

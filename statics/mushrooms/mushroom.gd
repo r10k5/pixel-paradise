@@ -1,6 +1,7 @@
 extends BaseEntity
 
-func _ready():
+func _ready() -> void:
+	collision_layer = PhysicsLayers.JUMPABLE
 	super._ready()
 	id = "passive-entity:mushroom"
 	title = "Гриб"

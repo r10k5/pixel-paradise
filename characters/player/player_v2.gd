@@ -52,6 +52,9 @@ func _ready() -> void:
 		"pickaxe_right": "pickaxe_right",
 	}
 	_setup_steps_player()
+	var hand_tool_hit_area := find_child("HandToolHitArea", true, false) as Area2D
+	if hand_tool_hit_area:
+		hand_tool_hit_area.collision_mask = PhysicsLayers.MASK_NORMAL
 
 func begin_jump() -> void:
 	_is_jumping = true

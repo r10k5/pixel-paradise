@@ -35,6 +35,7 @@ height = 22.0
 radius = 27.074
 
 [node name="Mushroom" instance=ExtResource("1_udhdh")]
+collision_layer = 2
 modulate = Color(0.912799, 0.872165, 0.863459, 1)
 script = ExtResource("2_3dgmk")
 texture = ExtResource("3_kd86f")

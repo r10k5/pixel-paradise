@@ -23,7 +23,7 @@ animations = [{
 size = Vector2(17, 12)
 
 [node name="Stone" instance=ExtResource("1_entity")]
-collision_layer = 4
+collision_layer = 2
 script = ExtResource("2_stone")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
