@@ -8,8 +8,9 @@
 [ext_resource type="Texture2D" uid="uid://covgug6jnwcf7" path="res://assets/characters/player/Basic/jump.png" id="5_gijlw"]
 [ext_resource type="Script" uid="uid://d4l4vkeeek7jm" path="res://characters/player/player_idle.gd" id="6_3amm5"]
 [ext_resource type="Script" uid="uid://bi2ojh8gmpnxl" path="res://characters/player/player_walk_up.gd" id="7_2sgr8"]
-[ext_resource type="Script" path="res://characters/player/player_walk_side.gd" id="8_prdk1"]
+[ext_resource type="Script" uid="uid://l4horaroeh0" path="res://characters/player/player_walk_side.gd" id="8_prdk1"]
 [ext_resource type="Script" uid="uid://j3ngwr3fj5w4" path="res://characters/player/player_walk_down.gd" id="10_itodi"]
+[ext_resource type="Script" path="res://characters/player/player_jump.gd" id="11_jump"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_don1g"]
 atlas = ExtResource("3_50m08")
@@ -440,7 +441,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_kf6xo")
 }],
-"loop": true,
+"loop": false,
 "name": &"jump_down",
 "speed": 5.0
 }, {
@@ -463,7 +464,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_3ppa0")
 }],
-"loop": true,
+"loop": false,
 "name": &"jump_right",
 "speed": 5.0
 }, {
@@ -486,8 +487,8 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_i0ml7")
 }],
-"loop": true,
-"name": &"jupm_up",
+"loop": false,
+"name": &"jump_up",
 "speed": 5.0
 }, {
 "frames": [{
@@ -583,6 +584,8 @@ radius = 9.0
 height = 24.0
 
 [node name="Player" unique_id=450980070 instance=ExtResource("1_3rgay")]
+collision_layer = 1
+collision_mask = 6
 script = ExtResource("2_6timk")
 speed = 200.0
 
@@ -594,8 +597,10 @@ modulate = Color(1, 0.87526, 0.81089, 1)
 position = Vector2(0, -1)
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_hr3hw")
-animation = &"death_down"
+animation = &"idle_up"
 autoplay = "idle_up"
+frame = 0
+frame_progress = 0.0
 
 [node name="CollisionShape2D" parent="." index="2"]
 position = Vector2(0, -13)
@@ -621,3 +626,21 @@ script = ExtResource("8_prdk1")
 
 [node name="walk_down" parent="FSM" index="5"]
 script = ExtResource("10_itodi")
+
+[node name="jump_up" type="Node" parent="FSM" index="6" node_paths=PackedStringArray("base_body")]
+script = ExtResource("11_jump")
+base_body = NodePath("../..")
+animation = "jump_up"
+return_idle_state = "idle_up"
+
+[node name="jump_down" type="Node" parent="FSM" index="7" node_paths=PackedStringArray("base_body")]
+script = ExtResource("11_jump")
+base_body = NodePath("../..")
+animation = "jump_down"
+return_idle_state = "idle_down"
+
+[node name="jump_side" type="Node" parent="FSM" index="8" node_paths=PackedStringArray("base_body")]
+script = ExtResource("11_jump")
+base_body = NodePath("../..")
+animation = "jump_right"
+return_idle_state = "idle_side"

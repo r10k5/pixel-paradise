@@ -1,6 +1,9 @@
 extends WalkUp
 
 func update(delta: float):
+	if Input.is_action_just_pressed("jump"):
+		transition.emit(self, Player.jump_state_for(name))
+		return
 	super.update(delta)
 	if Input.is_action_just_released("move_up"):
 		transition.emit(self, "idle_up")

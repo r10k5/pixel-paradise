@@ -1,6 +1,9 @@
 extends WalkSide
 
 func update(delta: float) -> void:
+	if Input.is_action_just_pressed("jump"):
+		transition.emit(self, Player.jump_state_for(name))
+		return
 	super.update(delta)
 	if Input.is_action_just_released("move_left") and base_body.facing_left:
 		transition.emit(self, "idle_side")
