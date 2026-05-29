@@ -24,8 +24,19 @@ radius = 7.0
 height = 54.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ctjw8"]
-radius = 53.0
-height = 154.0
+radius = 35.0
+height = 132.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.15, 0.15, 0.15, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.35, 0.78, 0.28, 1)
 
 [node name="CharacterBody2D" unique_id=1887112698 instance=ExtResource("1_yo725")]
 collision_layer = 4
@@ -42,6 +53,28 @@ shape = SubResource("CapsuleShape2D_i6hax")
 position = Vector2(-1, 53)
 
 [node name="CollisionShape2D" parent="Area2D" index="0"]
-position = Vector2(2, -45)
+position = Vector2(2, -42)
 shape = SubResource("CapsuleShape2D_ctjw8")
 debug_color = Color(0, 0.6, 0.129412, 0.0705882)
+
+[node name="HealthBar" type="Control" parent="." index="3" unique_id=2050876020]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -20.0
+offset_top = -108.0
+offset_right = 20.0
+offset_bottom = -100.0
+
+[node name="ProgressBar" type="ProgressBar" parent="HealthBar" index="0" unique_id=781622732]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+max_value = 10.0
+step = 1.0
+value = 10.0
+show_percentage = false

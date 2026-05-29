@@ -9,6 +9,7 @@ const TILE_SIZE := 16
 const MAP_SCALE := 1.5
 
 @export var jump_tiles: float = 3.5
+@export var jump_arc_tiles: float = 1.0
 @export var jump_animation_speed_scale: float = 2.5
 
 var inventory: Inventory = Inventory.new()
@@ -34,6 +35,9 @@ func _ready() -> void:
 		"death_right": "death_right",
 		"death_up": "death_up",
 		"death_down": "death_down",
+		"axe_up": "axe_up",
+		"axe_down": "axe_down",
+		"axe_right": "axe_right",
 	}
 	_setup_steps_player()
 
@@ -62,12 +66,57 @@ static func jump_state_for(state_name: String) -> String:
 		_:
 			return "jump_side"
 
+static func axe_state_for(state_name: String) -> String:
+	match state_name:
+		"idle_up", "walk_up":
+			return "axe_up"
+		"idle_down", "walk_down":
+			return "axe_down"
+		_:
+			return "axe_side"
+
+const CHOP_RANGE := 64.0
+const CHOP_FACING_DOT := 0.4
+
+func try_chop_tree(direction: Vector2) -> void:
+	var tree := _find_choppable_tree(direction)
+	if tree:
+		tree.take_damage(1)
+
+func _find_choppable_tree(direction: Vector2) -> BaseEntity:
+	var best: BaseEntity = null
+	var best_dist := CHOP_RANGE
+	var dir := direction.normalized() if direction != Vector2.ZERO else Vector2.DOWN
+
+	for node in get_tree().get_nodes_in_group("choppable"):
+		if not node is BaseEntity:
+			continue
+		var entity := node as BaseEntity
+		if not entity.can_be_destroyed or entity.health <= 0:
+			continue
+		var offset := entity.global_position - global_position
+		var dist := offset.length()
+		if dist > CHOP_RANGE:
+			continue
+		if dist > 0.01 and offset.normalized().dot(dir) < CHOP_FACING_DOT:
+			continue
+		if dist < best_dist:
+			best_dist = dist
+			best = entity
+	return best
+
 func get_jump_distance() -> float:
 	return jump_tiles * TILE_SIZE * MAP_SCALE
 
-func compute_jump_speed(animation_name: String) -> float:
+func get_jump_arc_height() -> float:
+	return jump_arc_tiles * TILE_SIZE * MAP_SCALE
+
+func get_jump_duration(animation_name: String) -> float:
 	var sprite := $AnimatedSprite2D as AnimatedSprite2D
-	var duration := _animation_duration(sprite, animation_name)
+	return _animation_duration(sprite, animation_name)
+
+func compute_jump_speed(animation_name: String) -> float:
+	var duration := get_jump_duration(animation_name)
 	if duration <= 0.0:
 		return speed
 	return get_jump_distance() / duration
