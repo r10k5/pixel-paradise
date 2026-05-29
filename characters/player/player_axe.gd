@@ -1,14 +1,5 @@
 extends BaseAxe
 
-func _get_attack_direction() -> Vector2:
-	match name:
-		"axe_up":
-			return Vector2.UP
-		"axe_down":
-			return Vector2.DOWN
-		_:
-			return Vector2.LEFT if base_body.facing_left else Vector2.RIGHT
-
 func _return_to_movement() -> void:
 	if Input.is_action_pressed("move_up"):
 		transition.emit(self, "walk_up")

@@ -75,36 +75,6 @@ static func axe_state_for(state_name: String) -> String:
 		_:
 			return "axe_side"
 
-const CHOP_RANGE := 64.0
-const CHOP_FACING_DOT := 0.4
-
-func try_chop_tree(direction: Vector2) -> void:
-	var tree := _find_choppable_tree(direction)
-	if tree:
-		tree.take_damage(1)
-
-func _find_choppable_tree(direction: Vector2) -> BaseEntity:
-	var best: BaseEntity = null
-	var best_dist := CHOP_RANGE
-	var dir := direction.normalized() if direction != Vector2.ZERO else Vector2.DOWN
-
-	for node in get_tree().get_nodes_in_group("choppable"):
-		if not node is BaseEntity:
-			continue
-		var entity := node as BaseEntity
-		if not entity.can_be_destroyed or entity.health <= 0:
-			continue
-		var offset := entity.global_position - global_position
-		var dist := offset.length()
-		if dist > CHOP_RANGE:
-			continue
-		if dist > 0.01 and offset.normalized().dot(dir) < CHOP_FACING_DOT:
-			continue
-		if dist < best_dist:
-			best_dist = dist
-			best = entity
-	return best
-
 func get_jump_distance() -> float:
 	return jump_tiles * TILE_SIZE * MAP_SCALE
 

@@ -727,6 +727,9 @@ animations = [{
 radius = 9.0
 height = 24.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_axe"]
+size = Vector2(20, 24)
+
 [node name="Player" unique_id=450980070 instance=ExtResource("1_3rgay")]
 collision_mask = 6
 script = ExtResource("2_6timk")
@@ -750,6 +753,15 @@ shape = SubResource("CapsuleShape2D_fuh5h")
 
 [node name="CollisionShape2D" parent="Area2D" index="0"]
 position = Vector2(1, 0)
+
+[node name="AxeHitArea" type="Area2D" parent="."]
+collision_mask = 4
+monitorable = false
+
+[node name="AxeCollision" type="CollisionShape2D" parent="AxeHitArea"]
+position = Vector2(28, -8)
+shape = SubResource("RectangleShape2D_axe")
+disabled = true
 
 [node name="idle_side" parent="FSM" index="0"]
 script = ExtResource("6_3amm5")
