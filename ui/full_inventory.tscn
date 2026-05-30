@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dx2rm62v0pgjb"]
+[gd_scene load_steps=2 format=3 uid="uid://dx2rm62v0pgjb"]
 
-[ext_resource type="Texture2D" uid="uid://jplfd3q0flct" path="res://assets/ui/inventory-background.png" id="1_0mnfd"]
 [ext_resource type="Script" path="res://ui/full_inventory.gd" id="1_b33jh"]
+[ext_resource type="PackedScene" uid="uid://inventory_panel001" path="res://ui/inventory_panel.tscn" id="2_panel"]
 
 [node name="FullInventory" type="Control"]
 visible = false
@@ -18,42 +18,10 @@ grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("1_b33jh")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="InventoryPanel" parent="." instance=ExtResource("2_panel")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_0mnfd")
-expand_mode = 1
-
-[node name="InventoryContainer" type="PanelContainer" parent="."]
-self_modulate = Color(1, 1, 1, 0.0196078)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = 45.0
-offset_right = -40.0
-offset_bottom = -45.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="InventoryGrid" type="GridContainer" parent="InventoryContainer"]
-layout_mode = 2
-theme_override_constants/h_separation = 73
-theme_override_constants/v_separation = 76
-columns = 7
-
-[node name="ExitButtonContainer" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_left = 535.0
-offset_right = 606.0
-offset_bottom = 66.0
-
-[node name="ExitButton" type="Button" parent="ExitButtonContainer"]
-layout_mode = 2
-text = "Exit"
-icon_alignment = 1

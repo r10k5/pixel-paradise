@@ -59,6 +59,11 @@ func die() -> void:
 	super.die()
 	queue_free()
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("chop") and is_near_player:
+		take_damage(5)
+		return
+	super._input(event)
+
 func interact() -> void:
-	super.interact()
-	take_damage(5)
+	pass

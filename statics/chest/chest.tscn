@@ -45,11 +45,13 @@ size = Vector2(30, 24)
 size = Vector2(86, 76)
 
 [node name="Chest" instance=ExtResource("1_mucst")]
+collision_layer = 4
+collision_mask = 0
 script = ExtResource("2_0u2he")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_grntd")
-animation = &"open"
+animation = &"idle"
 
 [node name="CollisionShape2D" parent="." index="1"]
 position = Vector2(0, 13)

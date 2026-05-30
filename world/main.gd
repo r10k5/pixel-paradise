@@ -8,6 +8,7 @@ const BOMB_SCENE = preload("res://statics/bomb/bomb.tscn")
 const BOMB_ITEM_SCENE = preload("res://statics/bomb/bomb_item.tscn")
 const AXE_ITEM_SCENE = preload("res://statics/tools/axe_base.tscn")
 const PICKAXE_ITEM_SCENE = preload("res://statics/tools/pickaxe_base.tscn")
+const CHEST_SCENE = preload("res://statics/chest/chest.tscn")
 const BOMB_ITEM_ID := "item:bomb"
 const MAIN_MENU_SCENE := "res://world/main_menu.tscn"
 
@@ -20,6 +21,8 @@ const MAP_SCALE := 1.5
 @onready var droped_items = $Entities/DropItems
 @onready var inventory = $UI/Inventory
 @onready var full_inventory: Control = $UI/FullInventory
+@onready var chest_transfer_ui: Control = $UI/ChestTransferUI
+@onready var chests_container: Node2D = $Entities/Chests
 @onready var grass_tilemap: TileMap = $TileMap
 @onready var world_generator: WorldGenerator = $WorldGenerator
 @onready var seed_label: Label = $UI/WorldSeedLabel
@@ -53,7 +56,14 @@ func _input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			player.scroll_hotbar(1)
 	if event.is_action_pressed("inventory"):
+		if chest_transfer_ui.is_open():
+			return
 		full_inventory.toggle()
+	if event.is_action_pressed("interact"):
+		if chest_transfer_ui.is_open():
+			chest_transfer_ui.close()
+		else:
+			_try_interact_chest()
 	if event.is_action_pressed("bomb"):
 		_try_place_bomb()
 
@@ -61,6 +71,7 @@ func _ready() -> void:
 	player.health_changed.connect(on_health_changed)
 	inventory.setup(player.inventory, player)
 	full_inventory.connect_inventory(player.inventory)
+	chest_transfer_ui.closed.connect(_on_chest_transfer_closed)
 	_give_starting_tools()
 	_give_debug_bombs()
 	on_health_changed(player.health)
@@ -90,6 +101,7 @@ func _on_world_generated(map: WorldMap) -> void:
 	world_map = map
 	if multiverse_manager != null:
 		update_multiverse_label()
+		call_deferred("_spawn_nearby_chests")
 		return
 	player.global_position = world_generator.get_player_spawn()
 	if world_generator.has_method("clamp_player_to_world_bounds"):
@@ -98,6 +110,7 @@ func _on_world_generated(map: WorldMap) -> void:
 	_reset_destroyed_tiles()
 	_update_seed_label()
 	world_generator.force_refresh_chunks_around_player()
+	call_deferred("_spawn_nearby_chests")
 
 
 func prepare_cell_load(_from_cache: bool) -> void:
@@ -309,3 +322,47 @@ func _on_item_pick_up(item: BaseEntity) -> void:
 func on_item_pick_up(item: BaseEntity) -> void:
 	if player in item.entities_near:
 		call_deferred("_on_item_pick_up", item)
+
+func _spawn_nearby_chests() -> void:
+	if not is_instance_valid(player):
+		return
+	for child in chests_container.get_children():
+		if child is Timer:
+			continue
+		child.queue_free()
+
+	var offsets := [Vector2(80, 0), Vector2(-80, 32)]
+	for i in range(offsets.size()):
+		var chest := CHEST_SCENE.instantiate()
+		chests_container.add_child(chest)
+		chest.global_position = player.global_position + offsets[i]
+		chest.storage_opened.connect(_on_chest_storage_opened)
+
+func _on_chest_storage_opened(chest: Chest) -> void:
+	if chest_transfer_ui.is_open():
+		chest_transfer_ui.close()
+	full_inventory.suspend_for_chest_transfer()
+	chest_transfer_ui.open(chest, player.inventory)
+
+func _on_chest_transfer_closed() -> void:
+	full_inventory.resume_after_chest_transfer()
+
+func _try_interact_chest() -> void:
+	var chest := _find_interactable_chest()
+	if chest != null:
+		chest.interact()
+
+func _find_interactable_chest() -> Chest:
+	var closest: Chest = null
+	var closest_dist := INF
+	for child in chests_container.get_children():
+		if not child is Chest:
+			continue
+		var chest := child as Chest
+		if not chest.can_interact or not chest.is_player_in_range():
+			continue
+		var dist := chest.global_position.distance_squared_to(player.global_position)
+		if dist < closest_dist:
+			closest_dist = dist
+			closest = chest
+	return closest

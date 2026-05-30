@@ -18,7 +18,7 @@ func setup(inventory: Inventory, player: Player) -> void:
 
 	for slot in range(HOTBAR_SLOTS):
 		var cell := inventory_cell_scene.instantiate() as InventoryCell
-		cell.inventory_item = inventory.get_item(slot)
+		cell.bind(inventory, slot)
 		container.add_child(cell)
 		_hotbar_cells.append(cell)
 
@@ -26,6 +26,8 @@ func setup(inventory: Inventory, player: Player) -> void:
 		inventory.item_add.connect(_on_item_add)
 	if not inventory.item_drop.is_connected(_on_item_drop):
 		inventory.item_drop.connect(_on_item_drop)
+	if not inventory.contents_changed.is_connected(_on_contents_changed):
+		inventory.contents_changed.connect(_on_contents_changed)
 	if _player and not _player.hotbar_slot_changed.is_connected(_on_hotbar_slot_changed):
 		_player.hotbar_slot_changed.connect(_on_hotbar_slot_changed)
 	_update_selection_highlight()
@@ -37,10 +39,14 @@ func _on_item_drop(_item: BaseEntity, _count: int) -> void:
 	for slot in range(HOTBAR_SLOTS):
 		_refresh_slot(slot)
 
+func _on_contents_changed() -> void:
+	for slot in range(HOTBAR_SLOTS):
+		_refresh_slot(slot)
+
 func _refresh_slot(slot: int) -> void:
 	if slot < 0 or slot >= _hotbar_cells.size():
 		return
-	_hotbar_cells[slot].replace(_inventory.get_item(slot))
+	_hotbar_cells[slot].refresh()
 
 func _on_hotbar_slot_changed(_slot: int) -> void:
 	_update_selection_highlight()

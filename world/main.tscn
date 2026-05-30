@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://cyhth6oy6eydl" path="res://world/player_light.gd" id="6_ab0jk"]
 [ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
 [ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
+[ext_resource type="PackedScene" path="res://ui/chest_transfer_ui.tscn" id="12_chest"]
 [ext_resource type="Script" uid="uid://bbjgy41qpenvj" path="res://world/set_time.gd" id="8_0iml5"]
 [ext_resource type="Script" uid="uid://dpousw67rkjyx" path="res://world/world_generator.gd" id="9_wgen"]
 [ext_resource type="Script" path="res://world/multiverse/multiverse_manager.gd" id="10_mv"]
@@ -385,6 +386,8 @@ text = "FPS: 0"
 horizontal_alignment = 2
 
 [node name="FullInventory" parent="UI" unique_id=908056701 instance=ExtResource("7_p1uhn")]
+
+[node name="ChestTransferUI" parent="UI" instance=ExtResource("12_chest")]
 
 [node name="ScreenFade" type="ColorRect" parent="UI"]
 z_index = 100

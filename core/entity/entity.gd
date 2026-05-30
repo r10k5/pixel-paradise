@@ -43,12 +43,16 @@ var _fade_sprite_rect: Rect2 = Rect2(Vector2(-8, -8), Vector2(16, 16))
 func _ready():
 	set_process(true)
 	set_process_input(true)
-	$Area2D.body_entered.connect(_on_body_entered)
-	$Area2D.body_exited.connect(_on_body_exited)
+	var area := $Area2D as Area2D
+	if area:
+		area.collision_mask = PhysicsLayers.PLAYER
+		area.body_entered.connect(_on_body_entered)
+		area.body_exited.connect(_on_body_exited)
 	if fade_when_player_behind:
 		_fade_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 		if _fade_sprite != null:
 			_fade_sprite_rect = _animated_sprite_local_rect(_fade_sprite)
+	call_deferred("_sync_overlapping_bodies")
 
 func _process(delta: float) -> void:
 	_update_player_behind_fade(delta)
@@ -101,6 +105,21 @@ func on_pick_up():
 func interact():
 	# Логика взаимодействия с объектом
 	pass
+
+func is_player_in_range() -> bool:
+	var area := get_node_or_null("Area2D") as Area2D
+	if area:
+		for body in area.get_overlapping_bodies():
+			if body is Player or body.name.to_lower() == "player":
+				return true
+	return is_near_player
+
+func _sync_overlapping_bodies() -> void:
+	var area := get_node_or_null("Area2D") as Area2D
+	if area == null:
+		return
+	for body in area.get_overlapping_bodies():
+		_on_body_entered(body)
 
 func _on_Player_nearby(state: bool):
 	is_near_player = state
