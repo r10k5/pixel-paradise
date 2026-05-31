@@ -31,7 +31,9 @@ static func create(item_id: String) -> BaseEntity:
 			return null
 		_scene_cache[item_id] = packed
 	var scene: PackedScene = _scene_cache[item_id]
-	return scene.instantiate() as BaseEntity
+	var entity := scene.instantiate() as BaseEntity
+	PickupIcons.apply_to_item(entity, item_id)
+	return entity
 
 
 static func has_item(item_id: String) -> bool:

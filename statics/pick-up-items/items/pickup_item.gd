@@ -13,3 +13,4 @@ func _configure(p_id: String, p_title: String, p_stack: int, p_weight: float) ->
 	pick_up_trigger = PickUpTrigger.None
 	effects = []
 	effects_can_be_applied = {}
+	texture = PickupIcons.get_texture(p_id)

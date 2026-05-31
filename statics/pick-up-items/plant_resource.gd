@@ -1,15 +1,9 @@
 class_name PlantResource
 extends ResourceNode
 
-const ICONS := preload("res://assets/icons/32x32.png")
 
-
-func _apply_atlas_icon(region: Rect2) -> void:
-	var atlas_tex := AtlasTexture.new()
-	atlas_tex.atlas = ICONS
-	atlas_tex.region = region
-	var frames := SpriteFrames.new()
-	frames.add_frame("default", atlas_tex)
+func _apply_world_icon() -> void:
+	if item_id.is_empty():
+		return
 	var sprite := $AnimatedSprite2D as AnimatedSprite2D
-	sprite.sprite_frames = frames
-	sprite.play("default")
+	PickupIcons.apply_to_animated_sprite(sprite, item_id)

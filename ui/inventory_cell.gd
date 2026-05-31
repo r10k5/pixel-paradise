@@ -60,12 +60,22 @@ func _get_slot_item() -> InventoryItem:
 	return inventory_item
 
 
+func _get_item_texture(item: BaseEntity) -> Texture2D:
+	if item == null:
+		return null
+	if item.texture != null:
+		return item.texture
+	if item.id != null:
+		return PickupIcons.get_texture(str(item.id))
+	return null
+
+
 func _update_display() -> void:
 	if item_texture_node == null or item_count_lable == null:
 		return
 	var slot_item := _get_slot_item()
 	if slot_item != null and slot_item.item:
-		item_texture_node.texture = slot_item.item.texture
+		item_texture_node.texture = _get_item_texture(slot_item.item)
 		item_count_lable.text = str(slot_item.count) if slot_item.count > 1 else ""
 	else:
 		item_texture_node.texture = null
@@ -82,11 +92,12 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	var slot_item := _get_slot_item()
 	if slot_item == null or slot_item.is_empty() or bound_inventory == null:
 		return null
-	if slot_item.item.texture == null:
+	var drag_tex := _get_item_texture(slot_item.item)
+	if drag_tex == null:
 		return null
 
 	var preview := TextureRect.new()
-	preview.texture = slot_item.item.texture
+	preview.texture = drag_tex
 	preview.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	preview.custom_minimum_size = Vector2(48, 48)
 	set_drag_preview(preview)

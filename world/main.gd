@@ -300,8 +300,8 @@ func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk:
 		tree.drop_item.connect(func(item):
 			item.global_position = tree.global_position
 			if item is BaseEntity:
-				(item as BaseEntity).pick_up.connect(on_item_pick_up)
-				actors.add_child(item)
+				_register_world_pickup(item as BaseEntity)
+				droped_items.add_child(item)
 		)
 	var parent: Node = world_generator.get_chunk_entities_parent(chunk)
 	parent.add_child(node)
@@ -310,9 +310,7 @@ func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk:
 	if node is ResourceNode:
 		var resource := node as ResourceNode
 		resource.set_spawn_tile(tile)
-		resource.harvested.connect(
-			_on_resource_harvested.bind(entity_id, tile, resource.item_id, resource.respawn_seconds)
-		)
+		resource.harvested.connect(_on_resource_harvested.bind(entity_id, tile))
 
 	return node
 
@@ -343,19 +341,17 @@ func _unmark_destroyed(entity_id: String, tile: Vector2i) -> void:
 
 
 func _on_resource_harvested(
-	_resource_node: ResourceNode,
+	resource_node: ResourceNode,
 	entity_id: String,
-	tile: Vector2i,
-	item_id: String,
-	respawn_seconds: float
+	tile: Vector2i
 ) -> void:
 	_mark_destroyed(entity_id, tile)
+	var item_id := resource_node.item_id
+	var respawn_seconds := resource_node.respawn_seconds
 	resource_respawn.schedule(entity_id, tile, respawn_seconds)
 	if item_id.is_empty():
 		return
-	var item := ItemFactory.create(item_id)
-	if item != null:
-		player.inventory.add_item(item)
+	player.inventory.add_item_by_id(item_id)
 
 
 func _respawn_resource_at_tile(entity_id: String, tile: Vector2i) -> void:
@@ -372,21 +368,25 @@ func _respawn_resource_at_tile(entity_id: String, tile: Vector2i) -> void:
 	_spawn_entity(entity_id, scene, tile, chunk)
 
 
+func _register_world_pickup(item: BaseEntity) -> void:
+	if item == null:
+		return
+	if not item.pick_up.is_connected(on_item_pick_up):
+		item.pick_up.connect(on_item_pick_up)
+
+
 func _on_item_pick_up(item: BaseEntity) -> void:
 	if not is_instance_valid(item):
 		return
-	var par: Node = item.get_parent()
-	if par == null:
-		player.inventory.add_item(item)
+	var item_id := str(item.id)
+	if item_id.is_empty():
 		return
-	var children: Array = par.get_children()
-	if item in children:
-		player.inventory.add_item(item)
-		par.remove_child(item)
+	if player.inventory.add_item_by_id(item_id):
+		item.queue_free()
+
 
 func on_item_pick_up(item: BaseEntity) -> void:
-	if player in item.entities_near:
-		call_deferred("_on_item_pick_up", item)
+	call_deferred("_on_item_pick_up", item)
 
 func _spawn_nearby_chests() -> void:
 	if not is_instance_valid(player):
