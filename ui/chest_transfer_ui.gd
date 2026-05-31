@@ -14,7 +14,7 @@ func _ready() -> void:
 	player_panel.set_exit_visible(false)
 	exit_button.pressed.connect(close)
 
-func open(chest: Chest, player_inventory: Inventory) -> void:
+func open(chest: Chest, player_inventory: InventoryComponent) -> void:
 	if chest == null or chest.storage == null or player_inventory == null:
 		return
 	_chest = chest

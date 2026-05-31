@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://inventory_panel001"]
+[gd_scene load_steps=3 format=3 uid="uid://pn0lvtfk0joon1"]
 
 [ext_resource type="Texture2D" uid="uid://jplfd3q0flct" path="res://assets/ui/inventory-background.png" id="1_bg"]
-[ext_resource type="Script" path="res://ui/inventory_panel.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://0lvtfk0j3oon" path="res://ui/inventory_panel.gd" id="1_script"]
 
 [node name="InventoryPanel" type="Control"]
 custom_minimum_size = Vector2(620, 484)
@@ -38,7 +38,7 @@ grow_vertical = 2
 layout_mode = 2
 theme_override_constants/h_separation = 73
 theme_override_constants/v_separation = 76
-columns = 7
+columns = 10
 
 [node name="ExitButtonContainer" type="PanelContainer" parent="."]
 layout_mode = 0

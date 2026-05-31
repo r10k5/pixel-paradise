@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://c0y2n5cpexl7l"]
+
+[ext_resource type="PackedScene" uid="uid://rn9resnode07x" path="res://statics/resources/resource_node.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://ba887krdponqt" path="res://statics/pick-up-items/mushroom.gd" id="2_script"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mush"]
+radius = 27.0
+
+[node name="Mushroom" instance=ExtResource("1_base")]
+modulate = Color(0.912799, 0.872165, 0.863459, 1)
+script = ExtResource("2_script")
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_mush")

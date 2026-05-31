@@ -118,6 +118,9 @@ func _build_state_from_session(grid_pos: Vector2i) -> WorldCellState:
 		var exported: Dictionary = main.export_cell_state()
 		state.destroyed_tiles = exported.get("destroyed_tiles", state.destroyed_tiles)
 		state.flora_spawned = exported.get("flora_spawned", state.flora_spawned)
+		var timers: Variant = exported.get("respawn_timers", {})
+		if timers is Dictionary:
+			state.respawn_timers = (timers as Dictionary).duplicate(true)
 	return state
 
 

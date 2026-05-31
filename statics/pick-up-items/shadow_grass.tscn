@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://x77biakesf5m"]
+
+[ext_resource type="PackedScene" uid="uid://rn9resnode07x" path="res://statics/resources/resource_node.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://dpkbg8fh3vh3u" path="res://statics/pick-up-items/shadow_grass.gd" id="2_script"]
+
+[node name="ShadowGrass" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, -3)

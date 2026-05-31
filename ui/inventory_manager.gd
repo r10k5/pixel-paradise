@@ -5,11 +5,11 @@ const HOTBAR_SLOTS := 7
 @export var inventory_cell_scene: PackedScene
 @onready var container: HBoxContainer = $HBoxContainer
 
-var _inventory: Inventory
+var _inventory: InventoryComponent
 var _player: Player
 var _hotbar_cells: Array[InventoryCell] = []
 
-func setup(inventory: Inventory, player: Player) -> void:
+func setup(inventory: InventoryComponent, player: Player) -> void:
 	_inventory = inventory
 	_player = player
 	for child in container.get_children():

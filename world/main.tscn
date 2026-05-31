@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://dpousw67rkjyx" path="res://world/world_generator.gd" id="9_wgen"]
 [ext_resource type="Script" path="res://world/multiverse/multiverse_manager.gd" id="10_mv"]
 [ext_resource type="Script" path="res://world/ui/screen_fade.gd" id="11_fade"]
+[ext_resource type="Script" path="res://world/resource_respawn_manager.gd" id="13_respawn"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w50e3"]
 texture = ExtResource("1_71ssx")
@@ -290,6 +291,9 @@ sources/1 = SubResource("TileSetAtlasSource_tp5tb")
 
 [node name="Main" type="Node2D" unique_id=1367276529]
 script = ExtResource("1_hhpii")
+
+[node name="ResourceRespawnManager" type="Node" parent="."]
+script = ExtResource("13_respawn")
 
 [node name="DayNight" type="Node2D" parent="." unique_id=1080036559]
 script = ExtResource("8_0iml5")

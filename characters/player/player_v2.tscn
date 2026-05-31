@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://djwfljytos654" path="res://assets/characters/player/Farming/axe.png" id="13_axe"]
 [ext_resource type="Script" path="res://characters/player/player_hand_tool.gd" id="14_hand_tool_script"]
 [ext_resource type="Texture2D" uid="uid://bi525q3g2alw8" path="res://assets/characters/player/Farming/pickaxe.png" id="15_pickaxe"]
+[ext_resource type="PackedScene" uid="uid://ic0mponent7x1w" path="res://core/inventory/inventory_component.tscn" id="16_invcomp"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_don1g"]
 atlas = ExtResource("3_50m08")
@@ -989,3 +990,5 @@ script = ExtResource("12_death")
 
 [node name="death_down" parent="FSM"]
 script = ExtResource("12_death")
+
+[node name="InventoryComponent" parent="." instance=ExtResource("16_invcomp")]

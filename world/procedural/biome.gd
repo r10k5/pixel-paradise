@@ -48,7 +48,11 @@ static func create_default_biomes() -> Array[Biome]:
 	forest.allowed_decorations = [
 		"tree", "tree", "tree", "tree", "tree", "tree",
 		"bush", "bush",
+		"forest_berry", "forest_berry",
+		"shadow_grass", "shadow_grass",
 		"mushroom",
+		"oak_root",
+		"elf_tear",
 	]
 	biomes.append(forest)
 
@@ -82,8 +86,10 @@ static func create_default_biomes() -> Array[Biome]:
 	# Много грибов, немного деревьев.
 	swamp.allowed_decorations = [
 		"mushroom", "mushroom", "mushroom", "mushroom", "mushroom",
+		"shadow_grass", "shadow_grass",
 		"bush", "bush",
 		"tree",
+		"elf_tear",
 	]
 	biomes.append(swamp)
 
@@ -99,6 +105,7 @@ static func create_default_biomes() -> Array[Biome]:
 		"rock", "rock", "rock", "rock",
 		"bush",
 		"mushroom",
+		"forest_berry",
 	]
 	biomes.append(grassland)
 

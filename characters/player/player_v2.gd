@@ -20,7 +20,7 @@ const HOTBAR_SLOT_COUNT := 7
 
 signal hotbar_slot_changed(slot: int)
 
-var inventory: Inventory = Inventory.new()
+@onready var inventory: InventoryComponent = $InventoryComponent
 var selected_hotbar_slot: int = 0
 var is_dead: bool = false
 var _steps_player: AudioStreamPlayer

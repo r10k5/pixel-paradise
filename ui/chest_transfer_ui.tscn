@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://chest_transfer_ui01"]
+[gd_scene load_steps=3 format=3 uid="uid://bxjjdygsa8glp"]
 
-[ext_resource type="Script" path="res://ui/chest_transfer_ui.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://inventory_panel001" path="res://ui/inventory_panel.tscn" id="2_panel"]
+[ext_resource type="Script" uid="uid://bxjjdygsa8glm" path="res://ui/chest_transfer_ui.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://pn0lvtfk0joon1" path="res://ui/inventory_panel.tscn" id="2_panel"]
 
 [node name="ChestTransferUI" type="Control"]
 visible = false

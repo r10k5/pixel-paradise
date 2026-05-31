@@ -10,7 +10,7 @@ signal exit_pressed
 
 @onready var inventory_cell_scene = preload("res://ui/inventory_cell.tscn")
 
-var _inventory: Inventory
+var _inventory: InventoryComponent
 
 func _ready() -> void:
 	exit_button.pressed.connect(func() -> void:
@@ -20,7 +20,7 @@ func _ready() -> void:
 func set_exit_visible(show_exit: bool) -> void:
 	exit_button_container.visible = show_exit
 
-func bind(inventory: Inventory) -> void:
+func bind(inventory: InventoryComponent) -> void:
 	unbind()
 	_inventory = inventory
 	_build_grid()
@@ -47,7 +47,7 @@ func _build_grid() -> void:
 		cell.bind(_inventory, slot_item.id)
 		inventory_grid.add_child(cell)
 
-func _connect_inventory(inventory: Inventory) -> void:
+func _connect_inventory(inventory: InventoryComponent) -> void:
 	if not inventory.item_add.is_connected(_on_inventory_changed):
 		inventory.item_add.connect(_on_inventory_changed)
 	if not inventory.item_drop.is_connected(_on_inventory_changed_drop):
@@ -55,7 +55,7 @@ func _connect_inventory(inventory: Inventory) -> void:
 	if not inventory.contents_changed.is_connected(_on_contents_changed):
 		inventory.contents_changed.connect(_on_contents_changed)
 
-func _disconnect_inventory(inventory: Inventory) -> void:
+func _disconnect_inventory(inventory: InventoryComponent) -> void:
 	if inventory.item_add.is_connected(_on_inventory_changed):
 		inventory.item_add.disconnect(_on_inventory_changed)
 	if inventory.item_drop.is_connected(_on_inventory_changed_drop):

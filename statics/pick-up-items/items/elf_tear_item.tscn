@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://et7tearitem4x"]
+
+[ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_entity"]
+[ext_resource type="Script" uid="uid://dell3nuiwp1o7" path="res://statics/pick-up-items/items/elf_tear_item.gd" id="2_script"]
+
+[node name="ElfTearItem" instance=ExtResource("1_entity")]
+script = ExtResource("2_script")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+visible = false
+
+[node name="CollisionShape2D" parent="." index="1"]
+disabled = true
+
+[node name="Area2D" parent="." index="2"]
+monitoring = false
+monitorable = false

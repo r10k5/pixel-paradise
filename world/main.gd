@@ -1,9 +1,13 @@
 extends Node2D
 
 const TREE = preload("res://statics/tree/tree.tscn")
-const MUSHROOM = preload("res://statics/mushrooms/mushroom.tscn")
 const KUST = preload("res://statics/tree/kust.tscn")
 const STONE = preload("res://statics/stone/stone.tscn")
+const MUSHROOM = preload("res://statics/pick-up-items/mushroom.tscn")
+const FOREST_BERRY = preload("res://statics/pick-up-items/forest_berry.tscn")
+const SHADOW_GRASS = preload("res://statics/pick-up-items/shadow_grass.tscn")
+const OAK_ROOT = preload("res://statics/pick-up-items/oak_root.tscn")
+const ELF_TEAR = preload("res://statics/pick-up-items/elf_tear.tscn")
 const BOMB_SCENE = preload("res://statics/bomb/bomb.tscn")
 const BOMB_ITEM_SCENE = preload("res://statics/bomb/bomb_item.tscn")
 const AXE_ITEM_SCENE = preload("res://statics/tools/axe_base.tscn")
@@ -29,14 +33,11 @@ const MAP_SCALE := 1.5
 @onready var fps_label: Label = $UI/FpsLabel
 @onready var day_night: Node2D = $DayNight
 @onready var multiverse_manager: Node = $MultiverseManager
+@onready var resource_respawn: ResourceRespawnManager = $ResourceRespawnManager
 
 var world_map: WorldMap
 var _flora_spawned: Dictionary = {}
-var _destroyed_tiles: Dictionary = {
-	ChunkEntities.TREE_ID: {},
-	ChunkEntities.KUST_ID: {},
-	ChunkEntities.MUSHROOM_ID: {},
-}
+var _destroyed_tiles: Dictionary = {}
 
 const MIN_DISTANCE_FROM_WATER_TILES := 1
 
@@ -68,10 +69,18 @@ func _input(event: InputEvent) -> void:
 		_try_place_bomb()
 
 func _ready() -> void:
+	_reset_destroyed_tiles()
+	resource_respawn.setup(
+		self,
+		_is_destroyed,
+		_unmark_destroyed,
+		_respawn_resource_at_tile
+	)
 	player.health_changed.connect(on_health_changed)
 	inventory.setup(player.inventory, player)
 	full_inventory.connect_inventory(player.inventory)
 	chest_transfer_ui.closed.connect(_on_chest_transfer_closed)
+	InventoryPersistence.load(player.inventory, PlayerProfile.player_id)
 	_give_starting_tools()
 	_give_debug_bombs()
 	on_health_changed(player.health)
@@ -122,11 +131,13 @@ func export_cell_state() -> Dictionary:
 	return {
 		"destroyed_tiles": WorldCellState.copy_destroyed_tiles(_destroyed_tiles),
 		"flora_spawned": _flora_spawned.duplicate(true),
+		"respawn_timers": resource_respawn.export_timers(),
 	}
 
 
 func import_cell_state(state: WorldCellState) -> void:
 	_destroyed_tiles = WorldCellState.copy_destroyed_tiles(state.destroyed_tiles)
+	resource_respawn.import_timers(state.respawn_timers)
 
 
 func update_multiverse_label() -> void:
@@ -223,12 +234,22 @@ func on_player_died() -> void:
 	if _player_dying:
 		return
 	_player_dying = true
+	InventoryPersistence.save(player.inventory, PlayerProfile.player_id)
 	if screen_fade != null:
 		await screen_fade.await_fade_out()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 func _spawn_placements(chunk: Vector2i, placements: Dictionary) -> void:
-	for entity_id in [ChunkEntities.TREE_ID, ChunkEntities.KUST_ID, ChunkEntities.MUSHROOM_ID]:
+	var entity_ids := [
+		ChunkEntities.TREE_ID,
+		ChunkEntities.KUST_ID,
+		ChunkEntities.MUSHROOM_ID,
+		ChunkEntities.FOREST_BERRY_ID,
+		ChunkEntities.SHADOW_GRASS_ID,
+		ChunkEntities.OAK_ROOT_ID,
+		ChunkEntities.ELF_TEAR_ID,
+	]
+	for entity_id in entity_ids:
 		var scene: PackedScene = _scene_for_entity(entity_id)
 		if scene == null:
 			continue
@@ -257,6 +278,14 @@ func _scene_for_entity(entity_id: String) -> PackedScene:
 			return MUSHROOM
 		ChunkEntities.STONE_ID:
 			return STONE
+		ChunkEntities.FOREST_BERRY_ID:
+			return FOREST_BERRY
+		ChunkEntities.SHADOW_GRASS_ID:
+			return SHADOW_GRASS
+		ChunkEntities.OAK_ROOT_ID:
+			return OAK_ROOT
+		ChunkEntities.ELF_TEAR_ID:
+			return ELF_TEAR
 	return null
 
 func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk: Vector2i) -> Node:
@@ -274,13 +303,17 @@ func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk:
 				(item as BaseEntity).pick_up.connect(on_item_pick_up)
 				actors.add_child(item)
 		)
-	elif entity_id == ChunkEntities.MUSHROOM_ID:
-		node.pick_up.connect(on_item_pick_up)
-		node.pick_up.connect(_on_entity_picked_up.bind(entity_id, tile))
-
 	var parent: Node = world_generator.get_chunk_entities_parent(chunk)
 	parent.add_child(node)
 	node.global_position = world_pos
+
+	if node is ResourceNode:
+		var resource := node as ResourceNode
+		resource.set_spawn_tile(tile)
+		resource.harvested.connect(
+			_on_resource_harvested.bind(entity_id, tile, resource.item_id, resource.respawn_seconds)
+		)
+
 	return node
 
 func _on_entity_death(entity_id: String, tile: Vector2i) -> void:
@@ -290,12 +323,7 @@ func _on_entity_picked_up(_entity: BaseEntity, entity_id: String, tile: Vector2i
 	_mark_destroyed(entity_id, tile)
 
 func _reset_destroyed_tiles() -> void:
-	_destroyed_tiles = {
-		ChunkEntities.TREE_ID: {},
-		ChunkEntities.KUST_ID: {},
-		ChunkEntities.MUSHROOM_ID: {},
-		ChunkEntities.STONE_ID: {},
-	}
+	_destroyed_tiles = WorldCellState._default_destroyed_tiles()
 
 func _mark_destroyed(entity_id: String, tile: Vector2i) -> void:
 	if not _destroyed_tiles.has(entity_id):
@@ -306,6 +334,43 @@ func _is_destroyed(entity_id: String, tile: Vector2i) -> bool:
 	if not _destroyed_tiles.has(entity_id):
 		return false
 	return _destroyed_tiles[entity_id].has(ChunkEntities.tile_key(tile))
+
+
+func _unmark_destroyed(entity_id: String, tile: Vector2i) -> void:
+	if not _destroyed_tiles.has(entity_id):
+		return
+	_destroyed_tiles[entity_id].erase(ChunkEntities.tile_key(tile))
+
+
+func _on_resource_harvested(
+	_resource_node: ResourceNode,
+	entity_id: String,
+	tile: Vector2i,
+	item_id: String,
+	respawn_seconds: float
+) -> void:
+	_mark_destroyed(entity_id, tile)
+	resource_respawn.schedule(entity_id, tile, respawn_seconds)
+	if item_id.is_empty():
+		return
+	var item := ItemFactory.create(item_id)
+	if item != null:
+		player.inventory.add_item(item)
+
+
+func _respawn_resource_at_tile(entity_id: String, tile: Vector2i) -> void:
+	if world_map == null or _is_destroyed(entity_id, tile):
+		return
+	var scene := _scene_for_entity(entity_id)
+	if scene == null:
+		return
+	var chunk_size := world_generator.chunk_size
+	var chunk := Vector2i(
+		int(floor(float(tile.x) / float(chunk_size))),
+		int(floor(float(tile.y) / float(chunk_size)))
+	)
+	_spawn_entity(entity_id, scene, tile, chunk)
+
 
 func _on_item_pick_up(item: BaseEntity) -> void:
 	if not is_instance_valid(item):

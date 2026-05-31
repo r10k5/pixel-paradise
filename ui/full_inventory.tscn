@@ -1,7 +1,7 @@
 [gd_scene load_steps=2 format=3 uid="uid://dx2rm62v0pgjb"]
 
-[ext_resource type="Script" path="res://ui/full_inventory.gd" id="1_b33jh"]
-[ext_resource type="PackedScene" uid="uid://inventory_panel001" path="res://ui/inventory_panel.tscn" id="2_panel"]
+[ext_resource type="Script" uid="uid://c687reouq87rd" path="res://ui/full_inventory.gd" id="1_b33jh"]
+[ext_resource type="PackedScene" uid="uid://pn0lvtfk0joon1" path="res://ui/inventory_panel.tscn" id="2_panel"]
 
 [node name="FullInventory" type="Control"]
 visible = false
@@ -17,6 +17,14 @@ offset_bottom = 242.0
 grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("1_b33jh")
+
+[node name="WeightLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 8.0
+offset_right = 280.0
+offset_bottom = 32.0
+text = "Вес: 0 / 100"
 
 [node name="InventoryPanel" parent="." instance=ExtResource("2_panel")]
 layout_mode = 1

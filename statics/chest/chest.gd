@@ -4,11 +4,9 @@ class_name Chest
 
 signal storage_opened(chest: Chest)
 
-var storage: Inventory
+@onready var storage: InventoryComponent = $InventoryComponent
 
 func _ready() -> void:
-	if storage == null:
-		storage = Inventory.new()
 	collision_layer = PhysicsLayers.SOLID
 	collision_mask = 0
 	super._ready()

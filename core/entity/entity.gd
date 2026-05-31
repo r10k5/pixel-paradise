@@ -26,6 +26,8 @@ var effects: Array = []
 var animations: Dictionary = {}
 var effects_can_be_applied: Dictionary = {}
 @export var texture: Texture
+@export var stack_size: int = 99
+@export var item_weight: float = 1.0
 
 ## Смещение «линии земли» для YSort (если включён на родителе).
 @export var depth_sort_feet_bias: float = 14.0

@@ -8,6 +8,7 @@ var spawn_tile: Vector2i = Vector2i.ZERO
 var player_tile: Vector2i = Vector2i.ZERO
 var destroyed_tiles: Dictionary = {}
 var flora_spawned: Dictionary = {}
+var respawn_timers: Dictionary = {}
 
 
 func _init(
@@ -22,6 +23,7 @@ func _init(
 	player_tile = p_player_tile
 	destroyed_tiles = _default_destroyed_tiles()
 	flora_spawned = {}
+	respawn_timers = {}
 
 
 static func _default_destroyed_tiles() -> Dictionary:
@@ -30,6 +32,10 @@ static func _default_destroyed_tiles() -> Dictionary:
 		ChunkEntities.KUST_ID: {},
 		ChunkEntities.MUSHROOM_ID: {},
 		ChunkEntities.STONE_ID: {},
+		ChunkEntities.FOREST_BERRY_ID: {},
+		ChunkEntities.SHADOW_GRASS_ID: {},
+		ChunkEntities.OAK_ROOT_ID: {},
+		ChunkEntities.ELF_TEAR_ID: {},
 	}
 
 
@@ -48,6 +54,7 @@ func duplicate_state() -> WorldCellState:
 	var copy := WorldCellState.new(grid_pos, world_seed, spawn_tile, player_tile)
 	copy.destroyed_tiles = _deep_copy_destroyed(destroyed_tiles)
 	copy.flora_spawned = flora_spawned.duplicate(true)
+	copy.respawn_timers = respawn_timers.duplicate(true)
 	return copy
 
 
@@ -77,6 +84,7 @@ func to_dict() -> Dictionary:
 		"player_y": player_tile.y,
 		"destroyed_tiles": destroyed_out,
 		"flora_spawned": flora_spawned.duplicate(true),
+		"respawn_timers": respawn_timers.duplicate(true),
 	}
 
 
@@ -93,4 +101,7 @@ static func from_dict(data: Dictionary) -> WorldCellState:
 	var flora: Variant = data.get("flora_spawned", {})
 	if flora is Dictionary:
 		state.flora_spawned = (flora as Dictionary).duplicate(true)
+	var timers: Variant = data.get("respawn_timers", {})
+	if timers is Dictionary:
+		state.respawn_timers = (timers as Dictionary).duplicate(true)
 	return state

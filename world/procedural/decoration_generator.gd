@@ -4,7 +4,11 @@ extends RefCounted
 const DECORATION_TYPES := {
 	"tree": {"scenes": ["res://statics/tree/tree.tscn"], "chance": 0.02, "entity_id": "passive-entity:tree"},
 	"bush": {"scenes": ["res://statics/tree/kust.tscn"], "chance": 0.04, "entity_id": "passive-entity:kust"},
-	"mushroom": {"scenes": ["res://statics/mushrooms/mushroom.tscn"], "chance": 0.015, "entity_id": "passive-entity:mushroom"},
+	"mushroom": {"scenes": ["res://statics/pick-up-items/mushroom.tscn"], "chance": 0.015, "entity_id": "resource:mushroom"},
+	"forest_berry": {"scenes": ["res://statics/pick-up-items/forest_berry.tscn"], "chance": 0.02, "entity_id": "resource:forest_berry"},
+	"shadow_grass": {"scenes": ["res://statics/pick-up-items/shadow_grass.tscn"], "chance": 0.018, "entity_id": "resource:shadow_grass"},
+	"oak_root": {"scenes": ["res://statics/pick-up-items/oak_root.tscn"], "chance": 0.008, "entity_id": "resource:oak_root"},
+	"elf_tear": {"scenes": ["res://statics/pick-up-items/elf_tear.tscn"], "chance": 0.005, "entity_id": "resource:elf_tear"},
 	"rock": {"scenes": ["res://statics/stone/stone.tscn"], "chance": 0.03, "entity_id": "passive-entity:stone"},
 	"cactus": {"scenes": [], "chance": 0.02, "entity_id": ""},
 	"pine_tree": {"scenes": [], "chance": 0.025, "entity_id": ""},
@@ -87,6 +91,14 @@ static func _type_chance(biome: Biome, decor_type: String, default_chance: float
 					return 0.12
 				"mushroom":
 					return 0.04
+				"forest_berry":
+					return 0.06
+				"shadow_grass":
+					return 0.05
+				"oak_root":
+					return 0.02
+				"elf_tear":
+					return 0.008
 				_:
 					return default_chance
 		Biome.BiomeType.SWAMP:
@@ -97,6 +109,10 @@ static func _type_chance(biome: Biome, decor_type: String, default_chance: float
 					return 0.10
 				"tree":
 					return 0.05
+				"shadow_grass":
+					return 0.08
+				"elf_tear":
+					return 0.03
 				_:
 					return default_chance
 		Biome.BiomeType.GRASSLAND:
@@ -107,6 +123,8 @@ static func _type_chance(biome: Biome, decor_type: String, default_chance: float
 					return 0.07
 				"mushroom":
 					return 0.05
+				"forest_berry":
+					return 0.03
 				_:
 					return default_chance
 		_:

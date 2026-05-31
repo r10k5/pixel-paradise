@@ -1,7 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://dhqvarbhiojb4"]
+[gd_scene format=3 uid="uid://dhqvarbhiojb4"]
 
 [ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_ymnf6"]
-[ext_resource type="Script" path="res://statics/drop/log.gd" id="2_b3rpq"]
+[ext_resource type="Script" uid="uid://c2av148aagifi" path="res://statics/drop/log.gd" id="2_b3rpq"]
 [ext_resource type="Texture2D" uid="uid://danl6trst3v7t" path="res://assets/drop_item/log.png" id="3_3sfql"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_m5g6y"]
@@ -22,7 +22,7 @@ height = 28.0545
 [sub_resource type="CircleShape2D" id="CircleShape2D_5t0rs"]
 radius = 39.0
 
-[node name="Log" instance=ExtResource("1_ymnf6")]
+[node name="Log" unique_id=2055426922 instance=ExtResource("1_ymnf6")]
 script = ExtResource("2_b3rpq")
 texture = ExtResource("3_3sfql")
 

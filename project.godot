@@ -19,6 +19,10 @@ run/main_scene="res://world/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+PlayerProfile="*res://core/save/player_profile.gd"
+
 [display]
 
 window/size/viewport_width=1920
