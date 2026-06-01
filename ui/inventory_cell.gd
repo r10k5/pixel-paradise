@@ -12,7 +12,7 @@ var slot_id: int = -1
 @onready var item_texture_node = $TextureRect
 @onready var background = $Background
 
-var _tooltip: PanelContainer
+var _tooltip: Label
 
 const SELECTED_TINT := Color(1.15, 1.15, 0.75)
 const NORMAL_TINT := Color.WHITE
@@ -35,12 +35,9 @@ func _on_gui_input(event: InputEvent) -> void:
 
 
 func _setup_tooltip() -> void:
-	_tooltip = PanelContainer.new()
+	_tooltip = Label.new()
 	_tooltip.visible = false
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var label := Label.new()
-	label.name = "TooltipLabel"
-	_tooltip.add_child(label)
 	add_child(_tooltip)
 
 
@@ -91,6 +88,7 @@ func _update_display() -> void:
 		item_texture_node.texture = null
 		item_count_lable.text = ""
 	_update_tooltip_text()
+	_sync_tooltip_visibility()
 
 
 func set_selected(selected: bool) -> void:
@@ -118,6 +116,8 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 		"from_player": bound_inventory != null and bound_inventory.get_parent() is Player,
 	}
 	DragDropManager.notify_drag_started(payload)
+	if _tooltip:
+		_tooltip.visible = false
 	return payload
 
 
@@ -139,7 +139,27 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	InventoryComponent.transfer_between(from_inventory, from_id, bound_inventory, slot_id)
 
 
+func _should_show_tooltip() -> bool:
+	if DragDropManager.is_drag_active():
+		return false
+	var slot_item := _get_slot_item()
+	return slot_item != null and not slot_item.is_empty()
+
+
+func _sync_tooltip_visibility() -> void:
+	if _tooltip == null:
+		return
+	if not _should_show_tooltip():
+		_tooltip.visible = false
+		return
+	if get_viewport() != null and get_global_rect().has_point(get_global_mouse_position()):
+		_tooltip.visible = true
+		_position_tooltip()
+
+
 func _on_mouse_entered() -> void:
+	if not _should_show_tooltip():
+		return
 	if _tooltip:
 		_tooltip.visible = true
 		_position_tooltip()
@@ -159,16 +179,13 @@ func _position_tooltip() -> void:
 func _update_tooltip_text() -> void:
 	if _tooltip == null:
 		return
-	var label := _tooltip.get_node_or_null("TooltipLabel") as Label
-	if label == null:
-		return
 	var slot_item := _get_slot_item()
 	if slot_item == null or slot_item.is_empty():
-		label.text = ""
+		_tooltip.text = ""
 		return
 	var item := slot_item.item
 	var weight_line := "%.1f kg" % (item.item_weight * float(slot_item.count))
-	label.text = "%s\n%d / %d\n%s" % [
+	_tooltip.text = "%s\n%d / %d\n%s" % [
 		item.title,
 		slot_item.count,
 		item.stack_size,

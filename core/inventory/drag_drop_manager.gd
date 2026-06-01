@@ -12,6 +12,10 @@ func _ready() -> void:
 	add_child(_tooltip)
 
 
+func is_drag_active() -> bool:
+	return not _active_drag.is_empty()
+
+
 func notify_drag_started(data: Dictionary) -> void:
 	_active_drag = data.duplicate()
 

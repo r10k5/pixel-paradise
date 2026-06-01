@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cl738u6wnt1ws"]
 
 [ext_resource type="Script" path="res://ui/inventory_cell.gd" id="1_pw4rr"]
-[ext_resource type="Texture2D" uid="uid://og0m7k6mj350" path="res://assets/ui/cell-2.png" id="2_y24fy"]
+[ext_resource type="Texture2D" uid="uid://becse2ok1yo1y" path="res://assets/ui/inventory-cell.png" id="2_y24fy"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
