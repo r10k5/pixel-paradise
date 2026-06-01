@@ -12,13 +12,13 @@ enum SurvivalState { HEALTHY, HUNGRY, EXHAUSTED, DYING }
 @export var max_stamina: float = 100.0
 @export var max_hunger: float = 100.0
 
-@export var hunger_decay_per_sec: float = 0.5
+@export var hunger_decay_per_sec: float = 0.15
 @export var hunger_sprint_extra_per_sec: float = 1.0
-@export var stamina_regen_per_sec: float = 3.0
+@export var stamina_regen_per_sec: float = 2.5
 @export var heavy_weight_threshold: float = 70.0
 @export var heavy_stamina_drain_per_sec: float = 2.0
 @export var exhausted_speed_multiplier: float = 0.35
-@export var sprint_stamina_drain_per_sec: float = 8.0
+@export var sprint_stamina_drain_per_sec: float = 4.0
 
 var hp: float = 100.0
 var stamina: float = 100.0
@@ -33,12 +33,19 @@ var _rest_timer: float = 0.0
 var _dying_timer: float = 0.0
 var _last_hunger_emit: int = 100
 var _last_stamina_emit: int = 100
+var _is_near_safe_zone: bool = false
+var _safe_zone_check_accum: float = 0.0
 const REST_DURATION := 10.0
 const REST_HEAL_AMOUNT := 5.0
 const DYING_DURATION := 60.0
 const HUNGER_BLOCK_STAMINA_REGEN := 30.0
 const HUNGER_SLOW_THRESHOLD := 10.0
 const CRITICAL_RATIO := 0.2
+const SAFE_ZONE_CHECK_INTERVAL := 0.5
+const SAFE_ZONE_RADIUS := 64.0
+const JUMP_COST := 10.0
+const ATTACK_COST := 15.0
+const SPRINT_COST := 5.0
 
 @onready var _player: Player = get_parent() as Player
 
@@ -58,6 +65,10 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _player != null and _player.is_dead:
 		return
+	_safe_zone_check_accum += delta
+	if _safe_zone_check_accum >= SAFE_ZONE_CHECK_INTERVAL:
+		_safe_zone_check_accum = 0.0
+		_refresh_near_safe_zone()
 	_tick_hunger(delta)
 	_tick_stamina(delta)
 	_tick_starvation_damage(delta)
@@ -75,15 +86,15 @@ func is_spending_stamina() -> bool:
 
 
 func can_sprint() -> bool:
-	return stamina > 0.0
+	return stamina >= SPRINT_COST
 
 
 func can_jump() -> bool:
-	return stamina > 0.0
+	return stamina >= JUMP_COST
 
 
 func can_attack() -> bool:
-	return stamina > 0.0
+	return stamina >= ATTACK_COST
 
 
 func is_exhausted() -> bool:
@@ -113,9 +124,8 @@ func heal(amount: float) -> void:
 		return
 	hp = minf(max_hp, hp + amount)
 	hp_changed.emit(hp)
-	if hp > 0.0 and current_state == SurvivalState.DYING:
-		current_state = SurvivalState.HEALTHY
-		state_changed.emit(current_state)
+	if current_state == SurvivalState.DYING and hp > max_hp * CRITICAL_RATIO:
+		_exit_dying()
 
 
 func restore_hunger(amount: float) -> void:
@@ -144,15 +154,17 @@ func spend_stamina_flat(amount: float) -> void:
 
 
 func is_near_campfire_or_safe() -> bool:
+	return _is_near_safe_zone
+
+
+func _refresh_near_safe_zone() -> void:
+	_is_near_safe_zone = false
 	if _player == null:
-		return false
-	for node in get_tree().get_nodes_in_group("campfire"):
-		if node is Node2D and _player.global_position.distance_to((node as Node2D).global_position) <= 48.0:
-			return true
+		return
 	for node in get_tree().get_nodes_in_group("safe_zone"):
-		if node is Node2D and _player.global_position.distance_to((node as Node2D).global_position) <= 64.0:
-			return true
-	return false
+		if node is Node2D and _player.global_position.distance_to((node as Node2D).global_position) <= SAFE_ZONE_RADIUS:
+			_is_near_safe_zone = true
+			return
 
 
 func _tick_hunger(delta: float) -> void:
@@ -198,10 +210,10 @@ func _tick_rest_heal(delta: float) -> void:
 	if hunger < HUNGER_BLOCK_STAMINA_REGEN:
 		_rest_timer = 0.0
 		return
-	if _player.velocity.length() > 5.0 or is_sprinting or is_in_hand_tool:
+	if not _player.velocity.is_zero_approx():
 		_rest_timer = 0.0
 		return
-	if not is_near_campfire_or_safe():
+	if not _is_near_safe_zone:
 		_rest_timer = 0.0
 		return
 	_rest_timer += delta
@@ -210,8 +222,13 @@ func _tick_rest_heal(delta: float) -> void:
 		_rest_timer = 0.0
 
 
-func _tick_dying(_delta: float) -> void:
-	pass
+func _tick_dying(delta: float) -> void:
+	if current_state != SurvivalState.DYING:
+		return
+	_dying_timer -= delta
+	if _dying_timer <= 0.0 and _player != null and not _player.is_dead:
+		_player.is_dead = true
+		_player.die()
 
 
 func _enter_dying() -> void:
@@ -225,14 +242,26 @@ func _enter_dying() -> void:
 		_player.death.emit()
 
 
+func _exit_dying() -> void:
+	if current_state != SurvivalState.DYING:
+		return
+	_dying_timer = 0.0
+	current_state = SurvivalState.HEALTHY
+	state_changed.emit(current_state)
+
+
 func _update_state() -> void:
 	var new_state := SurvivalState.HEALTHY
-	if current_state == SurvivalState.DYING:
-		return
-	if hunger < HUNGER_BLOCK_STAMINA_REGEN or hp < max_hp * CRITICAL_RATIO:
-		new_state = SurvivalState.HUNGRY
-	if stamina <= 0.0:
+
+	if current_state == SurvivalState.DYING and hp <= max_hp * CRITICAL_RATIO:
+		new_state = SurvivalState.DYING
+	elif stamina <= 0.0:
 		new_state = SurvivalState.EXHAUSTED
+	elif hunger < HUNGER_BLOCK_STAMINA_REGEN or hp < max_hp * CRITICAL_RATIO:
+		new_state = SurvivalState.HUNGRY
+	else:
+		new_state = SurvivalState.HEALTHY
+
 	if new_state != current_state:
 		current_state = new_state
 		state_changed.emit(current_state)

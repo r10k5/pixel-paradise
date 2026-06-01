@@ -193,7 +193,7 @@ func compute_walk_speed(direction_active: bool) -> float:
 func try_begin_jump() -> bool:
 	if survival == null:
 		return true
-	return survival.spend_stamina(15.0)
+	return survival.spend_stamina(SurvivalStats.JUMP_COST)
 
 func has_movement_input() -> bool:
 	return (

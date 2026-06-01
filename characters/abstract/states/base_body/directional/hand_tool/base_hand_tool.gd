@@ -25,7 +25,7 @@ func enter() -> void:
 		var player := base_body as Player
 		var stats := player.get_node_or_null("SurvivalStats") as SurvivalStats
 		if stats != null:
-			if not stats.can_attack() or not stats.spend_stamina(10.0):
+			if not stats.can_attack() or not stats.spend_stamina(SurvivalStats.ATTACK_COST):
 				transition.emit(self, return_idle_state)
 				return
 			stats.is_in_hand_tool = true
