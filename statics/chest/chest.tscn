@@ -1,9 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://d1kjc1ta064pj"]
+[gd_scene format=3 uid="uid://d1kjc1ta064pj"]
 
 [ext_resource type="PackedScene" uid="uid://dtpb4dypr4ehk" path="res://core/entity/entity.tscn" id="1_mucst"]
 [ext_resource type="Texture2D" uid="uid://bwkf7cl84hcm0" path="res://assets/world/static/TX Props.png" id="1_vveg6"]
-[ext_resource type="Script" path="res://statics/chest/chest.gd" id="2_0u2he"]
-[ext_resource type="PackedScene" uid="uid://ic0mponent7x1w" path="res://core/inventory/inventory_component.tscn" id="3_invcomp"]
+[ext_resource type="Script" uid="uid://bsvs1nfkgsnv5" path="res://statics/chest/chest.gd" id="2_0u2he"]
+[ext_resource type="PackedScene" uid="uid://lnwsm4rqus8m" path="res://core/inventory/inventory_component.tscn" id="3_invcomp"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dfjw5"]
 atlas = ExtResource("1_vveg6")
@@ -45,10 +45,15 @@ size = Vector2(30, 24)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mn7fx"]
 size = Vector2(86, 76)
 
-[node name="Chest" instance=ExtResource("1_mucst")]
+[node name="Chest" unique_id=21255771 instance=ExtResource("1_mucst")]
 collision_layer = 4
 collision_mask = 0
 script = ExtResource("2_0u2he")
+chest_uid = ""
+loot_table_id = "forest_normal"
+loot_seed = 0
+loot_difficulty = "normal"
+default_biome = 0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_grntd")
@@ -57,9 +62,10 @@ animation = &"idle"
 [node name="CollisionShape2D" parent="." index="1"]
 position = Vector2(0, 13)
 shape = SubResource("RectangleShape2D_k8hbk")
+debug_color = Color(0.1919404, 0.5515812, 0.29391223, 0.41960785)
 
 [node name="CollisionShape2D" parent="Area2D" index="0"]
 position = Vector2(0, 5)
 shape = SubResource("RectangleShape2D_mn7fx")
 
-[node name="InventoryComponent" parent="." instance=ExtResource("3_invcomp")]
+[node name="InventoryComponent" parent="." index="4" unique_id=431498417 instance=ExtResource("3_invcomp")]

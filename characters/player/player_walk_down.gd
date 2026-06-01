@@ -2,7 +2,10 @@ extends WalkDown
 
 func update(delta: float):
 	if Input.is_action_just_pressed("attack"):
-		var tool_state := (base_body as Player).get_tool_attack_state(name)
+		var player := base_body as Player
+		if player.survival != null and not player.survival.can_attack():
+			return
+		var tool_state := player.get_tool_attack_state(name)
 		if not tool_state.is_empty():
 			transition.emit(self, tool_state)
 			return

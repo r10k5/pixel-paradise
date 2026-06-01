@@ -19,6 +19,14 @@ var _tool_collision_active := false
 var _hit_entities: Array[BaseEntity] = []
 
 func enter() -> void:
+	if base_body is Player:
+		var player := base_body as Player
+		var stats := player.get_node_or_null("SurvivalStats") as SurvivalStats
+		if stats != null:
+			if not stats.can_attack() or not stats.spend_stamina(10.0):
+				transition.emit(self, return_idle_state)
+				return
+			stats.is_in_hand_tool = true
 	_hit_entities.clear()
 	base_body.velocity = Vector2.ZERO
 	base_body.death.connect(_on_death)
@@ -36,6 +44,10 @@ func enter() -> void:
 	_return_to_movement()
 
 func exit() -> void:
+	if base_body is Player:
+		var stats := (base_body as Player).get_node_or_null("SurvivalStats") as SurvivalStats
+		if stats != null:
+			stats.is_in_hand_tool = false
 	_tool_collision_active = false
 	_set_tool_collision(false)
 	_reset_tool_collision_position()
@@ -109,7 +121,7 @@ func _queue_tool_damage(body: Node) -> void:
 	if entity in _hit_entities:
 		return
 	_hit_entities.append(entity)
-	entity.call_deferred("take_damage", hit_damage)
+	DamageAuthority.apply_damage(entity, float(hit_damage), "hand_tool")
 
 func _on_death() -> void:
 	transition.emit(self, _death_state_name())

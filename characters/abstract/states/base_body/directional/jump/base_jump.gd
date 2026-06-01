@@ -14,11 +14,16 @@ var _jump_duration: float = 0.0
 var _arc_height: float = 0.0
 
 func enter() -> void:
+	var player := base_body as Player
+	if player != null:
+		if not player.try_begin_jump():
+			transition.emit(self, return_idle_state)
+			return
 	_jump_active = true
 	_jump_elapsed = 0.0
 	_jump_direction = _get_jump_direction()
-	var player := base_body as Player
-	player.begin_jump()
+	if player != null:
+		player.begin_jump()
 	_jump_duration = player.get_jump_duration(animation)
 	_jump_speed = player.compute_jump_speed(animation)
 	_arc_height = player.get_jump_arc_height()

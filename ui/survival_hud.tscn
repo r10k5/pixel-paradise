@@ -1,0 +1,64 @@
+[gd_scene load_steps=2 format=3 uid="uid://survival_hud_pp"]
+
+[ext_resource type="Script" path="res://ui/survival_hud.gd" id="1_script"]
+
+[node name="SurvivalHUD" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="Vignette" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 280.0
+offset_bottom = 120.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HPBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(220, 18)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HungerBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(220, 18)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="StaminaBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(220, 18)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="Icons" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HungryIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/Icons"]
+visible = false
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Голод"
+
+[node name="ExhaustedIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/Icons"]
+visible = false
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+tooltip_text = "Усталость"

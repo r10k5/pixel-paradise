@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="LootTable" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://core/loot/loot_table.gd" id="1"]
+[ext_resource type="Script" path="res://core/loot/loot_entry.gd" id="2"]
+
+[sub_resource type="Resource" id="LootEntry_berry"]
+script = ExtResource("2")
+item_id = "item:forest_berry"
+weight = 2.0
+min_count = 1
+max_count = 3
+
+[sub_resource type="Resource" id="LootEntry_root"]
+script = ExtResource("2")
+item_id = "item:oak_root"
+weight = 1.5
+min_count = 1
+max_count = 2
+
+[resource]
+script = ExtResource("1")
+entries = Array[ExtResource("2")]([SubResource("LootEntry_berry"), SubResource("LootEntry_root")])

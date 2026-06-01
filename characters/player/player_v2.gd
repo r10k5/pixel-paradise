@@ -21,6 +21,7 @@ const HOTBAR_SLOT_COUNT := 7
 signal hotbar_slot_changed(slot: int)
 
 @onready var inventory: InventoryComponent = $InventoryComponent
+@onready var survival: SurvivalStats = $SurvivalStats
 var selected_hotbar_slot: int = 0
 var is_dead: bool = false
 var _steps_player: AudioStreamPlayer
@@ -29,6 +30,7 @@ var _is_jumping: bool = false
 
 func _ready() -> void:
 	super._ready()
+	add_to_group("player")
 	collision_layer = PhysicsLayers.PLAYER
 	collision_mask = PhysicsLayers.MASK_NORMAL
 	animations = {
@@ -161,25 +163,48 @@ func _animation_duration(sprite: AnimatedSprite2D, animation_name: String) -> fl
 func take_damage(amount: int) -> void:
 	if is_dead:
 		return
-	super.take_damage(amount)
+	DamageAuthority.apply_damage(self, float(amount), "legacy")
 
 func die() -> void:
 	if is_dead:
 		return
-	super.die()
+	is_dead = true
+	if survival != null:
+		survival.save()
+	death.emit()
 
 func use() -> void:
 	if is_dead:
 		return
 	if Input.is_action_just_pressed("use"):
-		pass
+		ConsumableEffects.try_use_selected(self)
 
-func _physics_process(_delta: float) -> void:
+func compute_walk_speed(direction_active: bool) -> float:
+	var mult := 1.0
+	if survival != null:
+		mult *= survival.get_move_speed_multiplier()
+		survival.is_sprinting = false
+		if direction_active and Input.is_action_pressed("sprint") and survival.can_sprint():
+			survival.is_sprinting = true
+			mult *= 1.6
+	return speed * mult
+
+func try_begin_jump() -> bool:
+	if survival == null:
+		return true
+	return survival.spend_stamina(15.0)
+
+func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
+	if survival != null:
+		if not survival.is_in_hand_tool:
+			survival.is_working = false
+		if inventory.get_total_weight() > survival.heavy_weight_threshold:
+			survival.spend_stamina_flat(survival.heavy_stamina_drain_per_sec * delta)
 	use()
 	move_and_slide()
-	_process_steps(_delta)
+	_process_steps(delta)
 
 func _setup_steps_player() -> void:
 	_steps_player = AudioStreamPlayer.new()

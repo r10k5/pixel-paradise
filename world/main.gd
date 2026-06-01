@@ -21,7 +21,7 @@ const MAP_SCALE := 1.5
 
 @onready var player: Player = $Entities/Actors/Player
 @onready var actors: Node2D = $Entities/Actors
-@onready var hp_bar = $UI/HP
+@onready var survival_hud: CanvasLayer = $UI/SurvivalHUD
 @onready var droped_items = $Entities/DropItems
 @onready var inventory = $UI/Inventory
 @onready var full_inventory: Control = $UI/FullInventory
@@ -76,14 +76,14 @@ func _ready() -> void:
 		_unmark_destroyed,
 		_respawn_resource_at_tile
 	)
-	player.health_changed.connect(on_health_changed)
 	inventory.setup(player.inventory, player)
 	full_inventory.connect_inventory(player.inventory)
 	chest_transfer_ui.closed.connect(_on_chest_transfer_closed)
 	InventoryPersistence.load(player.inventory, PlayerProfile.player_id)
+	if survival_hud != null and survival_hud.has_method("bind"):
+		survival_hud.bind(player.survival)
 	_give_starting_tools()
 	_give_debug_bombs()
-	on_health_changed(player.health)
 	world_generator.world_generated.connect(_on_world_generated)
 	world_generator.chunk_generated.connect(_on_chunk_generated)
 
@@ -203,9 +203,6 @@ func _spawn_biome_decorations(chunk: Vector2i) -> void:
 			continue
 		_spawn_entity(entity_id, packed, tile, chunk)
 
-func on_health_changed(current_health: int) -> void:
-	hp_bar.set_hp(current_health)
-
 func _give_starting_tools() -> void:
 	var axe := AXE_ITEM_SCENE.instantiate() as BaseEntity
 	var pickaxe := PICKAXE_ITEM_SCENE.instantiate() as BaseEntity
@@ -235,6 +232,8 @@ func on_player_died() -> void:
 		return
 	_player_dying = true
 	InventoryPersistence.save(player.inventory, PlayerProfile.player_id)
+	if player.survival != null:
+		player.survival.save()
 	if screen_fade != null:
 		await screen_fade.await_fade_out()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
@@ -388,6 +387,16 @@ func _on_item_pick_up(item: BaseEntity) -> void:
 func on_item_pick_up(item: BaseEntity) -> void:
 	call_deferred("_on_item_pick_up", item)
 
+func get_biome_type_at_position(world_pos: Vector2) -> Biome.BiomeType:
+	if world_map == null or grass_tilemap == null:
+		return Biome.BiomeType.GRASSLAND
+	var tile := grass_tilemap.local_to_map(grass_tilemap.to_local(world_pos))
+	var biome := world_map.get_biome(tile)
+	if biome == null:
+		return Biome.BiomeType.GRASSLAND
+	return biome.biome_type
+
+
 func _spawn_nearby_chests() -> void:
 	if not is_instance_valid(player):
 		return
@@ -398,9 +407,12 @@ func _spawn_nearby_chests() -> void:
 
 	var offsets := [Vector2(80, 0), Vector2(-80, 32)]
 	for i in range(offsets.size()):
-		var chest := CHEST_SCENE.instantiate()
+		var chest := CHEST_SCENE.instantiate() as Chest
 		chests_container.add_child(chest)
 		chest.global_position = player.global_position + offsets[i]
+		chest.chest_uid = "debug_chest_%d" % i
+		chest.loot_table_id = "forest_normal"
+		chest.loot_seed = world_generator.get_map_seed() + i if world_generator != null else i + 1
 		chest.storage_opened.connect(_on_chest_storage_opened)
 
 func _on_chest_storage_opened(chest: Chest) -> void:
@@ -414,8 +426,10 @@ func _on_chest_transfer_closed() -> void:
 
 func _try_interact_chest() -> void:
 	var chest := _find_interactable_chest()
-	if chest != null:
-		chest.interact()
+	if chest == null or player == null:
+		return
+	if ChestAuthority.request_open(chest, player):
+		_on_chest_storage_opened(chest)
 
 func _find_interactable_chest() -> Chest:
 	var closest: Chest = null

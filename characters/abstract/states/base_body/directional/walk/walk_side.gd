@@ -22,6 +22,15 @@ func update(_delta: float) -> void:
 	elif h > 0.0:
 		base_body.set_facing_left(false)
 	if h != 0.0:
-		base_body.velocity = Vector2(h, 0.0).normalized() * base_body.speed
+		var spd := _walk_speed(h != 0.0)
+		base_body.velocity = Vector2(h, 0.0).normalized() * spd
 	else:
 		base_body.velocity = Vector2.ZERO
+		if base_body is Player:
+			(base_body as Player).compute_walk_speed(false)
+
+
+func _walk_speed(direction_active: bool) -> float:
+	if base_body is Player:
+		return (base_body as Player).compute_walk_speed(direction_active)
+	return base_body.speed

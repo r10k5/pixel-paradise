@@ -2,6 +2,8 @@ extends Control
 
 class_name InventoryCell
 
+signal cell_pressed(cell: InventoryCell)
+
 var inventory_item: InventoryItem
 var bound_inventory: InventoryComponent
 var slot_id: int = -1
@@ -20,8 +22,16 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+	gui_input.connect(_on_gui_input)
 	_setup_tooltip()
 	refresh()
+
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			cell_pressed.emit(self)
 
 
 func _setup_tooltip() -> void:
@@ -102,10 +112,13 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	preview.custom_minimum_size = Vector2(48, 48)
 	set_drag_preview(preview)
 
-	return {
+	var payload := {
 		"inventory": bound_inventory,
 		"slot_id": slot_id,
+		"from_player": bound_inventory != null and bound_inventory.get_parent() is Player,
 	}
+	DragDropManager.notify_drag_started(payload)
+	return payload
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:

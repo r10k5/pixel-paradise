@@ -31,6 +31,14 @@ func _is_valid_id(id: int) -> bool:
 	return id in _items
 
 
+func is_valid_slot(id: int) -> bool:
+	return _is_valid_id(id)
+
+
+func find_accepting_slot(item: BaseEntity, count: int) -> int:
+	return _find_accepting_slot(item, count)
+
+
 func get_item(id: int) -> InventoryItem:
 	if _is_valid_id(id):
 		return _items[id]
@@ -185,6 +193,74 @@ func remove_item(id: int) -> bool:
 
 func swap_items(source_id: int, target_id: int) -> bool:
 	return transfer_between(self, source_id, self, target_id)
+
+
+## Переносит стаки item_id в other, пока не перенесено count штук или слоты кончились. Возвращает остаток.
+func try_move_stack_to(other: InventoryComponent, item_id: String, count: int) -> int:
+	if other == null or item_id.is_empty() or count <= 0:
+		return count
+	var remaining := count
+	for slot_id in range(max_slots):
+		if remaining <= 0:
+			break
+		var inv_item := get_item(slot_id)
+		if inv_item.is_empty() or str(inv_item.item.id) != item_id:
+			continue
+		var target_slot := other._find_accepting_slot(inv_item.item, inv_item.count)
+		if target_slot < 0:
+			continue
+		var stack_count := inv_item.count
+		if not transfer_between(self, slot_id, other, target_slot):
+			continue
+		remaining -= stack_count
+	return maxi(0, remaining)
+
+
+func move_all_matching(other: InventoryComponent, item_id: String = "") -> Dictionary:
+	var result := {"partial": false, "moved_stacks": 0}
+	if other == null or other == self:
+		return result
+	var changed := false
+	for slot_id in range(max_slots):
+		var inv_item := get_item(slot_id)
+		if inv_item.is_empty():
+			continue
+		if not item_id.is_empty() and str(inv_item.item.id) != item_id:
+			continue
+		while true:
+			inv_item = get_item(slot_id)
+			if inv_item.is_empty():
+				break
+			var target_slot := other._find_accepting_slot(inv_item.item, inv_item.count)
+			if target_slot < 0:
+				result["partial"] = true
+				break
+			if not transfer_between(self, slot_id, other, target_slot):
+				result["partial"] = true
+				break
+			result["moved_stacks"] += 1
+			changed = true
+	if changed:
+		contents_changed.emit()
+		if other != self:
+			other.contents_changed.emit()
+	return result
+
+
+func _find_accepting_slot(item: BaseEntity, count: int) -> int:
+	if item == null or count <= 0:
+		return -1
+	if item.id in _item_id_index_map:
+		var stack_slot: int = _item_id_index_map[item.id]
+		var stack_item := get_item(stack_slot)
+		if not stack_item.is_empty():
+			var space := _stack_limit(item) - stack_item.count
+			if space > 0:
+				return stack_slot
+	for slot_item in _items.values():
+		if slot_item.is_empty() and can_fit(item, count):
+			return slot_item.id
+	return -1
 
 
 static func transfer_between(

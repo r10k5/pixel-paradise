@@ -17,6 +17,25 @@ func set_death_state():
 func exit():
 	base_body.death.disconnect(set_death_state)
 
-func update(_delta: float):
-	base_body.velocity = Vector2(xDirection, -1).normalized() * base_body.speed
+func update(_delta: float) -> void:
+	var vertical := Input.is_action_pressed("move_up")
+	if not vertical:
+		base_body.velocity = Vector2.ZERO
+		_reset_walk_sprint()
+		xDirection = 0
+		return
+	var dir := Vector2(xDirection, -1.0)
+	var spd := _walk_speed(true)
+	base_body.velocity = dir.normalized() * spd
 	xDirection = 0
+
+
+func _walk_speed(direction_active: bool) -> float:
+	if base_body is Player:
+		return (base_body as Player).compute_walk_speed(direction_active)
+	return base_body.speed
+
+
+func _reset_walk_sprint() -> void:
+	if base_body is Player:
+		(base_body as Player).compute_walk_speed(false)

@@ -1,6 +1,10 @@
 extends BaseEntity
 class_name PickupItem
 
+@export var hunger_restore: float = 0.0
+@export var stamina_restore: float = 0.0
+@export var hp_restore: float = 0.0
+
 
 func _configure(p_id: String, p_title: String, p_stack: int, p_weight: float) -> void:
 	id = p_id
