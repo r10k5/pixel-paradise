@@ -12,9 +12,9 @@ func _ready() -> void:
 	super._ready()
 
 
-func configure(chunk: Vector2i, size_tiles: int, grass_template: TileMap) -> void:
+func configure(chunk: Vector2i, size_tiles: int, grass_template_root: Node2D) -> void:
 	chunk_coords = chunk
-	var tile_px := Vector2(grass_template.tile_set.tile_size) * grass_template.scale
+	var tile_px := BiomeLayerConfig.tile_pixel_size(grass_template_root)
 	position = Vector2(chunk.x * size_tiles, chunk.y * size_tiles) * tile_px
 	set_cull_rect(Rect2(Vector2.ZERO, Vector2(size_tiles, size_tiles) * tile_px))
 

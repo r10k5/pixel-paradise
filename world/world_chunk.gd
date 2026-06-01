@@ -4,12 +4,13 @@ extends ScreenCullRegion
 var chunk_coords: Vector2i = Vector2i.ZERO
 var chunk_size_tiles: int = 32
 
-@onready var grass_tilemap: TileMap = $GrassTileMap
+@onready var biome_terrain: Node2D = $BiomeGrassTileMap
+@onready var grass_reference_layer: TileMapLayer = $BiomeGrassTileMap/GrasslandLayer
 @onready var water_tilemap: TileMap = $WaterTileMap
 
 
 func _ready() -> void:
-	register_content(grass_tilemap)
+	register_content(biome_terrain)
 	register_content(water_tilemap)
 	super._ready()
 
@@ -17,20 +18,18 @@ func _ready() -> void:
 func configure(
 	chunk: Vector2i,
 	size_tiles: int,
-	grass_template: TileMap,
+	grass_template_root: Node2D,
 	water_template: TileMap
 ) -> void:
 	chunk_coords = chunk
 	chunk_size_tiles = size_tiles
 
-	grass_tilemap.tile_set = grass_template.tile_set
-	grass_tilemap.scale = grass_template.scale
-	grass_tilemap.rendering_quadrant_size = grass_template.rendering_quadrant_size
+	BiomeLayerConfig.apply_template_layers(biome_terrain, grass_template_root)
 	water_tilemap.tile_set = water_template.tile_set
 	water_tilemap.scale = water_template.scale
 	water_tilemap.rendering_quadrant_size = water_template.rendering_quadrant_size
 
-	var tile_px := Vector2(grass_template.tile_set.tile_size) * grass_template.scale
+	var tile_px := BiomeLayerConfig.tile_pixel_size(grass_template_root)
 	var origin := Vector2(chunk.x * size_tiles, chunk.y * size_tiles) * tile_px
 	position = origin
 	set_cull_rect(Rect2(Vector2.ZERO, Vector2(size_tiles, size_tiles) * tile_px))

@@ -27,7 +27,7 @@ const MAP_SCALE := 1.5
 @onready var full_inventory: Control = $UI/FullInventory
 @onready var chest_transfer_ui: Control = $UI/ChestTransferUI
 @onready var chests_container: Node2D = $Entities/Chests
-@onready var grass_tilemap: TileMap = $TileMap
+@onready var grass_reference_layer: TileMapLayer = $BiomeGrassTileMap/GrasslandLayer
 @onready var world_generator: WorldGenerator = $WorldGenerator
 @onready var seed_label: Label = $UI/WorldSeedLabel
 @onready var fps_label: Label = $UI/FpsLabel
@@ -101,7 +101,7 @@ func _update_forest_ambience() -> void:
 	if world_map == null or not world_map.settings.enable_biomes:
 		day_night.set_forest_darkness(0.0)
 		return
-	var tile := grass_tilemap.local_to_map(grass_tilemap.to_local(player.global_position))
+	var tile := grass_reference_layer.local_to_map(grass_reference_layer.to_local(player.global_position))
 	var biome := world_map.get_biome(tile)
 	var in_forest := biome != null and biome.biome_type == Biome.BiomeType.FOREST
 	day_night.set_forest_darkness(1.0 if in_forest else 0.0)
@@ -289,7 +289,7 @@ func _scene_for_entity(entity_id: String) -> PackedScene:
 
 func _spawn_entity(entity_id: String, scene: PackedScene, tile: Vector2i, chunk: Vector2i) -> Node:
 	var node := scene.instantiate()
-	var world_pos := grass_tilemap.to_global(grass_tilemap.map_to_local(tile))
+	var world_pos := grass_reference_layer.to_global(grass_reference_layer.map_to_local(tile))
 
 	if node is BaseEntity:
 		node.death.connect(_on_entity_death.bind(entity_id, tile))
@@ -388,9 +388,9 @@ func on_item_pick_up(item: BaseEntity) -> void:
 	call_deferred("_on_item_pick_up", item)
 
 func get_biome_type_at_position(world_pos: Vector2) -> Biome.BiomeType:
-	if world_map == null or grass_tilemap == null:
+	if world_map == null or grass_reference_layer == null:
 		return Biome.BiomeType.GRASSLAND
-	var tile := grass_tilemap.local_to_map(grass_tilemap.to_local(world_pos))
+	var tile := grass_reference_layer.local_to_map(grass_reference_layer.to_local(world_pos))
 	var biome := world_map.get_biome(tile)
 	if biome == null:
 		return Biome.BiomeType.GRASSLAND

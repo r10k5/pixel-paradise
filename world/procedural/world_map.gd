@@ -319,14 +319,11 @@ func _pick_grass_for_biome(tile: Vector2i, biome: Biome) -> Vector2i:
 		Biome.BiomeType.FOREST:
 			return GrassTiles.pick_forest_grass(to_global_tile(tile))
 		Biome.BiomeType.DESERT:
-			return GrassTiles.BIOME_SAND
+			return _pick_grass(tile)
 		Biome.BiomeType.SNOW:
-			return GrassTiles.pick_snow_tile(to_global_tile(tile))
+			return _pick_grass(tile)
 		Biome.BiomeType.SWAMP:
-			var global_tile := to_global_tile(tile)
-			return GrassTiles.GRASS_PLAIN[
-				abs(int(global_tile.x * 31 + global_tile.y * 19)) % GrassTiles.GRASS_PLAIN.size()
-			]
+			return _pick_grass(tile)
 		_:
 			return _pick_grass(tile)
 

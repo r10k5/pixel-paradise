@@ -11,7 +11,6 @@ const TILE_SIZE := 16
 const MAP_SCALE := 1.5
 const SCATTER_NEAR_PATH_CHANCE := 0.08
 const GRASS_SOURCE_ID := 0
-const BIOME_SOURCE_ID := 1
 
 @export var generation_settings: WorldGenerationSettings
 @export var active_chunk_radius: int = 4
@@ -36,7 +35,8 @@ var _world_max_chunk: Vector2i = Vector2i.ZERO
 var _chunk_nodes: Dictionary = {}
 var _entity_holders: Dictionary = {}
 
-@onready var grass_tilemap: TileMap = $"../TileMap"
+@onready var grass_template_root: Node2D = $"../BiomeGrassTileMap"
+@onready var grass_reference_layer: TileMapLayer = $"../BiomeGrassTileMap/GrasslandLayer"
 @onready var water_tilemap: TileMap = $"../WaterGenerator/TileMap"
 @onready var chunks_root: Node2D = $"../Chunks"
 @onready var actors: Node2D = $"../Entities/Actors"
@@ -45,7 +45,7 @@ var _entity_holders: Dictionary = {}
 func _ready() -> void:
 	if generation_settings == null:
 		generation_settings = WorldGenerationSettings.new()
-	grass_tilemap.visible = false
+	grass_template_root.visible = false
 	water_tilemap.visible = false
 	if auto_generate_on_ready:
 		call_deferred("generate_world")
@@ -201,10 +201,10 @@ func regenerate() -> void:
 		generate_world()
 
 func _world_to_tile(world_pos: Vector2) -> Vector2i:
-	return grass_tilemap.local_to_map(grass_tilemap.to_local(world_pos))
+	return grass_reference_layer.local_to_map(grass_reference_layer.to_local(world_pos))
 
 func _tile_to_world(tile: Vector2i) -> Vector2:
-	return grass_tilemap.to_global(grass_tilemap.map_to_local(tile))
+	return grass_reference_layer.to_global(grass_reference_layer.map_to_local(tile))
 
 func _tile_to_chunk(tile: Vector2i) -> Vector2i:
 	return Vector2i(
@@ -310,7 +310,7 @@ func clamp_player_to_world_bounds() -> void:
 func _chunk_half_extents() -> Vector2i:
 	var cam := _get_player_camera()
 	var half := _get_camera_half_extents(cam)
-	var cell := Vector2(grass_tilemap.tile_set.tile_size) * grass_tilemap.scale
+	var cell := BiomeLayerConfig.tile_pixel_size(grass_template_root)
 	var tiles_half := Vector2(ceil(half.x / cell.x), ceil(half.y / cell.y))
 	return Vector2i(
 		int(ceil(tiles_half.x / float(chunk_size))) + active_chunk_radius,
@@ -436,7 +436,7 @@ func _get_or_create_world_chunk(chunk: Vector2i) -> WorldChunk:
 	var node := WORLD_CHUNK_SCENE.instantiate() as WorldChunk
 	node.cull_when_off_screen = use_screen_culling
 	chunks_root.add_child(node)
-	node.configure(chunk, chunk_size, grass_tilemap, water_tilemap)
+	node.configure(chunk, chunk_size, grass_template_root, water_tilemap)
 	_chunk_nodes[ck] = node
 	return node
 
@@ -448,7 +448,7 @@ func _get_or_create_entity_holder(chunk: Vector2i) -> ChunkEntityHolder:
 	var holder := CHUNK_ENTITY_HOLDER_SCENE.instantiate() as ChunkEntityHolder
 	holder.cull_when_off_screen = use_screen_culling
 	actors.add_child(holder)
-	holder.configure(chunk, chunk_size, grass_tilemap)
+	holder.configure(chunk, chunk_size, grass_template_root)
 	_entity_holders[ck] = holder
 	return holder
 
@@ -461,7 +461,7 @@ func _generate_chunk(chunk: Vector2i) -> void:
 		for x in range(start_x, start_x + chunk_size):
 			var world_tile := Vector2i(x, y)
 			var local := world_chunk.world_tile_to_local(world_tile)
-			_paint_ground_tile(world_chunk.grass_tilemap, world_tile, local)
+			_paint_ground_tile(world_chunk.biome_terrain, world_tile, local)
 			_paint_water_tile(world_chunk.water_tilemap, world_tile, local, GRASS_SOURCE_ID)
 	_get_or_create_entity_holder(chunk)
 	if uses_biome_decorations():
@@ -499,15 +499,17 @@ func _generate_decorations(chunk: Vector2i) -> void:
 	if not decorations.is_empty():
 		_placed_decorations[chunk_ck] = decorations
 
-func _paint_ground_tile(tilemap: TileMap, world_tile: Vector2i, local_tile: Vector2i) -> void:
-	var source_id := _ground_source_id_for_tile(world_tile)
+func _paint_ground_tile(terrain_root: Node2D, world_tile: Vector2i, local_tile: Vector2i) -> void:
+	var layer := BiomeLayerConfig.get_layer_for_tile(terrain_root, world_map, world_tile)
+	if layer == null:
+		return
 	var atlas: Vector2i = world_map.get_grass_atlas(world_tile)
-	tilemap.set_cell(0, local_tile, source_id, atlas, 0)
+	layer.set_cell(local_tile, GRASS_SOURCE_ID, atlas, 0)
 	if world_map.is_path(world_tile):
 		var style: int = world_map.get_path_style(world_tile)
 		var path_atlas: Vector2i = PathAutotile.resolve(world_tile, world_map, style)
-		# Дороги остаются в основном tileset (grass source).
-		tilemap.set_cell(0, local_tile, GRASS_SOURCE_ID, path_atlas, 0)
+		# Дороги остаются в основном tileset (grass source), на слое биома.
+		layer.set_cell(local_tile, GRASS_SOURCE_ID, path_atlas, 0)
 	elif _should_scatter_stone(world_tile):
 		var global_tile := world_map.to_global_tile(world_tile)
 		var stone_roll: int = absi(
@@ -516,19 +518,7 @@ func _paint_ground_tile(tilemap: TileMap, world_tile: Vector2i, local_tile: Vect
 		var stone_atlas: Vector2i = PathAutotile.SCATTER_STONE[
 			stone_roll % PathAutotile.SCATTER_STONE.size()
 		]
-		tilemap.set_cell(0, local_tile, GRASS_SOURCE_ID, stone_atlas, 0)
-
-func _ground_source_id_for_tile(tile: Vector2i) -> int:
-	if world_map == null or not generation_settings.enable_biomes:
-		return GRASS_SOURCE_ID
-	if world_map.is_water(tile):
-		return GRASS_SOURCE_ID
-	var biome := world_map.get_biome(tile)
-	if biome == null:
-		return GRASS_SOURCE_ID
-	if biome.biome_type == Biome.BiomeType.SNOW or biome.biome_type == Biome.BiomeType.DESERT:
-		return BIOME_SOURCE_ID
-	return GRASS_SOURCE_ID
+		layer.set_cell(local_tile, GRASS_SOURCE_ID, stone_atlas, 0)
 
 func _should_scatter_stone(tile: Vector2i) -> bool:
 	if not world_map.is_grass(tile):

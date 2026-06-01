@@ -50,8 +50,7 @@ const GRASS_UNDER_WATER: Array[Vector2i] = [
 	Vector2i(0, 2), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2),
 ]
 
-# Новые биомные тайлы:
-# (0,0) — снег, (0,1) — снег с травой, (0,2) — песок
+# Legacy-атласы из tileset.png (source 1); для Modulate-системы биомов не используются.
 const BIOME_SNOW := Vector2i(0, 0)
 const BIOME_SNOW_GRASS := Vector2i(0, 1)
 const BIOME_SAND := Vector2i(0, 2)
