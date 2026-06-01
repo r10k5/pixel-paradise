@@ -16,9 +16,11 @@ var _sprite: AnimatedSprite2D
 var _tool_hit_area: Area2D
 var _tool_collision: CollisionShape2D
 var _tool_collision_active := false
+var _attack_active: bool = false
 var _hit_entities: Array[BaseEntity] = []
 
 func enter() -> void:
+	_attack_active = false
 	if base_body is Player:
 		var player := base_body as Player
 		var stats := player.get_node_or_null("SurvivalStats") as SurvivalStats
@@ -27,6 +29,7 @@ func enter() -> void:
 				transition.emit(self, return_idle_state)
 				return
 			stats.is_in_hand_tool = true
+	_attack_active = true
 	_hit_entities.clear()
 	base_body.velocity = Vector2.ZERO
 	base_body.death.connect(_on_death)
@@ -40,10 +43,12 @@ func enter() -> void:
 	if _sprite:
 		_sprite.frame_changed.connect(_on_frame_changed)
 		_update_tool_collision()
-	await base_body.play_animation(animation)
-	_return_to_movement()
+	_connect_attack_finished()
+	base_body.play_animation(animation)
 
 func exit() -> void:
+	_attack_active = false
+	_disconnect_attack_finished()
 	if base_body is Player:
 		var stats := (base_body as Player).get_node_or_null("SurvivalStats") as SurvivalStats
 		if stats != null:
@@ -57,6 +62,22 @@ func exit() -> void:
 		_sprite.frame_changed.disconnect(_on_frame_changed)
 	if base_body.death.is_connected(_on_death):
 		base_body.death.disconnect(_on_death)
+
+func _connect_attack_finished() -> void:
+	if _sprite == null:
+		return
+	if _sprite.animation_finished.is_connected(_on_attack_animation_finished):
+		_sprite.animation_finished.disconnect(_on_attack_animation_finished)
+	_sprite.animation_finished.connect(_on_attack_animation_finished, CONNECT_ONE_SHOT)
+
+func _disconnect_attack_finished() -> void:
+	if _sprite != null and _sprite.animation_finished.is_connected(_on_attack_animation_finished):
+		_sprite.animation_finished.disconnect(_on_attack_animation_finished)
+
+func _on_attack_animation_finished() -> void:
+	if not _attack_active:
+		return
+	_return_to_movement()
 
 func _on_frame_changed() -> void:
 	_update_tool_collision()

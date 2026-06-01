@@ -5,8 +5,6 @@ class_name WalkDown
 @export var base_body: BaseBody
 @export var animation: String
 
-var xDirection = 0
-
 func enter():
 	base_body.death.connect(set_death_state)
 	base_body.play_animation(animation)
@@ -17,17 +15,18 @@ func set_death_state():
 func exit():
 	base_body.death.disconnect(set_death_state)
 
-func update(_delta: float) -> void:
+func physics_update(_delta: float) -> void:
 	var vertical := Input.is_action_pressed("move_down")
 	if not vertical:
 		base_body.velocity = Vector2.ZERO
 		_reset_walk_sprint()
-		xDirection = 0
 		return
-	var dir := Vector2(xDirection, 1.0)
+	var h := Input.get_axis(&"move_left", &"move_right")
+	var dir := Vector2(h, 1.0)
+	if dir.length_squared() < 0.0001:
+		dir = Vector2.DOWN
 	var spd := _walk_speed(true)
 	base_body.velocity = dir.normalized() * spd
-	xDirection = 0
 
 
 func _walk_speed(direction_active: bool) -> float:

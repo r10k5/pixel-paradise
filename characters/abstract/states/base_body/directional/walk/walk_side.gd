@@ -15,7 +15,7 @@ func _on_death() -> void:
 func exit() -> void:
 	base_body.death.disconnect(_on_death)
 
-func update(_delta: float) -> void:
+func physics_update(_delta: float) -> void:
 	var h := Input.get_axis(&"move_left", &"move_right")
 	if h < 0.0:
 		base_body.set_facing_left(true)

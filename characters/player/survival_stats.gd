@@ -17,6 +17,8 @@ enum SurvivalState { HEALTHY, HUNGRY, EXHAUSTED, DYING }
 @export var stamina_regen_per_sec: float = 3.0
 @export var heavy_weight_threshold: float = 70.0
 @export var heavy_stamina_drain_per_sec: float = 2.0
+@export var exhausted_speed_multiplier: float = 0.35
+@export var sprint_stamina_drain_per_sec: float = 8.0
 
 var hp: float = 100.0
 var stamina: float = 100.0
@@ -84,10 +86,17 @@ func can_attack() -> bool:
 	return stamina > 0.0
 
 
+func is_exhausted() -> bool:
+	return stamina <= 0.0
+
+
 func get_move_speed_multiplier() -> float:
+	var mult := 1.0
 	if hunger < HUNGER_SLOW_THRESHOLD:
-		return 0.8
-	return 1.0
+		mult *= 0.8
+	if stamina <= 0.0:
+		mult *= exhausted_speed_multiplier
+	return mult
 
 
 func apply_damage(amount: float) -> void:

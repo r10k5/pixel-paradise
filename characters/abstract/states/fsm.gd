@@ -11,6 +11,7 @@ var current_state: State
 var states: Dictionary = {}
 
 func _ready() -> void:
+	process_physics_priority = -10
 	for state in get_children():
 		if state is State:
 			states[state.name.to_lower()] = state
@@ -28,8 +29,8 @@ func _physics_process(delta: float) -> void:
 		current_state.physics_update(delta)
 
 func _enter_initial_state() -> void:
-	_enter_state(initial_state)
 	current_state = initial_state
+	_enter_state(initial_state)
 
 func _enter_state(state: State) -> void:
 	state_entering.emit(state)
@@ -48,8 +49,8 @@ func force_change_state(new_state_name: String) -> void:
 	if current_state:
 		current_state.exit()
 
-	_enter_state(new_state)
 	current_state = new_state
+	_enter_state(new_state)
 
 func change_state(state: State, new_state_name: String) -> void:
 	if state != current_state:
@@ -64,5 +65,5 @@ func change_state(state: State, new_state_name: String) -> void:
 	if current_state:
 		current_state.exit()
 
-	_enter_state(new_state)
 	current_state = new_state
+	_enter_state(new_state)

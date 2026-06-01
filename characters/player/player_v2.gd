@@ -30,6 +30,7 @@ var _is_jumping: bool = false
 
 func _ready() -> void:
 	super._ready()
+	process_physics_priority = 0
 	add_to_group("player")
 	collision_layer = PhysicsLayers.PLAYER
 	collision_mask = PhysicsLayers.MASK_NORMAL
@@ -194,14 +195,35 @@ func try_begin_jump() -> bool:
 		return true
 	return survival.spend_stamina(15.0)
 
+func has_movement_input() -> bool:
+	return (
+		Input.is_action_pressed("move_up")
+		or Input.is_action_pressed("move_down")
+		or absf(Input.get_axis(&"move_left", &"move_right")) > 0.0
+	)
+
+func _apply_movement_stop_guard() -> void:
+	if _is_jumping:
+		return
+	if survival != null and survival.is_in_hand_tool:
+		return
+	if has_movement_input():
+		return
+	velocity = Vector2.ZERO
+	if survival != null:
+		survival.is_sprinting = false
+
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 	if survival != null:
 		if not survival.is_in_hand_tool:
 			survival.is_working = false
+		if survival.is_sprinting:
+			survival.spend_stamina_flat(survival.sprint_stamina_drain_per_sec * delta)
 		if inventory.get_total_weight() > survival.heavy_weight_threshold:
 			survival.spend_stamina_flat(survival.heavy_stamina_drain_per_sec * delta)
+	_apply_movement_stop_guard()
 	use()
 	move_and_slide()
 	_process_steps(delta)
