@@ -52,7 +52,18 @@ func _ensure_universe_seed() -> void:
 func _physics_process(_delta: float) -> void:
 	if _transitioning or world_generator.world_map == null:
 		return
+	if _is_player_dying():
+		return
 	_check_edge_transition()
+
+
+func _is_player_dying() -> bool:
+	if player == null:
+		return false
+	var survival := player.get_node_or_null("SurvivalStats") as SurvivalStats
+	if survival == null:
+		return false
+	return survival.current_state == SurvivalStats.SurvivalState.DYING
 
 
 func _check_edge_transition() -> void:
@@ -80,6 +91,8 @@ func _check_edge_transition() -> void:
 
 func request_transition(edge: Vector2i) -> void:
 	if _transitioning or edge == Vector2i.ZERO:
+		return
+	if _is_player_dying():
 		return
 	if not can_transition_to(edge):
 		return

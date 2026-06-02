@@ -5,6 +5,8 @@ signal hunger_changed(value: float)
 signal stamina_changed(value: float)
 signal hp_changed(value: float)
 signal state_changed(state: SurvivalState)
+signal dying_countdown_changed(remaining_sec: float)
+signal dying_finished()
 
 enum SurvivalState { HEALTHY, HUNGRY, EXHAUSTED, DYING }
 
@@ -31,6 +33,8 @@ var is_working: bool = false
 
 var _rest_timer: float = 0.0
 var _dying_timer: float = 0.0
+var _dying_resolved: bool = false
+var _last_dying_seconds_emit: int = -1
 var _last_hunger_emit: int = 100
 var _last_stamina_emit: int = 100
 var _is_near_safe_zone: bool = false
@@ -222,13 +226,36 @@ func _tick_rest_heal(delta: float) -> void:
 		_rest_timer = 0.0
 
 
+func get_dying_time_remaining() -> float:
+	return maxf(0.0, _dying_timer)
+
+
+func revive_to_full() -> void:
+	hp = max_hp
+	stamina = max_stamina
+	hunger = max_hunger
+	_dying_resolved = true
+	_exit_dying()
+	sync_display()
+	save()
+
+
 func _tick_dying(delta: float) -> void:
 	if current_state != SurvivalState.DYING:
 		return
 	_dying_timer -= delta
-	if _dying_timer <= 0.0 and _player != null and not _player.is_dead:
-		_player.is_dead = true
-		_player.die()
+	_emit_dying_countdown_if_changed()
+	if _dying_timer <= 0.0 and not _dying_resolved:
+		_dying_resolved = true
+		dying_finished.emit()
+
+
+func _emit_dying_countdown_if_changed() -> void:
+	var seconds_left := int(ceil(_dying_timer))
+	if seconds_left == _last_dying_seconds_emit:
+		return
+	_last_dying_seconds_emit = seconds_left
+	dying_countdown_changed.emit(_dying_timer)
 
 
 func _enter_dying() -> void:
@@ -236,7 +263,10 @@ func _enter_dying() -> void:
 		return
 	current_state = SurvivalState.DYING
 	_dying_timer = DYING_DURATION
+	_dying_resolved = false
+	_last_dying_seconds_emit = -1
 	state_changed.emit(current_state)
+	_emit_dying_countdown_if_changed()
 	if _player != null and not _player.is_dead:
 		_player.velocity = Vector2.ZERO
 		_player.death.emit()
@@ -246,6 +276,7 @@ func _exit_dying() -> void:
 	if current_state != SurvivalState.DYING:
 		return
 	_dying_timer = 0.0
+	_last_dying_seconds_emit = -1
 	current_state = SurvivalState.HEALTHY
 	state_changed.emit(current_state)
 

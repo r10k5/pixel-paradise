@@ -14,7 +14,6 @@ const AXE_ITEM_SCENE = preload("res://statics/tools/axe_base.tscn")
 const PICKAXE_ITEM_SCENE = preload("res://statics/tools/pickaxe_base.tscn")
 const CHEST_SCENE = preload("res://statics/chest/chest.tscn")
 const BOMB_ITEM_ID := "item:bomb"
-const MAIN_MENU_SCENE := "res://world/main_menu.tscn"
 
 const TILE_SIZE := 16
 const MAP_SCALE := 1.5
@@ -43,16 +42,18 @@ const MIN_DISTANCE_FROM_WATER_TILES := 1
 
 @export var debug_start_bombs: int = 3
 
-var _player_dying: bool = false
+var _respawn_in_progress: bool = false
+var _was_in_dying: bool = false
 
 @onready var bombs: Node2D = $Entities/Bombs
 @onready var screen_fade: ColorRect = $UI/ScreenFade
 @onready var toast_manager: ToastManager = $UI/ToastManager
+@onready var dying_overlay: DyingOverlay = $UI/DyingOverlay
 
 var _toast_bridge: GameToastBridge
 
 func _input(event: InputEvent) -> void:
-	if _player_dying or player.is_dead:
+	if _respawn_in_progress or player.is_dead or _is_player_downed():
 		return
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -89,6 +90,7 @@ func _ready() -> void:
 		_toast_bridge = GameToastBridge.new()
 		add_child(_toast_bridge)
 		_toast_bridge.bind(toast_manager, player.survival)
+	_setup_dying_flow()
 	_give_starting_tools()
 	_give_debug_bombs()
 	world_generator.world_generated.connect(_on_world_generated)
@@ -225,7 +227,7 @@ func _give_debug_bombs() -> void:
 			break
 
 func _try_place_bomb() -> void:
-	if _player_dying or player.is_dead:
+	if _respawn_in_progress or player.is_dead or _is_player_downed():
 		return
 	if not player.inventory.consume_one_by_item_id(BOMB_ITEM_ID):
 		return
@@ -234,18 +236,77 @@ func _try_place_bomb() -> void:
 	bombs.add_child(bomb)
 	bomb.global_position = player.global_position + offset
 
-func on_player_died() -> void:
-	if _player_dying:
+func _is_player_downed() -> bool:
+	return player != null and player.is_downed()
+
+
+func _setup_dying_flow() -> void:
+	if player.survival == null:
 		return
-	_player_dying = true
-	InventoryPersistence.save(player.inventory, PlayerProfile.player_id)
-	if player.survival != null:
-		player.survival.save()
+	var stats := player.survival
+	stats.dying_countdown_changed.connect(_on_dying_countdown_changed)
+	stats.dying_finished.connect(_on_dying_finished)
+	stats.state_changed.connect(_on_survival_state_changed)
+	if dying_overlay != null:
+		dying_overlay.surrender_pressed.connect(_on_surrender_pressed)
+
+
+func _on_dying_countdown_changed(remaining_sec: float) -> void:
+	if dying_overlay != null:
+		dying_overlay.set_seconds_left(int(ceil(remaining_sec)))
+
+
+func _on_dying_finished() -> void:
+	respawn_player()
+
+
+func _on_surrender_pressed() -> void:
+	respawn_player()
+
+
+func _on_survival_state_changed(state: SurvivalStats.SurvivalState) -> void:
+	if state == SurvivalStats.SurvivalState.DYING:
+		_was_in_dying = true
+		if dying_overlay != null:
+			dying_overlay.show_overlay()
+			dying_overlay.set_seconds_left(int(ceil(player.survival.get_dying_time_remaining())))
+	elif _was_in_dying:
+		_was_in_dying = false
+		if dying_overlay != null:
+			dying_overlay.hide_overlay()
+		if not _respawn_in_progress:
+			_restore_player_from_downed(false)
+
+
+func respawn_player() -> void:
+	if _respawn_in_progress:
+		return
+	if player.survival == null or player.survival.current_state != SurvivalStats.SurvivalState.DYING:
+		return
+	_respawn_in_progress = true
+	if dying_overlay != null:
+		dying_overlay.hide_overlay()
+	player.survival.revive_to_full()
+	_restore_player_from_downed(true)
 	if toast_manager != null:
-		ToastMessages.show(toast_manager, ToastMessages.player_died())
-	if screen_fade != null:
-		await screen_fade.await_fade_out()
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+		ToastMessages.show(toast_manager, ToastMessages.player_respawned())
+	_respawn_in_progress = false
+
+
+func _restore_player_from_downed(teleport_to_spawn: bool) -> void:
+	player.is_dead = false
+	player.set_process(true)
+	player.set_process_input(true)
+	player.set_physics_process(true)
+	var fsm := player.get_node_or_null("FSM") as StateMachine
+	if fsm != null:
+		fsm.set_process(true)
+		fsm.force_change_state("idle_down")
+	if teleport_to_spawn and world_generator != null and world_generator.world_map != null:
+		player.global_position = world_generator.get_player_spawn()
+		if world_generator.has_method("clamp_player_to_world_bounds"):
+			world_generator.clamp_player_to_world_bounds()
+		world_generator.force_refresh_chunks_around_player()
 
 func _spawn_placements(chunk: Vector2i, placements: Dictionary) -> void:
 	var entity_ids := [

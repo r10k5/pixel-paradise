@@ -83,6 +83,14 @@ static func survived() -> Dictionary:
 	}
 
 
+static func player_respawned() -> Dictionary:
+	return {
+		"text": "✨ Вы возродились",
+		"duration": 2.5,
+		"color": COLOR_SURVIVED,
+	}
+
+
 static func show(toast: ToastManager, data: Dictionary) -> void:
 	if toast == null:
 		return

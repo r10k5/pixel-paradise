@@ -161,8 +161,12 @@ func _animation_duration(sprite: AnimatedSprite2D, animation_name: String) -> fl
 		duration /= sprite.speed_scale
 	return duration
 
+func is_downed() -> bool:
+	return survival != null and survival.current_state == SurvivalStats.SurvivalState.DYING
+
+
 func take_damage(amount: int) -> void:
-	if is_dead:
+	if is_dead or is_downed():
 		return
 	DamageAuthority.apply_damage(self, float(amount), "legacy")
 
@@ -175,7 +179,7 @@ func die() -> void:
 	death.emit()
 
 func use() -> void:
-	if is_dead:
+	if is_dead or is_downed():
 		return
 	if Input.is_action_just_pressed("use"):
 		ConsumableEffects.try_use_selected(self)
@@ -214,7 +218,7 @@ func _apply_movement_stop_guard() -> void:
 		survival.is_sprinting = false
 
 func _physics_process(delta: float) -> void:
-	if is_dead:
+	if is_dead or is_downed():
 		return
 	if survival != null:
 		if not survival.is_in_hand_tool:
