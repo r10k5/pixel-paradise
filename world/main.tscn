@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://yo7iagcy30dc" path="res://assets/characters/player/light.png" id="5_32ub7"]
 [ext_resource type="PackedScene" uid="uid://q8lkjijx2kh4" path="res://ui/inventory_manager.tscn" id="5_k1elx"]
 [ext_resource type="PackedScene" path="res://ui/survival_hud.tscn" id="5_pijuu"]
+[ext_resource type="PackedScene" uid="uid://w10n0qhjilnt" path="res://ui/ToastManager.tscn" id="15_toast"]
 [ext_resource type="Script" uid="uid://cyhth6oy6eydl" path="res://world/player_light.gd" id="6_ab0jk"]
 [ext_resource type="PackedScene" uid="uid://cmirdejxdf7se" path="res://statics/water/water_generator.tscn" id="6_dnm44"]
 [ext_resource type="PackedScene" uid="uid://dx2rm62v0pgjb" path="res://ui/full_inventory.tscn" id="7_p1uhn"]
@@ -76,6 +77,8 @@ script = ExtResource("10_mv")
 [node name="SurvivalHUD" parent="UI" unique_id=621703295 instance=ExtResource("5_pijuu")]
 offset = Vector2(0, 20)
 transform = Transform2D(1, 0, 0, 1, 0, 20)
+
+[node name="ToastManager" parent="UI" instance=ExtResource("15_toast")]
 
 [node name="TimeLabel" type="Label" parent="UI" unique_id=1352812172]
 offset_left = 266.0

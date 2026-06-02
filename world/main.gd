@@ -47,6 +47,9 @@ var _player_dying: bool = false
 
 @onready var bombs: Node2D = $Entities/Bombs
 @onready var screen_fade: ColorRect = $UI/ScreenFade
+@onready var toast_manager: ToastManager = $UI/ToastManager
+
+var _toast_bridge: GameToastBridge
 
 func _input(event: InputEvent) -> void:
 	if _player_dying or player.is_dead:
@@ -82,6 +85,10 @@ func _ready() -> void:
 	InventoryPersistence.load(player.inventory, PlayerProfile.player_id)
 	if survival_hud != null and survival_hud.has_method("bind"):
 		survival_hud.bind(player.survival)
+	if toast_manager != null and player.survival != null:
+		_toast_bridge = GameToastBridge.new()
+		add_child(_toast_bridge)
+		_toast_bridge.bind(toast_manager, player.survival)
 	_give_starting_tools()
 	_give_debug_bombs()
 	world_generator.world_generated.connect(_on_world_generated)
@@ -234,6 +241,8 @@ func on_player_died() -> void:
 	InventoryPersistence.save(player.inventory, PlayerProfile.player_id)
 	if player.survival != null:
 		player.survival.save()
+	if toast_manager != null:
+		ToastMessages.show(toast_manager, ToastMessages.player_died())
 	if screen_fade != null:
 		await screen_fade.await_fade_out()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
@@ -380,8 +389,16 @@ func _on_item_pick_up(item: BaseEntity) -> void:
 	var item_id := str(item.id)
 	if item_id.is_empty():
 		return
-	if player.inventory.add_item_by_id(item_id):
+	var count := 1
+	if player.inventory.add_item_by_id(item_id, count):
+		if toast_manager != null:
+			var title: String = str(item.title)
+			if title.is_empty():
+				title = item_id
+			ToastMessages.show(toast_manager, ToastMessages.pickup(title, count))
 		item.queue_free()
+	elif toast_manager != null:
+		ToastMessages.show(toast_manager, ToastMessages.inventory_full())
 
 
 func on_item_pick_up(item: BaseEntity) -> void:
