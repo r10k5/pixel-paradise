@@ -420,7 +420,7 @@ func _on_resource_harvested(
 	resource_respawn.schedule(entity_id, tile, respawn_seconds)
 	if item_id.is_empty():
 		return
-	player.inventory.add_item_by_id(item_id)
+	_show_pickup_toast(item_id, 1)
 
 
 func _respawn_resource_at_tile(entity_id: String, tile: Vector2i) -> void:
@@ -444,22 +444,35 @@ func _register_world_pickup(item: BaseEntity) -> void:
 		item.pick_up.connect(on_item_pick_up)
 
 
+func _show_pickup_toast(item_id: String, count: int) -> bool:
+	if player.inventory.add_item_by_id(item_id, count):
+		if toast_manager != null:
+			ToastMessages.show(toast_manager, ToastMessages.pickup(_item_display_title(item_id), count))
+		return true
+	if toast_manager != null:
+		ToastMessages.show(toast_manager, ToastMessages.inventory_full())
+	return false
+
+
+func _item_display_title(item_id: String) -> String:
+	var entity := ItemFactory.create(item_id)
+	if entity == null:
+		return item_id
+	var title := str(entity.title)
+	entity.queue_free()
+	if title.is_empty():
+		return item_id
+	return title
+
+
 func _on_item_pick_up(item: BaseEntity) -> void:
 	if not is_instance_valid(item):
 		return
 	var item_id := str(item.id)
 	if item_id.is_empty():
 		return
-	var count := 1
-	if player.inventory.add_item_by_id(item_id, count):
-		if toast_manager != null:
-			var title: String = str(item.title)
-			if title.is_empty():
-				title = item_id
-			ToastMessages.show(toast_manager, ToastMessages.pickup(title, count))
+	if _show_pickup_toast(item_id, 1):
 		item.queue_free()
-	elif toast_manager != null:
-		ToastMessages.show(toast_manager, ToastMessages.inventory_full())
 
 
 func on_item_pick_up(item: BaseEntity) -> void:
